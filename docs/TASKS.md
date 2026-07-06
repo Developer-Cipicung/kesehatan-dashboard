@@ -27,7 +27,7 @@ AI wajib mengikuti aturan berikut.
 - Phase 2 : ✅
 - Phase 3 : ✅
 - Phase 4 : ✅
-- Phase 5 : ⬜
+- Phase 5 : ✅
 - Phase 6 : ⬜
 - Phase 7 : ⬜
 - Phase 8 : ⬜
@@ -106,46 +106,46 @@ AI wajib mengikuti aturan berikut.
 
 ## Shared
 
-- [ ] Shared Patient Toolbar
-- [ ] Shared Patient Table
-- [ ] Shared Patient Card (Mobile)
-- [ ] Add Patient Dialog
-- [ ] Search Patient
+- [x] Shared Patient Toolbar
+- [x] Shared Patient Table
+- [x] Shared Patient Card (Mobile)
+- [x] Add Patient Dialog
+- [x] Search Patient
 
 ## Ibu Hamil
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Pasca Persalinan
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Calon Menikah
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Batita
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Balita
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Anak Sekolah
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ## Lansia
 
-- [ ] List Page
-- [ ] API Integration
+- [x] List Page
+- [x] API Integration
 
 ---
 
