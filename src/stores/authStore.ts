@@ -2,8 +2,8 @@ import { create } from 'zustand'
 
 interface AuthState {
   isAuthenticated: boolean
-  user: any | null
-  login: (token: string, user: any) => void
+  user: Record<string, unknown> | null
+  login: (token: string, user: Record<string, unknown>) => void
   logout: () => void
 }
 

@@ -24,7 +24,7 @@ AI wajib mengikuti aturan berikut.
 # Progress
 
 - Phase 1 : ✅
-- Phase 2 : ⬜
+- Phase 2 : ✅
 - Phase 3 : ⬜
 - Phase 4 : ⬜
 - Phase 5 : ⬜
@@ -57,23 +57,23 @@ AI wajib mengikuti aturan berikut.
 
 # Phase 2 — Reusable Components
 
-- [ ] Button
-- [ ] Input
-- [ ] NumberInput
-- [ ] DatePicker
-- [ ] Select
-- [ ] TextArea
-- [ ] FormField
-- [ ] Card
-- [ ] StatisticCard
-- [ ] DataTable
-- [ ] SearchInput
-- [ ] Pagination
-- [ ] EmptyState
-- [ ] ErrorState
-- [ ] Loading Skeleton
-- [ ] Confirm Dialog
-- [ ] Toast Integration
+- [x] Button
+- [x] Input
+- [x] NumberInput
+- [x] DatePicker
+- [x] Select
+- [x] TextArea
+- [x] FormField
+- [x] Card
+- [x] StatisticCard
+- [x] DataTable
+- [x] SearchInput
+- [x] Pagination
+- [x] EmptyState
+- [x] ErrorState
+- [x] Loading Skeleton
+- [x] Confirm Dialog
+- [x] Toast Integration
 
 ---
 
