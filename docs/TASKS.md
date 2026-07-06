@@ -25,7 +25,7 @@ AI wajib mengikuti aturan berikut.
 
 - Phase 1 : ✅
 - Phase 2 : ✅
-- Phase 3 : ⬜
+- Phase 3 : ✅
 - Phase 4 : ⬜
 - Phase 5 : ⬜
 - Phase 6 : ⬜
@@ -79,13 +79,13 @@ AI wajib mengikuti aturan berikut.
 
 # Phase 3 — Authentication
 
-- [ ] Login Page
-- [ ] Auth Store
-- [ ] Protected Route
-- [ ] Login API Integration
-- [ ] Logout
-- [ ] Session Restore
-- [ ] Unauthorized Redirect
+- [x] Login Page
+- [x] Auth Store
+- [x] Protected Route
+- [x] Login API Integration
+- [x] Logout
+- [x] Session Restore
+- [x] Unauthorized Redirect
 
 ---
 

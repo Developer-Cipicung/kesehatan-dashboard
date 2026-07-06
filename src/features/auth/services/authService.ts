@@ -1,0 +1,31 @@
+import { api } from '@/services/api'
+import { z } from 'zod'
+
+export const loginSchema = z.object({
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(6, 'Password minimal 6 karakter'),
+})
+
+export type LoginRequest = z.infer<typeof loginSchema>
+
+export interface LoginResponse {
+  success: boolean
+  message: string
+  data: {
+    user: Record<string, unknown>
+    session: {
+      access_token: string
+    }
+  }
+}
+
+export const authService = {
+  login: async (credentials: LoginRequest) => {
+    const response = await api.post<LoginResponse>('/auth/login', credentials)
+    return response.data
+  },
+  getMe: async () => {
+    const response = await api.get('/auth/me')
+    return response.data
+  },
+}

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { FolderX } from 'lucide-react'
 
 export interface EmptyStateProps {

@@ -1,15 +1,23 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
+import { ProtectedRoute } from './ProtectedRoute'
+import { LoginPage } from '@/features/auth/pages/LoginPage'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <DashboardLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
         path: '/',
-        element: <div>Dashboard Content</div>,
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <div>Dashboard Content</div>,
+          },
+        ],
       },
     ],
   },
@@ -18,8 +26,8 @@ const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       {
-        path: '',
-        element: <div>Login Form</div>,
+        index: true,
+        element: <LoginPage />,
       },
     ],
   },
