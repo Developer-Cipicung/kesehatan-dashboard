@@ -4,6 +4,8 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import { ProtectedRoute } from './ProtectedRoute'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 
+import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -15,7 +17,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <div>Dashboard Content</div>,
+            element: <DashboardPage />,
           },
         ],
       },
