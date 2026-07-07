@@ -24,8 +24,9 @@ export const authService = {
     const response = await api.post<LoginResponse>('/auth/login', credentials)
     return response.data
   },
-  getMe: async () => {
-    const response = await api.get('/auth/me')
+  getMe: async (token?: string) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined
+    const response = await api.get('/auth/me', { headers })
     return response.data
   },
 }

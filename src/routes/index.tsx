@@ -1,11 +1,28 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import AuthLayout from '../layouts/AuthLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
+import AdminLayout from '../layouts/AdminLayout'
 import { ProtectedRoute } from './ProtectedRoute'
-import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 
-import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
-import { SharedPatientList } from '@/features/warga/components/SharedPatientList'
+const Loadable = (Component: any) => (props: any) => (
+  <Suspense fallback={<SkeletonCard />}>
+    <Component {...props} />
+  </Suspense>
+)
+
+const LoginPage = Loadable(lazy(() => import('@/features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage }))))
+const DashboardPage = Loadable(lazy(() => import('@/features/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage }))))
+const SharedPatientList = Loadable(lazy(() => import('@/features/warga/components/SharedPatientList').then(m => ({ default: m.SharedPatientList }))))
+const PatientHistoryPage = Loadable(lazy(() => import('@/features/pemeriksaan/pages/PatientHistoryPage').then(m => ({ default: m.PatientHistoryPage }))))
+const ReportPage = Loadable(lazy(() => import('@/features/reports/pages/ReportPage').then(m => ({ default: m.ReportPage }))))
+const AdminDashboardPage = Loadable(lazy(() => import('@/features/admin/pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage }))))
+const PosyanduManagementPage = Loadable(lazy(() => import('@/features/admin/pages/PosyanduManagementPage').then(m => ({ default: m.PosyanduManagementPage }))))
+const UserManagementPage = Loadable(lazy(() => import('@/features/admin/pages/UserManagementPage').then(m => ({ default: m.UserManagementPage }))))
+
+
+const AdminStatusPendataanPage = Loadable(lazy(() => import('@/features/admin/pages/AdminStatusPendataanPage').then(m => ({ default: m.AdminStatusPendataanPage }))))
 
 const router = createBrowserRouter([
   {
@@ -21,7 +38,7 @@ const router = createBrowserRouter([
             element: <DashboardPage />,
           },
           {
-            path: 'ibu-hamil',
+            path: 'bumil',
             element: <SharedPatientList title="Ibu Hamil" kategori="bumil" />,
           },
           {
@@ -29,24 +46,50 @@ const router = createBrowserRouter([
             element: <SharedPatientList title="Pasca Persalinan" kategori="pasca_persalinan" />,
           },
           {
-            path: 'calon-menikah',
-            element: <SharedPatientList title="Calon Menikah" kategori="calon_menikah" />,
-          },
-          {
-            path: 'batita',
-            element: <SharedPatientList title="Batita" kategori="batita" />,
+            path: 'baduta',
+            element: <SharedPatientList title="Baduta" kategori="baduta" />,
           },
           {
             path: 'balita',
             element: <SharedPatientList title="Balita" kategori="balita" />,
           },
           {
-            path: 'anak-sekolah',
-            element: <SharedPatientList title="Anak Sekolah" kategori="anak_sekolah" />,
-          },
-          {
             path: 'lansia',
             element: <SharedPatientList title="Lansia" kategori="lansia" />,
+          },
+          {
+            path: 'laporan',
+            element: <ReportPage />,
+          },
+          {
+            path: 'status-pendataan',
+            element: <AdminStatusPendataanPage />,
+          },
+          {
+            path: ':kategori/:id',
+            element: <PatientHistoryPage />,
+          },
+        ],
+      },
+      {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminDashboardPage />,
+          },
+          {
+            path: 'status-pendataan',
+            element: <AdminStatusPendataanPage />,
+          },
+          {
+            path: 'posyandu',
+            element: <PosyanduManagementPage />,
+          },
+          {
+            path: 'users',
+            element: <UserManagementPage />,
           },
         ],
       },

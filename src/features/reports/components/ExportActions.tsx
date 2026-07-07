@@ -1,0 +1,76 @@
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { FileText, FileSpreadsheet } from 'lucide-react'
+import { exportWargaToPdf } from '../utils/exportPdf'
+import { exportWargaToExcel } from '../utils/exportExcel'
+import { Warga } from '@/features/warga/services/wargaService'
+import { toast } from 'sonner'
+
+interface ExportActionsProps {
+  wargaList: Warga[]
+  isLoading: boolean
+}
+
+export function ExportActions({ wargaList, isLoading }: ExportActionsProps) {
+  const [kategoriFilter, setKategoriFilter] = useState<string>('semua')
+
+  const getFilteredWarga = () => {
+    if (kategoriFilter === 'semua') return wargaList
+    return wargaList.filter(w => w.kategori.toLowerCase().includes(kategoriFilter.toLowerCase()))
+  }
+
+  const handleExportPdf = () => {
+    try {
+      const filtered = getFilteredWarga()
+      exportWargaToPdf(filtered, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`)
+      toast.success('Laporan PDF berhasil diunduh.')
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengekspor PDF.')
+    }
+  }
+
+  const handleExportExcel = () => {
+    try {
+      const filtered = getFilteredWarga()
+      exportWargaToExcel(filtered, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`)
+      toast.success('Laporan Excel berhasil diunduh.')
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengekspor Excel.')
+    }
+  }
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      <select 
+        value={kategoriFilter}
+        onChange={(e) => setKategoriFilter(e.target.value)}
+        className="h-10 px-3 rounded-md border border-input bg-background w-full sm:w-auto"
+      >
+        <option value="semua">Semua Warga</option>
+        <option value="balita">Balita & Baduta</option>
+        <option value="bumil">Ibu Hamil</option>
+        <option value="pasca persalinan">Ibu Pasca Persalinan</option>
+        <option value="lansia">Lansia</option>
+        <option value="anak sekolah">Anak Sekolah</option>
+      </select>
+      <Button 
+        variant="outline" 
+        onClick={handleExportPdf}
+        disabled={isLoading || !wargaList || wargaList.length === 0}
+        className="w-full sm:w-auto"
+      >
+        <FileText className="mr-2 h-4 w-4" />
+        Download PDF
+      </Button>
+      <Button 
+        variant="default"
+        onClick={handleExportExcel}
+        disabled={isLoading || !wargaList || wargaList.length === 0}
+        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+      >
+        <FileSpreadsheet className="mr-2 h-4 w-4" />
+        Download Excel
+      </Button>
+    </div>
+  )
+}

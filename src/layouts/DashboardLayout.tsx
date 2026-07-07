@@ -10,7 +10,7 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block flex-shrink-0">
         <Sidebar />
       </div>
 
@@ -29,7 +29,7 @@ export default function DashboardLayout() {
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <Sidebar />
+        <Sidebar onClose={() => setIsMobileMenuOpen(false)} />
       </div>
 
       {/* Main Content */}

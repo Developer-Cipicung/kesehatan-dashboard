@@ -1,0 +1,68 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { pemeriksaanService, Pemeriksaan } from '../services/pemeriksaanService'
+import { toast } from 'sonner'
+
+export function useGetHistory(kategori: string, wargaId: string, posyanduId?: string) {
+  return useQuery({
+    queryKey: ['history', kategori, wargaId, posyanduId],
+    queryFn: () => pemeriksaanService.getHistory(kategori, wargaId, posyanduId),
+    enabled: !!kategori && !!wargaId,
+  })
+}
+
+export function useGetPemeriksaanById(kategori: string, id: string, posyanduId?: string) {
+  return useQuery({
+    queryKey: ['pemeriksaan', kategori, id, posyanduId],
+    queryFn: () => pemeriksaanService.getById(kategori, id, posyanduId),
+    enabled: !!kategori && !!id,
+  })
+}
+
+export function useCreatePemeriksaan() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ kategori, payload }: { kategori: string; payload: Partial<Pemeriksaan> }) =>
+      pemeriksaanService.create(kategori, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
+      toast.success('Pemeriksaan berhasil ditambahkan.')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Gagal menambahkan pemeriksaan.')
+    },
+  })
+}
+
+export function useUpdatePemeriksaan() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ kategori, id, payload }: { kategori: string; id: string; payload: Partial<Pemeriksaan> }) =>
+      pemeriksaanService.update(kategori, id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan', variables.kategori, variables.id] })
+      toast.success('Pemeriksaan berhasil diubah.')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Gagal mengubah pemeriksaan.')
+    },
+  })
+}
+
+export function useDeletePemeriksaan() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ kategori, id }: { kategori: string; id: string }) =>
+      pemeriksaanService.delete(kategori, id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
+      toast.success('Pemeriksaan berhasil dihapus.')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Gagal menghapus pemeriksaan.')
+    },
+  })
+}

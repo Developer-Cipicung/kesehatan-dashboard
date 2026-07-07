@@ -1,6 +1,7 @@
-import { Menu, LogOut, User } from 'lucide-react'
+import { Menu, LogOut, User, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
+import { PosyanduSelector } from './PosyanduSelector'
 import {
   Popover,
   PopoverContent,
@@ -14,6 +15,8 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const logout = useAuthStore((state) => state.logout)
   const user = useAuthStore((state) => state.user)
+  const posyandu = useAuthStore((state) => state.posyandu)
+  
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-4 md:px-6">
@@ -27,7 +30,17 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle menu</span>
         </Button>
-        <h1 className="text-lg font-semibold md:hidden">Posyandu Cipicung</h1>
+        {posyandu ? (
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="h-4 w-4 text-primary shrink-0" />
+            <PosyanduSelector />
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="h-4 w-4 text-primary shrink-0" />
+            <span className="font-semibold text-slate-800 text-sm">Posyandu</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -47,6 +60,11 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email as string || 'kader@posyandu.com'}
                 </p>
+                {posyandu && (
+                  <p className="text-xs leading-none text-primary mt-1">
+                    {posyandu.nama}
+                  </p>
+                )}
               </div>
               <div className="border-t my-1" />
               <Button

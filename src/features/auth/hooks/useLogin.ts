@@ -11,17 +11,21 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       const token = data.data.session.access_token
       const user = data.data.user
-      login(token, user)
+      // Fetch posyandu info using the new token
+      try {
+        const meData = await authService.getMe(token)
+        login(token, user, meData?.data?.posyandu ?? undefined)
+      } catch {
+        login(token, user)
+      }
       toast.success('Login berhasil')
       navigate('/', { replace: true })
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      const message =
-        error.response?.data?.message || 'Login gagal. Periksa kembali kredensial Anda.'
-      toast.error(message)
+      // Hanya mengandalkan inline error di form login
     },
   })
 }

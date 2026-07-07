@@ -9,10 +9,10 @@ export function useGetWargaList(params?: GetWargaParams) {
   })
 }
 
-export function useGetWargaById(id: string) {
+export function useGetWargaById(id: string, posyanduId?: string) {
   return useQuery({
-    queryKey: ['warga', 'detail', id],
-    queryFn: () => wargaService.getWargaById(id),
+    queryKey: ['warga', 'detail', id, posyanduId],
+    queryFn: () => wargaService.getWargaById(id, posyanduId),
     enabled: !!id,
   })
 }
@@ -43,6 +43,21 @@ export function useDeleteWarga() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Gagal menghapus pasien.')
+    },
+  })
+}
+
+export function useUpdateWarga() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string, payload: Partial<AddWargaPayload> }) => wargaService.updateWarga(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      toast.success('Data pasien berhasil diperbarui.')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Gagal memperbarui data pasien.')
     },
   })
 }

@@ -18,16 +18,13 @@ import { FormControl, FormItem, FormLabel, FormMessage, FormField as RHFFormFiel
 
 const formSchema = z.object({
   nik: z.string().min(16, 'NIK harus 16 digit').max(16, 'NIK harus 16 digit'),
-  no_kk: z.string().min(16, 'No KK harus 16 digit').max(16, 'No KK harus 16 digit'),
+  nomor: z.string().min(1, 'Nomor Telepon wajib diisi'),
   nama: z.string().min(1, 'Nama wajib diisi'),
-  tempat_lahir: z.string().min(1, 'Tempat lahir wajib diisi'),
   tanggal_lahir: z.string().min(1, 'Tanggal lahir wajib diisi'),
   jenis_kelamin: z.enum(['L', 'P']),
-  alamat: z.string().min(1, 'Alamat wajib diisi'),
-  rt: z.string().min(1, 'RT wajib diisi'),
-  rw: z.string().min(1, 'RW wajib diisi'),
-  status_pernikahan: z.enum(['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']),
   kategori: z.string().min(1, 'Kategori wajib diisi'),
+  nama_ayah: z.string().optional(),
+  nama_ibu: z.string().optional(),
 })
 
 interface AddPatientDialogProps {
@@ -43,22 +40,32 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
     resolver: zodResolver(formSchema),
     defaultValues: {
       nik: '',
-      no_kk: '',
+      nomor: '',
       nama: '',
-      tempat_lahir: '',
       tanggal_lahir: '',
       jenis_kelamin: 'L',
-      alamat: '',
-      rt: '',
-      rw: '',
-      status_pernikahan: 'Belum Kawin',
       kategori: defaultCategory || '',
+      nama_ayah: '',
+      nama_ibu: '',
     },
   })
 
+  const watchKategori = methods.watch('kategori')
+  const isAnak = watchKategori === 'balita' || watchKategori === 'baduta'
+  const isIbuIbu = watchKategori === 'bumil' || watchKategori === 'pasca_persalinan' || watchKategori === 'wus_pus'
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await addWarga(values as AddWargaPayload)
+      let status_kehamilan = 'TIDAK_HAMIL'
+      if (values.kategori === 'bumil') status_kehamilan = 'HAMIL'
+      if (values.kategori === 'pasca_persalinan') status_kehamilan = 'PASCA_PERSALINAN'
+
+      const payload = { ...values, status_kehamilan }
+      if (isIbuIbu) {
+        payload.jenis_kelamin = 'P'
+      }
+
+      await addWarga(payload as AddWargaPayload)
       methods.reset()
       onOpenChange(false)
     } catch (error) {
@@ -88,9 +95,9 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
               />
               <FormField
                 control={methods.control}
-                name="no_kk"
-                label="No KK"
-                placeholder="Masukkan 16 digit No KK"
+                name="nomor"
+                label="Nomor Telepon"
+                placeholder="Contoh: 08123456789"
                 type="text"
               />
               <FormField
@@ -100,85 +107,34 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                 placeholder="Masukkan nama lengkap"
                 type="text"
               />
-              <RHFFormField
-                control={methods.control}
-                name="jenis_kelamin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Jenis Kelamin</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih jenis kelamin" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="L">Laki-laki</SelectItem>
-                        <SelectItem value="P">Perempuan</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={methods.control}
-                name="tempat_lahir"
-                label="Tempat Lahir"
-                placeholder="Contoh: Bandung"
-                type="text"
-              />
+              {!isIbuIbu && (
+                <RHFFormField
+                  control={methods.control}
+                  name="jenis_kelamin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Jenis Kelamin</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih jenis kelamin" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="L">Laki-laki</SelectItem>
+                          <SelectItem value="P">Perempuan</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={methods.control}
                 name="tanggal_lahir"
                 label="Tanggal Lahir"
                 type="date"
-              />
-              <div className="md:col-span-2">
-                <FormField
-                  control={methods.control}
-                  name="alamat"
-                  label="Alamat"
-                  placeholder="Nama jalan / kampung"
-                  type="text"
-                />
-              </div>
-              <FormField
-                control={methods.control}
-                name="rt"
-                label="RT"
-                placeholder="Contoh: 001"
-                type="text"
-              />
-              <FormField
-                control={methods.control}
-                name="rw"
-                label="RW"
-                placeholder="Contoh: 002"
-                type="text"
-              />
-              <RHFFormField
-                control={methods.control}
-                name="status_pernikahan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status Pernikahan</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Belum Kawin">Belum Kawin</SelectItem>
-                        <SelectItem value="Kawin">Kawin</SelectItem>
-                        <SelectItem value="Cerai Hidup">Cerai Hidup</SelectItem>
-                        <SelectItem value="Cerai Mati">Cerai Mati</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
               />
               {!defaultCategory && (
                 <FormField
@@ -188,6 +144,24 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                   placeholder="Contoh: bumil, balita, lansia"
                   type="text"
                 />
+              )}
+              {isAnak && (
+                <>
+                  <FormField
+                    control={methods.control}
+                    name="nama_ayah"
+                    label="Nama Ayah"
+                    placeholder="Contoh: Budi"
+                    type="text"
+                  />
+                  <FormField
+                    control={methods.control}
+                    name="nama_ibu"
+                    label="Nama Ibu"
+                    placeholder="Contoh: Siti"
+                    type="text"
+                  />
+                </>
               )}
             </div>
             

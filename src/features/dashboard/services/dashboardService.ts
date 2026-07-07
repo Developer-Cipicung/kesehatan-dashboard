@@ -15,12 +15,42 @@ export interface DashboardStatsResponse {
       pasca_persalinan: 'draft' | 'selesai'
       lansia: 'draft' | 'selesai'
     }
+    kategori_breakdown: {
+      ibu_hamil: number
+      pasca_persalinan: number
+      lansia: number
+      baduta: number
+      balita: number
+      anak_sekolah: number
+    }
+    kunjungan_6_bulan: Array<{
+      name: string
+      ibu: number
+      lansia: number
+      anak: number
+    }>
+    aktivitas_terkini: Array<{
+      id: string | number
+      name: string
+      category: string
+      date: string
+      status: string
+    }>
+    alerts: Array<{
+      id: string | number
+      name: string
+      category: string
+      date: string
+      status: string
+    }>
   }
 }
 
 export const dashboardService = {
-  getStats: async () => {
-    const response = await api.get<DashboardStatsResponse>('/dashboard')
+  getStats: async (posyanduId?: string) => {
+    const response = await api.get<DashboardStatsResponse>('/dashboard', {
+      params: { posyanduId }
+    })
     return response.data.data
   },
 }

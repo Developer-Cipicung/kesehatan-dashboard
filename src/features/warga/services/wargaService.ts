@@ -21,21 +21,26 @@ export interface Warga {
   pendidikan?: string
   status_pernikahan: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati'
   kategori: string
+  status_kehamilan?: 'HAMIL' | 'PASCA_PERSALINAN' | 'TIDAK_HAMIL'
   posyandu_id?: string
   created_at: string
   updated_at: string
+  pemeriksaan_balita_baduta?: Array<any>
+  pemeriksaan_bumil?: Array<any>
+  pemeriksaan_pasca_persalinan?: Array<any>
+  pemeriksaan_lansia?: Array<any>
 }
 
 export interface WargaListResponse {
   success: boolean
   message: string
   data: {
-    warga: Warga[]
-    meta: {
+    data: Warga[]
+    metadata: {
       page: number
       limit: number
       total: number
-      total_pages: number
+      totalPages: number
     }
   }
 }
@@ -51,30 +56,20 @@ export interface GetWargaParams {
   limit?: number
   search?: string
   jenis_kelamin?: 'L' | 'P'
-  posyandu_id?: string
+  posyanduId?: string
   kategori?: string
 }
 
 export interface AddWargaPayload {
   nik: string
-  no_kk: string
+  nomor: string
   nama: string
-  tempat_lahir: string
   tanggal_lahir: string
   jenis_kelamin: 'L' | 'P'
-  alamat: string
-  rt: string
-  rw: string
-  kelurahan?: string
-  kecamatan?: string
-  kabupaten?: string
-  provinsi?: string
-  golongan_darah?: string
-  no_hp?: string
-  pekerjaan?: string
-  pendidikan?: string
-  status_pernikahan: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati'
   kategori: string
+  status_kehamilan?: 'HAMIL' | 'PASCA_PERSALINAN' | 'TIDAK_HAMIL'
+  nama_ayah?: string
+  nama_ibu?: string
   posyandu_id?: string
 }
 
@@ -83,8 +78,8 @@ export const wargaService = {
     const response = await api.get<WargaListResponse>('/warga', { params })
     return response.data.data
   },
-  getWargaById: async (id: string) => {
-    const response = await api.get<WargaResponse>(`/warga/${id}`)
+  getWargaById: async (id: string, posyanduId?: string) => {
+    const response = await api.get<WargaResponse>(`/warga/${id}`, { params: { posyanduId } })
     return response.data.data
   },
   addWarga: async (payload: AddWargaPayload) => {

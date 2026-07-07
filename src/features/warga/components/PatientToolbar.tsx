@@ -7,6 +7,8 @@ interface PatientToolbarProps {
   onSearchChange: (value: string) => void
   onAddPatient: () => void
   title: string
+  totalPatients: number
+  isReadOnly?: boolean
 }
 
 export function PatientToolbar({
@@ -14,28 +16,33 @@ export function PatientToolbar({
   onSearchChange,
   onAddPatient,
   title,
+  totalPatients,
+  isReadOnly,
 }: PatientToolbarProps) {
   return (
-    <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-        <p className="text-muted-foreground">Kelola daftar {title.toLowerCase()} di posyandu.</p>
+    <div className="flex flex-col space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+
+          <h2 className="text-[28px] font-bold text-slate-800 leading-tight">{title}</h2>
+          <p className="text-sm text-slate-500 mt-1">{totalPatients} pasien terdaftar</p>
+        </div>
+        {!isReadOnly && (
+          <Button onClick={onAddPatient} className="bg-primary hover:bg-primary/90 text-white rounded-lg shadow-sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Input Data Baru
+          </Button>
+        )}
       </div>
 
-      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cari NIK atau Nama..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Button onClick={onAddPatient} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Pasien
-        </Button>
+      <div className="relative w-full md:w-[400px]">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+        <Input
+          placeholder="Cari nama atau NIK..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-10 py-6 border-slate-200 rounded-xl shadow-sm text-base focus-visible:ring-primary"
+        />
       </div>
     </div>
   )

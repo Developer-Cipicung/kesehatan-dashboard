@@ -1,41 +1,20 @@
 import { useDashboardStats } from '../hooks/useDashboardStats'
-import { StatisticCard } from '@/components/cards/StatisticCard'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
-import { Users, Baby, HeartPulse, PersonStanding } from 'lucide-react'
+
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts'
-import { cn } from '@/lib/utils'
 
-const mockChartData = [
-  { name: 'Jan', kunjungan: 120 },
-  { name: 'Feb', kunjungan: 132 },
-  { name: 'Mar', kunjungan: 101 },
-  { name: 'Apr', kunjungan: 143 },
-  { name: 'Mei', kunjungan: 167 },
-  { name: 'Jun', kunjungan: 210 },
-]
 
-const mockRecentActivity = [
-  { id: 1, action: 'Pendataan Balita', user: 'Siti Aminah', time: '2 jam yang lalu' },
-  { id: 2, action: 'Pembaruan Data Ibu Hamil', user: 'Nurhayati', time: '3 jam yang lalu' },
-  { id: 3, action: 'Registrasi Lansia Baru', user: 'Budi Santoso', time: '5 jam yang lalu' },
-  { id: 4, action: 'Selesai Pendataan Imunisasi', user: 'Siti Aminah', time: '1 hari yang lalu' },
-]
+
 
 export function DashboardPage() {
   const { data, isLoading, error, refetch } = useDashboardStats()
@@ -43,15 +22,8 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <SkeletonCard />
-          <SkeletonCard />
+        <div className="grid grid-cols-4 gap-4">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard />
         </div>
       </div>
     )
@@ -67,141 +39,103 @@ export function DashboardPage() {
     )
   }
 
-  const { total_warga, total_balita, total_bumil, total_lansia, pendataan } = data
+  const {
+    total_warga,
+    total_lansia,
+    kategori_breakdown,
+    kunjungan_6_bulan
+  } = data
 
-  const statusItems = [
-    { label: 'Balita', status: pendataan.balita },
-    { label: 'Imunisasi', status: pendataan.imunisasi },
-    { label: 'Ibu Hamil', status: pendataan.bumil },
-    { label: 'Pasca Persalinan', status: pendataan.pasca_persalinan },
-    { label: 'Lansia', status: pendataan.lansia },
-  ]
+  const totalIbu = kategori_breakdown.ibu_hamil + kategori_breakdown.pasca_persalinan
+  const totalAnak = kategori_breakdown.baduta + kategori_breakdown.balita
 
   return (
-    <div className="flex flex-col space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Ringkasan</h2>
-        <p className="text-muted-foreground">
-          Berikut adalah ringkasan data posyandu bulan ini.
-        </p>
+    <div className="flex flex-col max-w-full">
+      <div className="mb-8">
+        <h1 className="text-[28px] font-bold text-slate-800 leading-tight">Selamat Datang, Petugas</h1>
+        <p className="text-sm text-slate-500 mt-1">Senin, 29 Juni 2026 · Pusat Pendataan Kesehatan Cipicung</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatisticCard
-          title="Total Warga"
-          value={total_warga}
-          icon={Users}
-          description="Terdaftar di sistem"
-        />
-        <StatisticCard
-          title="Total Balita"
-          value={total_balita}
-          icon={Baby}
-          description="Bulan ini"
-        />
-        <StatisticCard
-          title="Total Ibu Hamil"
-          value={total_bumil}
-          icon={HeartPulse}
-          description="Bulan ini"
-        />
-        <StatisticCard
-          title="Total Lansia"
-          value={total_lansia}
-          icon={PersonStanding}
-          description="Bulan ini"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Tren Kunjungan</CardTitle>
-            <CardDescription>
-              Jumlah kunjungan posyandu 6 bulan terakhir
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={mockChartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => String(value)}
-                  />
-                  <Tooltip
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="kunjungan"
-                    stroke="var(--color-primary, #000)"
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary-dark p-6 flex flex-col justify-between">
+          <div>
+            <div className="text-4xl font-bold text-slate-800 mb-2">{total_warga}</div>
+            <div className="font-semibold text-slate-700 text-sm">Total Terdaftar</div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400">
+            semua kategori
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary p-6 flex flex-col justify-between">
+          <div>
+            <div className="text-4xl font-bold text-slate-800 mb-2">{totalIbu}</div>
+            <div className="font-semibold text-slate-700 text-sm">Ibu-ibu</div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="block text-slate-500">Ibu Hamil</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.ibu_hamil}</span>
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <span className="block text-slate-500">Pasca Salin</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.pasca_persalinan}</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary-light p-6 flex flex-col justify-between">
+          <div>
+            <div className="text-4xl font-bold text-slate-800 mb-2">{total_lansia}</div>
+            <div className="font-semibold text-slate-700 text-sm">Lansia</div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 gap-2 text-xs">
+            <div>
+              <span className="block text-slate-500">Terdaftar Aktif</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.lansia}</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-accent p-6 flex flex-col justify-between">
+          <div>
+            <div className="text-4xl font-bold text-slate-800 mb-2">{totalAnak}</div>
+            <div className="font-semibold text-slate-700 text-sm">Anak-anak</div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-1 text-xs">
+            <div>
+              <span className="block text-slate-500">Baduta</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.baduta}</span>
+            </div>
+            <div>
+              <span className="block text-slate-500">Balita</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.balita}</span>
+            </div>
+            <div>
+              <span className="block text-slate-500">Sekolah</span>
+              <span className="font-semibold text-slate-700">{kategori_breakdown.anak_sekolah}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="flex flex-col space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Status Pendataan</CardTitle>
-              <CardDescription>Bulan ini</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {statusItems.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{item.label}</span>
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
-                        item.status === 'selesai'
-                          ? 'bg-success/15 text-success-foreground'
-                          : 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {item.status === 'selesai' ? 'Selesai' : 'Draft'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Aktivitas Terakhir</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockRecentActivity.map((activity) => (
-                  <div key={activity.id} className="flex flex-col space-y-1">
-                    <span className="text-sm font-medium">{activity.action}</span>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <span>{activity.user}</span>
-                      <span className="mx-1">•</span>
-                      <span>{activity.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      <div className="mb-8">
+        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-6">
+          <h3 className="text-sm font-bold text-slate-700 mb-6">Pemeriksaan 6 Bulan Terakhir</h3>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={kunjungan_6_bulan} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={12}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: '#F1F5F9' }}
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.1)' }}
+                />
+                <Legend iconType="square" wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
+                <Bar dataKey="ibu" name="Ibu-ibu" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="lansia" name="Lansia" fill="var(--color-primary-light)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="anak" name="Anak-anak" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
