@@ -33,7 +33,6 @@ export function MonthlySummaryWidget({
     pasca_persalinan: 'Pasca Persalinan',
     batita: 'Batita',
     balita: 'Balita',
-    anak_sekolah: 'Anak Sekolah',
     lansia: 'Lansia',
     imunisasi: 'Imunisasi',
   }

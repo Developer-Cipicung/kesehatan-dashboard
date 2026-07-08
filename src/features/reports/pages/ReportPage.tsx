@@ -4,6 +4,8 @@ import { useGetPendataanGlobalStatus, useGetAdminStatusPendataan } from '@/featu
 import { useGetWargaList } from '@/features/warga/hooks/useWarga'
 import { MonthlySummaryWidget } from '../components/MonthlySummaryWidget'
 import { ExportActions } from '../components/ExportActions'
+import { MonthlyReportTable } from '../components/MonthlyReportTable'
+import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 
@@ -12,6 +14,7 @@ export function ReportPage() {
   const currentYear = new Date().getFullYear()
 
   const [posyanduFilter, setPosyanduFilter] = useState<'my' | 'all'>('my')
+  const [kategoriFilter, setKategoriFilter] = useState<string>('baduta')
   const posyanduIdParam = posyanduFilter === 'all' ? 'all' : undefined
 
   // Fetch Dashboard Stats for numbers
@@ -25,6 +28,33 @@ export function ReportPage() {
 
   // Fetch Warga List for exports (set limit very high to get all)
   const { data: wargaData, isLoading: isWargaLoading } = useGetWargaList({ limit: 10000, posyanduId: posyanduIdParam })
+
+  // Fetch Pemeriksaan List for the selected category, month, and year
+  const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(kategoriFilter, {
+    bulan: currentMonth,
+    tahun: currentYear,
+    limit: 10000,
+    posyanduId: posyanduIdParam,
+  })
+
+  // Compute baduta vs balita filter dynamically
+  const filteredPemeriksaanList = (() => {
+    const list = pemeriksaanData?.data || []
+    if (kategoriFilter === 'baduta') {
+      return list.filter((item: any) => {
+        if (!item.warga?.tanggal_lahir) return false
+        const ageMonths = (new Date(item.tanggal_pemeriksaan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+        return ageMonths < 24
+      })
+    } else if (kategoriFilter === 'balita') {
+      return list.filter((item: any) => {
+        if (!item.warga?.tanggal_lahir) return false
+        const ageMonths = (new Date(item.tanggal_pemeriksaan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+        return ageMonths >= 24 && ageMonths < 60
+      })
+    }
+    return list
+  })()
 
   if (isDashboardLoading || isStatusLoading) {
     return (
@@ -100,7 +130,19 @@ export function ReportPage() {
         
         <ExportActions 
           wargaList={wargaData?.data || []} 
-          isLoading={isWargaLoading} 
+          pemeriksaanList={filteredPemeriksaanList}
+          isLoading={isWargaLoading || isPemeriksaanLoading} 
+          kategoriFilter={kategoriFilter}
+          setKategoriFilter={setKategoriFilter}
+        />
+      </div>
+
+      <div className="bg-card p-6 rounded-lg border mt-6 overflow-hidden">
+        <h3 className="text-lg font-bold mb-4 capitalize">Data Laporan {kategoriFilter.replace('_', ' ')} Bulan Ini</h3>
+        <MonthlyReportTable 
+          kategori={kategoriFilter} 
+          data={filteredPemeriksaanList} 
+          isLoading={isPemeriksaanLoading} 
         />
       </div>
 

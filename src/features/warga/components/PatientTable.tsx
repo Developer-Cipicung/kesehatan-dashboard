@@ -243,7 +243,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             )}
           </tr>
           <tr className="border-b-2 border-primary bg-primary/5">
-            <th colSpan={3}></th>
+            <th colSpan={2}></th>
 
             <th className="px-3 py-3 font-semibold text-primary text-xs">Usia</th>
             {isBumil && (
@@ -256,8 +256,6 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Kepala (cm)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Nama Ayah</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Nama Ibu</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
@@ -384,12 +382,6 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || 'cm'} width="w-[70px]" disabled={isReadOnly} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell value={row.nama_ayah} onChange={(v) => set(warga.id, 'nama_ayah', v)} placeholder={lastNamaAyah || 'Ayah...'} width="w-[110px]" disabled={isReadOnly} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell value={row.nama_ibu} onChange={(v) => set(warga.id, 'nama_ibu', v)} placeholder={lastNamaIbu || 'Ibu...'} width="w-[110px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />

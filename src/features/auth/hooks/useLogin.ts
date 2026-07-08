@@ -17,7 +17,7 @@ export function useLogin() {
       // Fetch posyandu info using the new token
       try {
         const meData = await authService.getMe(token)
-        login(token, user, meData?.data?.posyandu ?? undefined)
+        login(token, { ...user, ...meData?.data?.app_user }, meData?.data?.posyandu ?? undefined)
       } catch {
         login(token, user)
       }

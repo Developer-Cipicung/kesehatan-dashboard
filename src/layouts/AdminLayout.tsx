@@ -11,7 +11,7 @@ export default function AdminLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   if (!user || (user as any).role !== 'admin') {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/" replace />
   }
 
   const menuItems = [
@@ -23,13 +23,15 @@ export default function AdminLayout() {
 
   const SidebarContent = () => (
     <>
-      <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-primary-foreground tracking-tight flex items-center">
-          <span className="bg-primary text-primary-foreground w-8 h-8 rounded-lg flex items-center justify-center mr-2 shadow-sm">
-            C
-          </span>
-          Cicipung <span className="text-xs ml-2 px-2 py-0.5 bg-red-500 rounded-full">Admin</span>
-        </h1>
+      <div className="flex h-[72px] items-center px-6 border-b border-slate-800 gap-3">
+        <div className="bg-white rounded-full p-2 flex items-center justify-center shrink-0">
+          <img src='/logo-cipicung.webp' alt="Logo" className="w-8 h-8 object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-lg font-bold text-white tracking-tight leading-none flex items-center">
+            Cicipung <span className="text-[10px] font-bold uppercase ml-2 px-1.5 py-0.5 bg-red-500 text-white rounded">Admin</span>
+          </h1>
+        </div>
         <Button variant="ghost" size="icon" aria-label="Tutup Menu" className="md:hidden text-white hover:bg-slate-800" onClick={() => setIsMobileMenuOpen(false)}>
           <X className="h-5 w-5" />
         </Button>
@@ -63,8 +65,8 @@ export default function AdminLayout() {
           <p className="text-xs text-slate-400 truncate">{(user as any).email}</p>
         </div>
         <Button
-          variant="outline"
-          className="w-full justify-start text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white"
+          variant="ghost"
+          className="w-full justify-start text-slate-300 hover:bg-slate-800 hover:text-white"
           onClick={logout}
         >
           <LogOut className="mr-2 h-4 w-4" />

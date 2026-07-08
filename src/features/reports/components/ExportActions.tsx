@@ -8,21 +8,21 @@ import { toast } from 'sonner'
 
 interface ExportActionsProps {
   wargaList: Warga[]
+  pemeriksaanList?: any[]
   isLoading: boolean
+  kategoriFilter: string
+  setKategoriFilter: (val: string) => void
 }
 
-export function ExportActions({ wargaList, isLoading }: ExportActionsProps) {
-  const [kategoriFilter, setKategoriFilter] = useState<string>('semua')
-
+export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kategoriFilter, setKategoriFilter }: ExportActionsProps) {
   const getFilteredWarga = () => {
-    if (kategoriFilter === 'semua') return wargaList
     return wargaList.filter(w => w.kategori.toLowerCase().includes(kategoriFilter.toLowerCase()))
   }
 
   const handleExportPdf = () => {
     try {
-      const filtered = getFilteredWarga()
-      exportWargaToPdf(filtered, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`)
+      // Pass the pemeriksaanList to the PDF exporter, along with the category
+      exportWargaToPdf(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`, pemeriksaanList, kategoriFilter)
       toast.success('Laporan PDF berhasil diunduh.')
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengekspor PDF.')
@@ -31,8 +31,8 @@ export function ExportActions({ wargaList, isLoading }: ExportActionsProps) {
 
   const handleExportExcel = () => {
     try {
-      const filtered = getFilteredWarga()
-      exportWargaToExcel(filtered, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`)
+      // Pass the pemeriksaanList to the Excel exporter
+      exportWargaToExcel(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`, pemeriksaanList, kategoriFilter)
       toast.success('Laporan Excel berhasil diunduh.')
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengekspor Excel.')
@@ -46,12 +46,11 @@ export function ExportActions({ wargaList, isLoading }: ExportActionsProps) {
         onChange={(e) => setKategoriFilter(e.target.value)}
         className="h-10 px-3 rounded-md border border-input bg-background w-full sm:w-auto"
       >
-        <option value="semua">Semua Warga</option>
-        <option value="balita">Balita & Baduta</option>
+        <option value="baduta">Baduta</option>
+        <option value="balita">Balita</option>
         <option value="bumil">Ibu Hamil</option>
-        <option value="pasca persalinan">Ibu Pasca Persalinan</option>
+        <option value="pasca_persalinan">Ibu Pasca Persalinan</option>
         <option value="lansia">Lansia</option>
-        <option value="anak sekolah">Anak Sekolah</option>
       </select>
       <Button 
         variant="outline" 

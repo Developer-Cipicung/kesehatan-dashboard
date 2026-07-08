@@ -99,7 +99,7 @@ export function DashboardPage() {
             <div className="text-4xl font-bold text-slate-800 mb-2">{totalAnak}</div>
             <div className="font-semibold text-slate-700 text-sm">Anak-anak</div>
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-1 text-xs">
+          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
             <div>
               <span className="block text-slate-500">Baduta</span>
               <span className="font-semibold text-slate-700">{kategori_breakdown.baduta}</span>
@@ -107,10 +107,6 @@ export function DashboardPage() {
             <div>
               <span className="block text-slate-500">Balita</span>
               <span className="font-semibold text-slate-700">{kategori_breakdown.balita}</span>
-            </div>
-            <div>
-              <span className="block text-slate-500">Sekolah</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.anak_sekolah}</span>
             </div>
           </div>
         </div>

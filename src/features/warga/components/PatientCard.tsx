@@ -292,12 +292,6 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <FieldRow label="LILA (cm)">
                   <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="0" />
                 </FieldRow>
-                <FieldRow label="Nama Ayah">
-                  <MobileInput value={form.nama_ayah} onChange={(v) => set('nama_ayah', v)} placeholder="ayah..." />
-                </FieldRow>
-                <FieldRow label="Nama Ibu">
-                  <MobileInput value={form.nama_ibu} onChange={(v) => set('nama_ibu', v)} placeholder="ibu..." />
-                </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.keluhan} onChange={(v) => set('keluhan', v)} placeholder="tidak ada..." />
                 </FieldRow>

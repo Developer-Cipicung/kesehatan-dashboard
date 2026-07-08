@@ -10,6 +10,14 @@ export function useGetHistory(kategori: string, wargaId: string, posyanduId?: st
   })
 }
 
+export function useGetPemeriksaanList(kategori: string, params: { bulan?: number; tahun?: number; limit?: number; posyanduId?: string }) {
+  return useQuery({
+    queryKey: ['pemeriksaan_list', kategori, params],
+    queryFn: () => pemeriksaanService.getAll(kategori, params),
+    enabled: !!kategori,
+  })
+}
+
 export function useGetPemeriksaanById(kategori: string, id: string, posyanduId?: string) {
   return useQuery({
     queryKey: ['pemeriksaan', kategori, id, posyanduId],

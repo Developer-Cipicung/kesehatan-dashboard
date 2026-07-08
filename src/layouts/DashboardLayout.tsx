@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, Navigate } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { cn } from '@/lib/utils'
 
 export default function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const user = useAuthStore((state) => state.user)
+
+  if ((user as any)?.role === 'admin') {
+    return <Navigate to="/admin" replace />
+  }
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">

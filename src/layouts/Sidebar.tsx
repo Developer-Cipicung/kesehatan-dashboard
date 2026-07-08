@@ -12,6 +12,7 @@ import {
   ClipboardList
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/authStore'
 
 interface SubNavItem {
   name: string
@@ -59,8 +60,10 @@ interface SidebarProps {
 export function Sidebar({ className, onClose }: SidebarProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     'Ibu-ibu': true,
-    'Anak-anak': false,
+    'Anak-anak': true,
   })
+
+  const user = useAuthStore((state) => state.user)
 
   const toggleSection = (name: string) => {
     setOpenSections((prev) => ({ ...prev, [name]: !prev[name] }))
