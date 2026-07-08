@@ -8,11 +8,9 @@ import {
   Users,
   Baby,
   BarChart2,
-  Stethoscope,
   ClipboardList
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/authStore'
 
 interface SubNavItem {
   name: string
@@ -62,8 +60,6 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     'Ibu-ibu': true,
     'Anak-anak': true,
   })
-
-  const user = useAuthStore((state) => state.user)
 
   const toggleSection = (name: string) => {
     setOpenSections((prev) => ({ ...prev, [name]: !prev[name] }))

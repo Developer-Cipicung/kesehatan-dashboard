@@ -299,36 +299,27 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             const latestPasca = warga.pemeriksaan_pasca_persalinan?.[0]
 
             // Build last-record display as placeholder hints
-            let lastDate = ''
             let lastBb = ''
             let lastTd = ''
             let lastTfuTb = ''
             let lastLingkarPerut = ''
             let lastLilaGds = ''
-            let lastNamaAyah = ''
-            let lastNamaIbu = ''
 
             if (latestBumil) {
-              lastDate = new Date(latestBumil.tanggal_kunjungan).toLocaleDateString('id-ID')
               lastBb = latestBumil.bb?.toString()
               lastTfuTb = latestBumil.tb?.toString()
               lastLingkarPerut = latestBumil.lingkar_perut?.toString()
               lastLilaGds = latestBumil.lingkar_lengan_atas?.toString()
             } else if (latestBalita) {
-              lastDate = new Date(latestBalita.tanggal_kunjungan).toLocaleDateString('id-ID')
               lastBb = latestBalita.bb?.toString()
               lastTfuTb = latestBalita.tb?.toString()
               lastLilaGds = latestBalita.lingkar_lengan_atas?.toString()
-              lastNamaAyah = latestBalita.nama_ayah || ''
-              lastNamaIbu = latestBalita.nama_ibu || ''
             } else if (latestLansia) {
-              lastDate = new Date(latestLansia.tanggal_kunjungan).toLocaleDateString('id-ID')
               lastBb = latestLansia.bb?.toString()
               lastTd = `${latestLansia.tekanan_darah_sistolik}/${latestLansia.tekanan_darah_diastolik}`
               lastTfuTb = latestLansia.tb?.toString()
               lastLilaGds = latestLansia.gula_darah_sewaktu?.toString()
             } else if (latestPasca) {
-              lastDate = new Date(latestPasca.tanggal_kunjungan).toLocaleDateString('id-ID')
               lastBb = latestPasca.bb?.toString()
               lastTd = `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}`
               lastTfuTb = latestPasca.suhu_tubuh?.toString()

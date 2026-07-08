@@ -30,3 +30,13 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Deploy ke Vercel
+
+Dashboard ini sudah siap deploy ke Vercel sebagai single-page app.
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variable wajib: `VITE_API_URL`
+
+File `vercel.json` sudah menambahkan rewrite agar route React Router seperti `/login`, `/admin`, dan halaman detail tetap bisa dibuka saat refresh atau direct access.

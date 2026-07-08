@@ -1,14 +1,11 @@
 import { Warga } from '@/features/warga/services/wargaService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 interface PatientProfileCardProps {
   warga: Warga
 }
 
 export function PatientProfileCard({ warga }: PatientProfileCardProps) {
-  const isMale = warga.jenis_kelamin === 'L'
-
   return (
     <Card>
       <CardHeader>

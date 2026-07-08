@@ -24,7 +24,7 @@ export function ReportPage() {
   const { isLoading: isStatusLoading } = useGetPendataanGlobalStatus(currentMonth, currentYear)
 
   // Fetch all posyandus status if filter is 'all'
-  const { data: allPosyanduData, isLoading: isAllPosyanduLoading } = useGetAdminStatusPendataan(currentYear)
+  const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear)
 
   // Fetch Warga List for exports (set limit very high to get all)
   const { data: wargaData, isLoading: isWargaLoading } = useGetWargaList({ limit: 10000, posyanduId: posyanduIdParam })
@@ -146,11 +146,11 @@ export function ReportPage() {
         />
       </div>
 
-      {posyanduFilter === 'all' && allPosyanduData?.data && (
+      {posyanduFilter === 'all' && allPosyanduData && (
         <div className="bg-card p-6 rounded-lg border mt-6">
           <h3 className="text-lg font-bold mb-4">Status Pendataan Posyandu (Bulan Ini)</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allPosyanduData.data.map(posyandu => {
+            {allPosyanduData.map((posyandu) => {
               const currentMonthStatus = posyandu.status.find(s => s.bulan === currentMonth)?.status || 'draft'
               return (
                 <div key={posyandu.id} className="p-4 border rounded-md flex justify-between items-center bg-slate-50/50">

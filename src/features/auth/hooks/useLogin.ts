@@ -3,7 +3,6 @@ import { authService, LoginRequest } from '../services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { AxiosError } from 'axios'
 
 export function useLogin() {
   const login = useAuthStore((state) => state.login)
@@ -24,7 +23,7 @@ export function useLogin() {
       toast.success('Login berhasil')
       navigate('/', { replace: true })
     },
-    onError: (error: AxiosError<{ message?: string }>) => {
+    onError: (_error) => {
       // Hanya mengandalkan inline error di form login
     },
   })
