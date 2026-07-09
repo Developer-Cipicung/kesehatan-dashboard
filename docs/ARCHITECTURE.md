@@ -6,784 +6,281 @@
 
 Pusat Pendataan Kesehatan Posyandu Cipicung
 
-Frontend dibangun menggunakan React dengan arsitektur **Feature-Based Architecture**.
+Frontend dibangun menggunakan React + Vite dengan arsitektur **Feature-Based Architecture**.
 
-Tujuan utama arsitektur ini adalah:
+---
 
-- mudah dikembangkan
-- scalable
-- reusable
-- mudah dipahami AI Agent
-- mudah dipelihara developer
+# Technology Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | React 18 + Vite |
+| Language | TypeScript (strict) |
+| Routing | React Router DOM v6 |
+| Server State | TanStack Query v5 |
+| Client State | useState / Zustand (minimal) |
+| Forms | React Hook Form + Zod |
+| HTTP Client | Axios (via `src/services/api.ts`) |
+| UI Library | shadcn/ui (Radix UI primitives) |
+| Styling | Tailwind CSS + CSS Variables |
+| Notifications | Sonner (toast) |
+| Export | jsPDF + jspdf-autotable (PDF), ExcelJS (Excel) |
+| Deployment | Vercel (SPA) |
 
 ---
 
 # High Level Architecture
 
-```
+```text
 Browser
-
-↓
-
-React Application
-
-↓
-
-React Router
-
-↓
-
-Layout
-
-↓
-
-Feature Module
-
-↓
-
-Reusable Components
-
-↓
-
-Service Layer
-
-↓
-
-Axios Client
-
-↓
-
-Backend API
-
-↓
-
-Database
+  ↓
+React Application (Vite SPA)
+  ↓
+React Router → Layout (DashboardLayout / AdminLayout / AuthLayout)
+  ↓
+Feature Module (warga, pemeriksaan, reports, dashboard, admin, auth)
+  ↓
+Feature Hook (TanStack Query / useMutation)
+  ↓
+Feature Service (Axios calls)
+  ↓
+Backend REST API (kesehatan-API)
+  ↓
+Database (PostgreSQL via Supabase)
 ```
 
 Frontend **tidak pernah** berkomunikasi langsung dengan database.
 
-Semua komunikasi dilakukan melalui Backend API.
-
 ---
 
-# Design Principles
+# Folder Structure (Actual)
 
-Frontend harus memenuhi prinsip berikut:
-
-- Mobile First
-- Responsive
-- Component Reusability
-- Feature Isolation
-- Single Responsibility
-- Separation of Concerns
-- Strict Type Safety
-- Predictable State
-- Maintainable Structure
-
----
-
-# Folder Structure
-
-```
+```text
 src/
-
-│
-
-├── app/
-
-├── assets/
-
-│
-
 ├── components/
-
-│   ├── ui/
-
-│   ├── common/
-
-│   ├── layout/
-
-│   ├── forms/
-
-│   ├── tables/
-
-│   ├── cards/
-
-│   ├── dialogs/
-
-│   └── charts/
-
+│   ├── ui/                 ← shadcn/ui primitives (button, dialog, card, dll.)
+│   ├── common/             ← DatePicker, SearchInput, NumberInput
+│   ├── forms/              ← FormField (wrapper RHF + shadcn)
+│   ├── tables/             ← DataTable
+│   ├── cards/              ← StatisticCard
+│   ├── dialogs/            ← ConfirmDialog
+│   └── feedback/           ← EmptyState, ErrorState, LoadingSkeleton
 │
-
 ├── features/
-
-│   ├── auth/
-
-│   ├── dashboard/
-
-│   ├── bumil/
-
-│   ├── pasca-persalinan/
-
-│   ├── calon-menikah/
-
-│   ├── lansia/
-
-│   ├── batita/
-
-│   ├── balita/
-
-│   ├── anak-sekolah/
-
-│   ├── riwayat/
-
-│   ├── laporan/
-
-│   └── superadmin/
-
+│   ├── auth/               ← Login
+│   ├── dashboard/          ← DashboardPage, useDashboardStats
+│   ├── warga/              ← SharedPatientList, PatientTable, PatientCard,
+│   │                           AddPatientDialog, ImunisasiCell
+│   │                           useWarga, useImunisasi
+│   │                           wargaService, imunisasiService
+│   ├── pemeriksaan/        ← PatientHistoryPage, HistoryTimeline,
+│   │                           PatientProfileCard, MonthlyRecordForm
+│   │                           usePemeriksaan
+│   │                           pemeriksaanService
+│   ├── pendataan/          ← usePendataanBulanan
+│   ├── reports/            ← ReportPage, MonthlyReportTable, ExportActions
+│   │                           exportPdf.ts, exportExcel.ts
+│   └── admin/              ← AdminDashboardPage, PosyanduManagementPage,
+│                               UserManagementPage, AdminStatusPendataanPage
 │
-
-├── hooks/
-
 ├── layouts/
-
-├── lib/
-
+│   ├── DashboardLayout.tsx ← Layout utama kader
+│   ├── AdminLayout.tsx     ← Layout admin
+│   ├── AuthLayout.tsx      ← Layout login
+│   ├── Sidebar.tsx
+│   ├── Header.tsx
+│   └── PosyanduSelector.tsx
+│
 ├── routes/
-
+│   ├── index.tsx           ← Seluruh routing definisi
+│   └── ProtectedRoute.tsx
+│
 ├── services/
-
-├── stores/
-
-├── types/
-
-├── utils/
-
+│   └── api.ts              ← Axios instance (base URL, interceptors)
+│
 ├── App.tsx
-
 └── main.tsx
 ```
 
 ---
 
-# Folder Responsibilities
+# Routing (Actual)
 
-## app/
+```text
+/login                          ← Public (AuthLayout)
+/                               ← Protected (DashboardLayout)
+  /                             ← DashboardPage (index)
+  /bumil                        ← SharedPatientList kategori="bumil"
+  /pasca-persalinan             ← SharedPatientList kategori="pasca_persalinan"
+  /baduta                       ← SharedPatientList kategori="baduta"
+  /balita                       ← SharedPatientList kategori="balita"
+  /lansia                       ← SharedPatientList kategori="lansia"
+  /laporan                      ← ReportPage
+  /status-pendataan             ← AdminStatusPendataanPage (kader view)
+  /:kategori/:id                ← PatientHistoryPage (detail + riwayat)
 
-Global provider.
+/admin                          ← Protected Admin (AdminLayout)
+  /admin                        ← AdminDashboardPage (index)
+  /admin/status-pendataan       ← AdminStatusPendataanPage (admin view)
+  /admin/posyandu               ← PosyanduManagementPage
+  /admin/users                  ← UserManagementPage
+```
 
-Contoh:
-
-- QueryClientProvider
-- RouterProvider
-- ThemeProvider
+**Catatan penting:** Routing aktual menggunakan flat path (`/bumil`, `/balita`) bukan nested (`/ibu/hamil`, `/anak/batita`) seperti dokumen lama. Dokumentasi lama sudah tidak relevan.
 
 ---
 
-## assets/
+# Feature: Warga & Pemeriksaan
 
-Static assets.
+## SharedPatientList
 
-- image
-- icon
-- logo
-- font
+Komponen tunggal yang melayani semua kategori warga (bumil, baduta, balita, lansia, pasca_persalinan). Menerima props `title` dan `kategori`.
 
----
-
-## components/
-
-Reusable UI.
-
-Tidak boleh mengandung business logic.
-
-Contoh:
-
-```
-Button
-
-Input
-
-Modal
-
-Badge
-
-Table
-
-Card
-
-Sidebar
-
-Navbar
-```
+Di dalamnya terdapat:
+- **PatientTable** — tampilan desktop (tabel dengan kolom per kategori)
+- **PatientCard** — tampilan mobile (card per warga)
+- **AddPatientDialog** — dialog tambah warga baru
+- **ImunisasiCell** — kelola imunisasi balita/baduta langsung di tabel
 
 ---
 
-## features/
+## PatientHistoryPage (`/:kategori/:id`)
 
-Setiap fitur berdiri sendiri.
-
-Contoh:
-
-```
-features/
-
-dashboard/
-
-bumil/
-
-lansia/
-```
-
-Masing-masing memiliki:
-
-```
-components/
-
-hooks/
-
-pages/
-
-services/
-
-types/
-```
+Halaman detail warga. Menampilkan:
+- **PatientProfileCard** — informasi identitas warga + riwayat imunisasi (untuk balita/baduta)
+- **HistoryTimeline** — daftar seluruh riwayat pemeriksaan
+- **MonthlyRecordForm** — dialog edit/tambah pemeriksaan (field dinamis per kategori)
 
 ---
 
-## hooks/
+## ImunisasiCell
 
-Reusable hooks.
+Komponen yang tampil di PatientTable dan PatientCard untuk menampilkan dan mengelola imunisasi balita/baduta.
 
-Misalnya
-
-```
-useDebounce
-
-useMediaQuery
-
-usePagination
-
-useDisclosure
-```
+- Menampilkan chip/pill per vaksin
+- Tombol X (merah, terpisah) untuk hapus
+- Input teks manual untuk tambah vaksin baru (tekan Enter atau klik +)
 
 ---
 
-## layouts/
+# Feature: Reports
 
-Layout aplikasi.
+## ReportPage (`/laporan`)
 
-Misalnya
-
-```
-AuthLayout
-
-DashboardLayout
-
-SuperAdminLayout
-```
+- Filter berdasarkan Posyandu (Saya / Semua)
+- Filter berdasarkan kategori warga
+- **MonthlyReportTable** — tabel rekap bulan berjalan dengan kolom imunisasi untuk balita/baduta
+- **ExportActions** — tombol Download PDF dan Download Excel
+- Export PDF menggunakan jsPDF + autotable
+- Export Excel menggunakan ExcelJS + file-saver
 
 ---
 
-## routes/
-
-Seluruh routing.
-
-Tidak boleh ada routing di dalam feature.
-
----
-
-## services/
-
-Seluruh komunikasi API.
-
-Contoh
-
-```
-dashboard.service.ts
-
-bumil.service.ts
-
-lansia.service.ts
-```
-
-Component dilarang menggunakan axios secara langsung.
-
----
-
-## stores/
-
-Global state menggunakan Zustand.
-
-Contoh
-
-```
-authStore
-
-sidebarStore
-
-themeStore
-```
-
-Tidak digunakan untuk server state.
-
----
-
-## types/
-
-Seluruh interface global.
-
-Contoh
-
-```
-User
-
-ApiResponse
-
-Pagination
-
-Patient
-```
-
----
-
-## utils/
-
-Helper.
-
-Misalnya
-
-```
-dateFormatter
-
-numberFormatter
-
-validators
-
-constants
-```
-
----
-
-# Feature Structure
-
-Setiap feature memiliki struktur sama.
-
-Contoh
-
-```
-features/
-
-bumil/
-
-│
-
-components/
-
-hooks/
-
-pages/
-
-services/
-
-types/
-
-index.ts
-```
-
-Tidak boleh membuat struktur berbeda.
-
----
-
-# Component Architecture
-
-```
-Page
-
-↓
-
-Feature Component
-
-↓
-
-Reusable Component
-
-↓
-
-Primitive UI
-```
-
-Contoh
-
-```
-BumilPage
-
-↓
-
-BumilTable
-
-↓
-
-DataTable
-
-↓
-
-Table
-```
-
----
-
-# Layout Hierarchy
-
-```
-App
-
-↓
-
-Router
-
-↓
-
-Layout
-
-↓
-
-Page
-
-↓
-
-Section
-
-↓
-
-Card
-
-↓
-
-Table
-
-↓
-
-Input
-```
+# Feature: Admin
+
+- **AdminDashboardPage** — statistik global semua posyandu
+- **AdminStatusPendataanPage** — status pendataan semua posyandu per bulan/tahun
+- **PosyanduManagementPage** — CRUD posyandu
+- **UserManagementPage** — CRUD user + assign posyandu + ubah role
 
 ---
 
 # State Management
 
-State dibagi menjadi dua.
+## Server State → TanStack Query
 
-## Server State
+Semua data dari API dikelola via custom hooks menggunakan `useQuery` dan `useMutation`.
 
-Menggunakan TanStack Query.
+Contoh hooks:
+- `useGetWargaList`, `useAddWarga`, `useUpdateWarga`
+- `useGetPemeriksaanList`, `useUpdatePemeriksaan`, `useDeletePemeriksaan`
+- `useGetImunisasiByWarga`, `useCreateImunisasi`, `useDeleteImunisasi`
+- `useDashboardStats`
+- `useGetPendataanGlobalStatus`, `useSubmitPendataan`
 
-Contoh
+## Client State → useState
 
-- dashboard
-- warga
-- pemeriksaan
-- laporan
+Digunakan untuk: dialog open/close, filter aktif, form state lokal.
 
-Tidak boleh disimpan ke Zustand.
-
----
-
-## Client State
-
-Menggunakan Zustand atau useState.
-
-Contoh
-
-- sidebar
-- dialog
-- auth
-- selected month
-- selected kategori
-
----
-
-# Data Flow
-
-```
-User
-
-↓
-
-React Component
-
-↓
-
-React Hook Form
-
-↓
-
-Validation
-
-↓
-
-Service
-
-↓
-
-Axios
-
-↓
-
-Backend API
-
-↓
-
-Response
-
-↓
-
-React Query
-
-↓
-
-Component
-```
-
----
-
-# Authentication Flow
-
-```
-Login
-
-↓
-
-Backend
-
-↓
-
-Token
-
-↓
-
-Store
-
-↓
-
-Protected Route
-
-↓
-
-Dashboard
-```
-
-Semua halaman selain login harus menggunakan Protected Route.
+Tidak menggunakan Zustand secara aktif — auth state dikelola via Supabase session.
 
 ---
 
 # Authorization
 
-## Kader
+## Kader / Bidan
 
-Dapat mengakses:
+- Akses: Dashboard, Pemeriksaan semua kategori, Riwayat, Laporan, Status Pendataan.
+- Dibatasi pada data Posyandu sendiri.
 
-- Dashboard
-- Pemeriksaan
-- Riwayat
-- Laporan
+## Admin
 
----
-
-## Super Admin
-
-Dapat mengakses:
-
-- CRUD Posyandu
-- CRUD User
-
-Tidak memiliki akses ke pendataan kesehatan.
-
----
-
-# API Layer
-
-Semua API berada pada folder:
-
-```
-services/
-```
-
-Contoh
-
-```
-bumil.service.ts
-
-dashboard.service.ts
-```
-
-Dilarang:
-
-```tsx
-axios.get(...)
-```
-
-langsung di component.
-
----
-
-# UI Layer
-
-Semua styling menggunakan:
-
-- Tailwind CSS
-- CSS Variables pada app.css
-
-Tidak boleh hardcode:
-
-```
-text-blue-500
-
-bg-red-500
-
-text-green-400
-```
-
-Gunakan design token.
-
----
-
-# Routing
-
-Setiap halaman menggunakan React Router.
-
-Tidak boleh membuat router sendiri.
-
----
-
-# Error Handling
-
-Semua error ditangani oleh:
-
-- Axios Interceptor
-- TanStack Query
-- Error Boundary
-
-Component tidak menangani error API secara manual kecuali untuk kebutuhan UI tertentu.
-
----
-
-# Loading Strategy
-
-Seluruh halaman menggunakan:
-
-- Skeleton Loading
-- Spinner
-- Disabled Button
-
-Tidak boleh menampilkan halaman kosong saat fetch.
+- Akses: Admin Dashboard, CRUD Posyandu, CRUD User, Status Pendataan semua Posyandu.
+- Tidak mengakses pendataan kesehatan langsung.
 
 ---
 
 # Form Strategy
 
-Semua form menggunakan:
+Semua form menggunakan **React Hook Form + Zod**:
+- `AddPatientDialog` — tambah warga baru
+- `MonthlyRecordForm` — edit pemeriksaan (field dinamis per kategori)
+- Form admin (posyandu, user)
 
-- React Hook Form
-- Zod
-
-Tidak boleh menggunakan useState untuk form yang kompleks.
-
----
-
-# Table Strategy
-
-Semua tabel menggunakan komponen yang sama.
-
-Tidak boleh membuat tabel baru untuk setiap halaman.
-
-Contoh:
-
-```
-DataTable
-```
-
-dipakai oleh:
-
-- Bumil
-- Lansia
-- Balita
-- Batita
-- Anak Sekolah
+`FormField` di `src/components/forms/FormField.tsx` adalah wrapper reusable yang menerima `label: ReactNode | string`.
 
 ---
 
-# Business Modules
+# Export
 
-Frontend dibagi menjadi module berikut.
-
-```
-Authentication
-
-Dashboard
-
-Ibu Hamil
-
-Pasca Persalinan
-
-Calon Menikah
-
-Lansia
-
-Batita
-
-Balita
-
-Anak Sekolah
-
-Riwayat Pemeriksaan
-
-Rekapitulasi
-
-Super Admin
-```
-
-Tidak boleh mencampur business logic antar module.
+- `exportWargaToPdf(...)` di `features/reports/utils/exportPdf.ts`
+- `exportWargaToExcel(...)` di `features/reports/utils/exportExcel.ts`
+- Kolom export dinamis berdasarkan `kategoriFilter`
+- Kolom Imunisasi untuk balita/baduta menampilkan semua vaksin dipisahkan koma
 
 ---
 
-# Reusability Rules
+# Design Principles
 
-Setiap komponen harus dipertimbangkan reusable.
-
-Jika komponen dapat digunakan minimal dua halaman,
-
-maka harus dipindahkan ke:
-
-```
-components/
-```
+- Mobile First
+- Responsive (PatientTable di desktop, PatientCard di mobile)
+- Component Reusability
+- Feature Isolation
+- Strict TypeScript
+- Backend sebagai Single Source of Truth
 
 ---
 
 # AI Development Rules
 
 AI wajib:
-
-- mengikuti struktur folder
-- tidak membuat folder baru tanpa alasan
-- menggunakan reusable component
-- tidak mengubah arsitektur
-- mengupdate dokumentasi jika arsitektur berubah
-- menyelesaikan satu task setiap iterasi
+- Mengikuti struktur folder yang sudah ada
+- Tidak membuat folder baru tanpa alasan
+- Menggunakan reusable component (cek `components/` terlebih dahulu)
+- Tidak mengubah arsitektur tanpa dokumentasi
+- Mengupdate dokumentasi jika arsitektur berubah
+- Menyelesaikan satu task setiap iterasi
 
 ---
 
-# Summary
+# Implemented Features
 
-Frontend menggunakan:
+- ✅ Login (Supabase Auth)
+- ✅ Dashboard (statistik + aktivitas terbaru)
+- ✅ Daftar warga per kategori (balita, baduta, bumil, lansia, pasca_persalinan)
+- ✅ Tambah warga baru
+- ✅ Edit data warga
+- ✅ Riwayat pemeriksaan per warga (dengan edit/hapus)
+- ✅ Imunisasi balita/baduta (tambah, hapus, tampil di tabel dan profil)
+- ✅ Pendataan bulanan (status + submit selesai)
+- ✅ Laporan & rekap bulanan (tabel + export PDF + export Excel)
+- ✅ Admin: CRUD Posyandu, CRUD User, Status Pendataan
 
-- Feature-Based Architecture
-- Mobile First Design
-- Reusable Components
-- TanStack Query
-- React Hook Form
-- Axios Service Layer
-- Zustand untuk Global UI State
-- CSS Variables sebagai Design Token
-- Strict TypeScript
-- Backend sebagai Single Source of Truth
+---
+
+# Future Improvements
+
+- Notifikasi real-time
+- Calendar view pendataan
+- Grafik perkembangan BB/TB per anak
+- PWA / offline support

@@ -6,653 +6,241 @@ Seluruh UI pada project wajib dibangun menggunakan reusable component.
 
 AI Agent wajib mencari reusable component terlebih dahulu sebelum membuat component baru.
 
-Jika sebuah component dapat digunakan oleh minimal dua halaman, component tersebut harus dipindahkan ke folder:
-
-```
-
-src/components
-
-```
-
-Tidak diperbolehkan membuat duplicate component.
-
 ---
 
-# Folder Structure
+# Folder Structure (Actual)
 
 ```
-components/
-
-ui/
-
-layout/
-
-forms/
-
-tables/
-
-cards/
-
-dialogs/
-
-feedback/
-
-navigation/
-
-charts/
-
-common/
-
-```
-
----
-
-# Component Hierarchy
-
-```
-Primitive UI
-
-↓
-
-Reusable Component
-
-↓
-
-Feature Component
-
-↓
-
-Page
-
-```
-
-Contoh
-
-```
-Button
-
-↓
-
-SearchInput
-
-↓
-
-PatientToolbar
-
-↓
-
-BumilPage
+src/components/
+├── ui/                 ← shadcn/ui primitives (Radix UI)
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── dialog.tsx
+│   ├── form.tsx
+│   ├── input.tsx
+│   ├── label.tsx
+│   ├── select.tsx
+│   ├── table.tsx
+│   ├── badge.tsx
+│   ├── skeleton.tsx
+│   ├── textarea.tsx
+│   ├── popover.tsx
+│   ├── calendar.tsx
+│   ├── alert-dialog.tsx
+│   └── pagination.tsx
+│
+├── common/             ← Komponen utilitas lintas fitur
+│   ├── DatePicker.tsx
+│   ├── SearchInput.tsx
+│   └── NumberInput.tsx
+│
+├── forms/              ← Wrapper form
+│   └── FormField.tsx   ← Wrapper RHF + shadcn FormItem + label + error
+│
+├── tables/
+│   └── DataTable.tsx   ← Generic table (belum dipakai secara luas)
+│
+├── cards/
+│   └── StatisticCard.tsx
+│
+├── dialogs/
+│   └── ConfirmDialog.tsx
+│
+└── feedback/
+    ├── EmptyState.tsx
+    ├── ErrorState.tsx
+    └── LoadingSkeleton.tsx  ← SkeletonCard
 ```
 
 ---
 
-# Primitive Components
+# shadcn/ui (ui/)
 
-Primitive adalah komponen dasar yang tidak memiliki business logic.
+Komponen primitive dari shadcn/ui. Tidak boleh dimodifikasi kecuali styling via CSS variables.
 
-## Button
-
-Digunakan pada seluruh aplikasi.
-
-Variant:
-
-```
-Primary
-
-Secondary
-
-Outline
-
-Ghost
-
-Danger
-
-Success
-
-```
-
-Props
-
-```
-children
-
-variant
-
-size
-
-loading
-
-disabled
-
-onClick
-
-type
-
-```
-
-Tidak diperbolehkan membuat button baru.
+Gunakan komponen ini sebagai building block:
+- `Button`, `Input`, `Textarea`, `Select`, `Badge`
+- `Card`, `CardHeader`, `CardContent`, `CardTitle`
+- `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`
+- `Table`, `TableHead`, `TableRow`, `TableCell`, `TableBody`
+- `Form`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`
 
 ---
 
-## Input
+# Common Components (common/)
 
-Digunakan untuk seluruh text input.
+## DatePicker
 
-Props
-
+```tsx
+<DatePicker value={date} onChange={setDate} />
 ```
-label
 
-placeholder
+Berbasis Calendar + Popover dari shadcn.
 
-error
+---
 
-disabled
+## SearchInput
 
-required
-
+```tsx
+<SearchInput value={q} onChange={setQ} placeholder="Cari nama atau NIK..." />
 ```
 
 ---
 
 ## NumberInput
 
-Untuk:
-
-- Berat badan
-- Tinggi badan
-- Gula darah
-- Tekanan darah
-
-Harus otomatis menerima angka.
+Untuk input angka desimal (BB, TB, GDS, dll.).
 
 ---
 
-## DatePicker
+# FormField (forms/)
 
-Seluruh tanggal menggunakan component ini.
+Wrapper React Hook Form + shadcn FormItem.
 
-Tidak boleh menggunakan input type=date secara langsung.
-
----
-
-## TextArea
-
-Digunakan untuk:
-
-- Keluhan
-- Catatan
-
----
-
-## Select
-
-Digunakan untuk:
-
-- Dropdown
-- Status
-- Pilihan
-
----
-
-## Checkbox
-
-Digunakan bila diperlukan.
-
----
-
-## RadioGroup
-
-Digunakan bila diperlukan.
-
----
-
-# Layout Components
-
-## Sidebar
-
-Berisi:
-
-- Logo
-- Navigation
-- User
-
-Responsif.
-
-Mobile menjadi drawer.
-
----
-
-## Header
-
-Berisi
-
-- Judul Halaman
-
-- Breadcrumb
-
-- User Menu
-
----
-
-## DashboardLayout
-
-Layout utama kader.
-
----
-
-## SuperAdminLayout
-
-Layout admin.
-
----
-
-## AuthLayout
-
-Layout login.
-
----
-
-# Navigation Components
-
-## SidebarItem
-
-Digunakan untuk seluruh menu.
-
----
-
-## Breadcrumb
-
-Seluruh halaman menggunakan component yang sama.
-
----
-
-## UserDropdown
-
-Dropdown profile.
-
----
-
-# Table Components
-
-## DataTable
-
-Component paling penting.
-
-Digunakan oleh:
-
-- Bumil
-- Pasca Persalinan
-- Calon Menikah
-- Lansia
-- Batita
-- Balita
-- Anak Sekolah
-- Posyandu
-- User
-
-Props
-
-```
-columns
-
-data
-
-loading
-
-pagination
-
-search
-
-emptyState
-
+```tsx
+<FormField
+  control={methods.control}
+  name="nik"
+  label={<>NIK <span className="text-red-500">*</span></>}
+  placeholder="16 digit NIK"
+  type="text"
+/>
 ```
 
----
-
-## TableToolbar
-
-Berisi
-
-Search
-
-Tambah Data
-
-Filter (future)
-
-Export
+Props:
+- `control` — dari `useForm()`
+- `name` — nama field
+- `label` — `ReactNode | string`
+- `placeholder?` — string
+- `type?` — HTML input type
+- `disabled?` — boolean
+- `children?` — render prop untuk custom input
 
 ---
 
-## TablePagination
+# Feature Components (features/warga/)
 
-Reusable.
+## SharedPatientList
 
----
+Komponen tunggal untuk semua halaman daftar pasien.
 
-## SearchInput
+Props: `title: string`, `kategori: string`
 
-Placeholder
-
-```
-Cari nama atau NIK...
-```
+Menampilkan PatientTable (desktop) dan PatientCard (mobile) secara bersamaan berdasarkan screen size.
 
 ---
 
-# Card Components
+## PatientTable
 
-## Card
+Tabel warga untuk desktop. Kolom berbeda per kategori:
 
-Base card.
-
----
-
-## StatisticCard
-
-Dashboard.
-
-Isi
-
-```
-Icon
-
-Title
-
-Value
-
-```
+| Kategori | Kolom utama |
+|----------|------------|
+| balita/baduta | BB, TB, Lingkar Kepala, Imunisasi |
+| bumil | Usia Kehamilan, BB, TB, Lingkar Perut |
+| lansia | BB, TB, Tekanan Darah, GDS |
+| pasca_persalinan | Tgl Persalinan, TD, Suhu, Kondisi |
 
 ---
 
 ## PatientCard
 
-Digunakan untuk mobile view.
-
-Karena tabel kurang nyaman di layar kecil.
-
-Berisi
-
-Nama
-
-NIK
-
-Aksi
+Tampilan kartu untuk mobile. Menampilkan data ringkas + aksi + ImunisasiCell untuk balita/baduta.
 
 ---
 
-# Dialog Components
+## AddPatientDialog
 
-## ConfirmDialog
-
-Digunakan untuk:
-
-Delete
-
-Submit Pendataan
-
-Logout
+Dialog tambah warga baru. Field muncul/hilang berdasarkan kategori yang dipilih:
+- Balita/Baduta: nama ayah, nama ibu
+- Pasca Persalinan: tanggal persalinan
+- Ibu-ibu: jenis kelamin otomatis P
 
 ---
 
-## PatientDialog
+## ImunisasiCell
 
-Tambah pasien.
+Menampilkan dan mengelola riwayat imunisasi di dalam PatientTable/PatientCard.
 
----
-
-## PosyanduDialog
-
-CRUD Posyandu.
+- Chip/pill per vaksin (teks + tombol X merah terpisah di luar chip)
+- Input manual untuk tambah vaksin (tekan Enter atau klik +)
+- `disabled` prop untuk mode readonly (setelah pendataan selesai)
 
 ---
 
-## UserDialog
+# Feature Components (features/pemeriksaan/)
 
-CRUD User.
+## PatientHistoryPage
 
----
-
-# Form Components
-
-## FormField
-
-Wrapper.
-
-Berisi
-
-```
-Label
-
-Input
-
-Error
-
-```
+Halaman detail warga. Komponen:
+1. `PatientProfileCard` — info warga + imunisasi
+2. `HistoryTimeline` — daftar riwayat pemeriksaan + tombol edit/hapus
+3. `MonthlyRecordForm` — dialog edit pemeriksaan (field dinamis per kategori)
 
 ---
 
-## FormSection
+## PatientProfileCard
 
-Mengelompokkan beberapa field.
+Card profil warga di atas halaman riwayat.
 
-Misalnya
-
-```
-Data Kehamilan
-
-↓
-
-Usia Kehamilan
-
-↓
-
-HPHT
-
-↓
-
-HTP
-
-```
-
----
-
-# History Components
-
-## HistoryTable
-
-Menampilkan seluruh riwayat pemeriksaan.
+Menampilkan data identitas + riwayat imunisasi (chips, readonly) untuk balita/baduta.
 
 ---
 
 ## HistoryTimeline
 
-Future.
-
-Belum digunakan.
+Tabel riwayat pemeriksaan. Kolom berbeda per kategori. Setiap baris memiliki tombol Edit dan Hapus (disabled jika periode sudah dikunci).
 
 ---
 
-# Dashboard Components
+## MonthlyRecordForm
 
-## ActivityCard
+Dialog form edit pemeriksaan. Field muncul berdasarkan kategori:
 
-Aktivitas terbaru.
-
----
-
-## ChartCard
-
-Membungkus grafik.
-
----
-
-## SummaryCard
-
-Jumlah warga.
+| Kategori | Field |
+|----------|-------|
+| balita/baduta | Tanggal, BB, TB, Lingkar Kepala, LILA, Keluhan |
+| bumil | Tanggal, Usia Kehamilan, BB, TB, Lingkar Perut, LILA, HPHT, HTP, Keluhan |
+| lansia | Tanggal, BB, TB, Tekanan Darah, GDS, Keluhan |
+| pasca_persalinan | Tanggal, BB, Suhu, Tekanan Darah, Kondisi Ibu, Keluhan |
 
 ---
 
-# Feedback Components
+# Feature Components (features/reports/)
 
-## LoadingScreen
+## MonthlyReportTable
 
-Loading halaman.
+Tabel rekap bulanan. Kolom berbeda per kategori. Kolom Imunisasi untuk balita/baduta (format: `BCG, Polio 1, DPT-HB-Hib 1`).
+
+---
+
+## ExportActions
+
+Tombol Download PDF + Download Excel + dropdown pilih kategori.
 
 ---
 
-## SkeletonTable
+# Feedback Components (feedback/)
 
-Loading tabel.
+## SkeletonCard / LoadingSkeleton
 
----
+Ditampilkan saat lazy loading halaman.
 
 ## EmptyState
 
-Jika data kosong.
-
----
+Ditampilkan jika data kosong.
 
 ## ErrorState
 
-Jika request gagal.
+Ditampilkan jika request API gagal. Memiliki props `onRetry`.
 
 ---
 
-## Toast
+# Dashboard Components (features/dashboard/)
 
-Menggunakan Sonner.
+## StatisticCard
 
-Tidak membuat toast sendiri.
-
----
-
-# Export Components
-
-## ExportButton
-
-Membuka pilihan
-
-PDF
-
-Excel
-
----
-
-# Authentication Components
-
-## LoginForm
-
-Form login kader.
-
----
-
-## AdminLoginForm
-
-Form login admin.
-
----
-
-# Business Components
-
-## PatientToolbar
-
-Berisi
-
-Search
-
-Tambah Pasien
-
----
-
-## AddRecordButton
-
-Button
-
-```
-Tambah Data
-```
-
-Muncul apabila pasien belum memiliki record pada bulan berjalan.
-
-Klik
-
-↓
-
-Membuat record kosong
-
-↓
-
-Redirect ke halaman Riwayat.
-
----
-
-## HistoryButton
-
-Jika record bulan berjalan sudah ada.
-
-Button berubah menjadi
-
-```
-Riwayat
-```
-
-Klik
-
-↓
-
-Masuk halaman Riwayat.
-
----
-
-## SubmitMonthlyButton
-
-Button
-
-```
-Selesai Pendataan Bulan Ini
-```
-
-Hanya muncul apabila status masih Draft.
-
-Jika status Verified
-
-↓
-
-Hidden.
-
----
-
-# Component Rules
-
-Semua component harus:
-
-- Reusable
-- Typed
-- Functional Component
-- Tidak memiliki duplicate
-- Tidak memiliki business logic berat
-
----
-
-# Business Logic Placement
-
-Component hanya menangani UI.
-
-Business Logic berada pada:
-
-```
-features/
-
-↓
-
-hooks
-
-↓
-
-services
-
-```
+Menampilkan: ikon + judul + nilai angka.
 
 ---
 
@@ -660,96 +248,22 @@ services
 
 Gunakan PascalCase.
 
-Contoh
-
-```
-PatientTable
-
-PatientCard
-
-StatisticCard
-
-AddRecordButton
-
-```
-
-Tidak menggunakan nama generik seperti
-
-```
-Table1
-
-ButtonNew
-
-Card2
-
-```
+Contoh: `PatientTable`, `ImunisasiCell`, `MonthlyRecordForm`, `ExportActions`
 
 ---
 
 # Props Rules
 
-Props harus memiliki interface.
-
-Contoh
-
-```ts
-interface ButtonProps {
-
-children: ReactNode
-
-variant: ButtonVariant
-
-loading?: boolean
-
-}
-```
-
-Tidak menggunakan any.
-
----
-
-# Children Rules
-
-Jika component dapat menggunakan children,
-
-gunakan
-
-```
-ReactNode
-```
+Props harus memiliki TypeScript interface. Hindari `any` sebisa mungkin.
 
 ---
 
 # AI Development Rules
 
 AI wajib:
-
-- Menggunakan component yang sudah ada.
+- Menggunakan component yang sudah ada (cek daftar di atas terlebih dahulu).
 - Tidak membuat duplicate component.
-- Memindahkan component reusable ke folder components.
-- Tidak mencampur business logic.
+- Memindahkan component reusable ke folder `components/`.
+- Tidak mencampur business logic dengan UI component.
 - Menggunakan TypeScript Strict.
-
----
-
-# Future Components
-
-Disiapkan untuk pengembangan.
-
-- NotificationCenter
-- AuditTimeline
-- HealthChart
-- Calendar
-- ReportPreview
-
-Belum perlu diimplementasikan.
-
----
-
-# Summary
-
-Seluruh UI aplikasi dibangun dari reusable component.
-
-AI wajib mengutamakan penggunaan component yang sudah tersedia dibanding membuat component baru.
-
-Business Logic tidak boleh berada di reusable component.
+- Mengupdate dokumen ini jika menambah component baru.

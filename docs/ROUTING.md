@@ -2,55 +2,43 @@
 
 # Routing Documentation
 
-Project menggunakan **React Router DOM** dengan nested routing.
+Project menggunakan **React Router DOM v6** dengan `createBrowserRouter` dan nested routing.
 
-Seluruh halaman harus didefinisikan di folder:
+Seluruh routing didefinisikan di:
 
 ```
-src/routes
+src/routes/index.tsx
 ```
-
-Tidak diperbolehkan membuat routing di dalam feature.
 
 ---
 
-# Routing Structure
+# Actual Route Structure
 
 ```
-/
+/login                          ← Public
 
-├── login
-├── dashboard
-│
-├── ibu
-│   ├── hamil
-│   ├── pasca-persalinan
-│   └── calon-menikah
-│
-├── anak
-│   ├── batita
-│   ├── balita
-│   └── sekolah
-│
-├── lansia
-│
-├── riwayat
-│   └── :recordId
-│
-├── laporan
-│
-└── superadmin
-    ├── login
-    ├── dashboard
-    ├── posyandu
-    └── users
+/                               ← Protected (ProtectedRoute)
+  /                             ← DashboardLayout
+    /                 (index)   ← DashboardPage
+    /bumil                      ← SharedPatientList (kategori="bumil")
+    /pasca-persalinan           ← SharedPatientList (kategori="pasca_persalinan")
+    /baduta                     ← SharedPatientList (kategori="baduta")
+    /balita                     ← SharedPatientList (kategori="balita")
+    /lansia                     ← SharedPatientList (kategori="lansia")
+    /laporan                    ← ReportPage
+    /status-pendataan           ← AdminStatusPendataanPage (kader view)
+    /:kategori/:id              ← PatientHistoryPage (detail + riwayat + edit)
+
+  /admin                        ← AdminLayout
+    /admin            (index)   ← AdminDashboardPage
+    /admin/status-pendataan     ← AdminStatusPendataanPage (admin view)
+    /admin/posyandu             ← PosyanduManagementPage
+    /admin/users                ← UserManagementPage
 ```
 
 ---
 
 # Route Groups
-
-Route dibagi menjadi tiga kelompok.
 
 ## Public
 
@@ -58,518 +46,131 @@ Tidak membutuhkan login.
 
 ```
 /login
-
-/superadmin/login
 ```
 
 ---
 
 ## Protected Kader
 
-Hanya dapat diakses kader.
+Hanya dapat diakses user yang sudah login.
 
 ```
-/dashboard
-
-/ibu/*
-
-/anak/*
-
+/
+/bumil
+/pasca-persalinan
+/baduta
+/balita
 /lansia
-
-/riwayat/:id
-
 /laporan
+/status-pendataan
+/:kategori/:id
 ```
 
 ---
 
-## Protected Super Admin
+## Protected Admin
 
 ```
-/superadmin/dashboard
-
-/superadmin/posyandu
-
-/superadmin/users
-```
-
----
-
-# Authentication Flow
-
-```
-Login
-
-↓
-
-Backend
-
-↓
-
-JWT
-
-↓
-
-Save Session
-
-↓
-
-Redirect Dashboard
-```
-
-Jika token tidak valid
-
-↓
-
-Logout
-
-↓
-
-Kembali ke Login
-
----
-
-# Authorization
-
-## Kader
-
-Allowed
-
-```
-Dashboard
-
-Kategori Pasien
-
-Riwayat
-
-Laporan
-```
-
-Forbidden
-
-```
-Superadmin
+/admin
+/admin/status-pendataan
+/admin/posyandu
+/admin/users
 ```
 
 ---
 
-## Super Admin
+# Authentication & Route Guard
 
-Allowed
+Menggunakan `ProtectedRoute` di `src/routes/ProtectedRoute.tsx`.
 
-```
-Dashboard Admin
+`ProtectedRoute` mengecek Supabase session:
+- Jika belum login → redirect ke `/login`
+- Jika sudah login → render children (outlet)
 
-CRUD Posyandu
-
-CRUD User
-```
-
-Forbidden
-
-```
-Pendataan kesehatan
-```
-
----
-
-# Main Navigation
-
-Sidebar kader.
-
-```
-Dashboard
-
-Ibu
-    Ibu Hamil
-    Pasca Persalinan
-    Calon Menikah
-
-Anak
-    Batita
-    Balita
-    Anak Sekolah
-
-Lansia
-
-Laporan
-```
-
----
-
-Sidebar Super Admin
-
-```
-Dashboard
-
-Posyandu
-
-Users
-```
-
----
-
-# Dashboard Route
-
-```
-/dashboard
-```
-
-Menampilkan:
-
-- statistik
-- aktivitas
-- grafik
-- shortcut
-
----
-
-# Ibu Routes
-
-## Ibu Hamil
-
-```
-/ibu/hamil
-```
-
-Menampilkan daftar ibu hamil.
-
----
-
-## Pasca Persalinan
-
-```
-/ibu/pasca-persalinan
-```
-
----
-
-## Calon Menikah
-
-```
-/ibu/calon-menikah
-```
-
----
-
-# Anak Routes
-
-## Batita
-
-```
-/anak/batita
-```
-
----
-
-## Balita
-
-```
-/anak/balita
-```
-
----
-
-## Anak Sekolah
-
-```
-/anak/sekolah
-```
-
----
-
-# Lansia
-
-```
-/lansia
-```
-
----
-
-# Riwayat Pemeriksaan
-
-```
-/riwayat/:recordId
-```
-
-Halaman ini menjadi **pusat seluruh detail pemeriksaan**.
-
-Semua edit dilakukan di halaman ini.
-
-Halaman daftar pasien hanya menjadi entry point.
-
----
-
-# Riwayat Behaviour
-
-Jika record:
-
-Draft
-
-↓
-
-Edit diperbolehkan.
-
-Jika:
-
-Verified
-
-↓
-
-Readonly.
-
----
-
-# Laporan
-
-```
-/laporan
-```
-
-Berisi:
-
-- Rekap Bulanan
-- Export PDF
-- Export Excel
-
----
-
-# Super Admin
-
-Dashboard
-
-```
-/superadmin/dashboard
-```
-
----
-
-CRUD Posyandu
-
-```
-/superadmin/posyandu
-```
-
----
-
-CRUD User
-
-```
-/superadmin/users
-```
-
----
-
-# Route Protection
-
-Menggunakan:
-
-```
-ProtectedRoute
-
-ProtectedAdminRoute
-
-PublicRoute
-```
-
-AI wajib menggunakan wrapper.
-
-Tidak boleh mengecek login di setiap halaman.
-
----
-
-# Redirect Rules
-
-Belum login
-
-↓
-
-```
-/login
-```
-
----
-
-Login sebagai kader
-
-↓
-
-```
-/dashboard
-```
-
----
-
-Login sebagai admin
-
-↓
-
-```
-/superadmin/dashboard
-```
-
----
-
-Akses halaman tanpa izin
-
-↓
-
-403
-
-atau redirect dashboard.
-
----
-
-# Breadcrumb
-
-Contoh.
-
-```
-Dashboard
-
-↓
-
-Ibu
-
-↓
-
-Ibu Hamil
-```
-
----
-
-```
-Dashboard
-
-↓
-
-Anak
-
-↓
-
-Balita
-```
-
----
-
-```
-Dashboard
-
-↓
-
-Laporan
-```
-
----
-
-# Page Title
-
-Setiap route harus mengubah:
-
-```
-document.title
-```
-
-Contoh
-
-```
-Dashboard
-
-Ibu Hamil
-
-Lansia
-
-Balita
-
-Rekapitulasi
-```
+Redirect setelah login:
+- Kader/Bidan → `/` (Dashboard)
+- Admin → `/admin` (Admin Dashboard)
 
 ---
 
 # Lazy Loading
 
-Seluruh halaman menggunakan
+Semua halaman menggunakan `React.lazy()` + `Suspense` melalui helper `Loadable`:
+
+```tsx
+const Loadable = (Component) => (props) => (
+  <Suspense fallback={<SkeletonCard />}>
+    <Component {...props} />
+  </Suspense>
+)
+```
+
+Halaman yang di-lazy-load:
+- LoginPage
+- DashboardPage
+- SharedPatientList
+- PatientHistoryPage
+- ReportPage
+- AdminDashboardPage
+- AdminStatusPendataanPage
+- PosyanduManagementPage
+- UserManagementPage
+
+---
+
+# Dynamic Route: PatientHistoryPage
 
 ```
-React.lazy()
-
-Suspense
+/:kategori/:id
 ```
 
-Contoh
+Halaman detail warga yang berlaku untuk semua kategori:
+
+| URL contoh | Kategori |
+|------------|----------|
+| `/bumil/uuid-warga` | Ibu Hamil |
+| `/balita/uuid-warga` | Balita |
+| `/baduta/uuid-warga` | Baduta |
+| `/lansia/uuid-warga` | Lansia |
+| `/pasca-persalinan/uuid-warga` | Pasca Persalinan |
+
+---
+
+# Navigation (Sidebar Kader)
 
 ```
-Dashboard
-
-Laporan
-
-Riwayat
-
-Superadmin
+Dashboard           /
+Ibu Hamil           /bumil
+Pasca Persalinan    /pasca-persalinan
+Baduta              /baduta
+Balita              /balita
+Lansia              /lansia
+Laporan             /laporan
+Status Pendataan    /status-pendataan
 ```
 
 ---
 
-# Not Found
+# Navigation (Sidebar Admin)
 
 ```
-*
+Dashboard           /admin
+Status Pendataan    /admin/status-pendataan
+Posyandu            /admin/posyandu
+Users               /admin/users
 ```
-
-↓
-
-404 Page
-
-Berisi:
-
-- ilustrasi
-- tombol kembali dashboard
-
----
-
-# Loading
-
-Saat lazy loading.
-
-↓
-
-Skeleton
-
-atau
-
-Loading Screen.
-
----
-
-# Future Expansion
-
-Struktur routing harus mudah ditambah.
-
-Contoh.
-
-```
-/remaja
-
-/disabilitas
-
-/rujukan
-```
-
-Tidak perlu mengubah struktur route utama.
 
 ---
 
 # AI Development Rules
 
 AI wajib:
-
-- Tidak mengubah route tanpa dokumentasi.
+- Tidak mengubah route tanpa memperbarui dokumentasi ini.
 - Tidak membuat duplicate route.
-- Menggunakan nested routing.
-- Menggunakan route guard.
-- Menggunakan lazy loading.
-- Memperbarui dokumentasi jika route berubah.
+- Menggunakan nested routing (`DashboardLayout` / `AdminLayout`).
+- Menggunakan `ProtectedRoute` sebagai route guard.
+- Menggunakan `Loadable` untuk lazy loading.
+- Mengupdate `src/routes/index.tsx` untuk menambah route baru.
 
 ---
 
@@ -577,10 +178,8 @@ AI wajib:
 
 Frontend memiliki tiga kelompok route:
 
-- Public
-- Protected Kader
-- Protected Super Admin
+- **Public** (`/login`)
+- **Protected Kader** (semua halaman utama, `DashboardLayout`)
+- **Protected Admin** (`/admin/*`, `AdminLayout`)
 
-Halaman **Riwayat Pemeriksaan** menjadi satu-satunya halaman untuk melihat dan mengedit detail pemeriksaan (selama periode belum dikunci).
-
-Semua navigasi mengikuti struktur sidebar dan business flow yang telah disepakati.
+Halaman **PatientHistoryPage** (`/:kategori/:id`) menjadi satu-satunya halaman untuk melihat dan mengedit detail pemeriksaan warga selama periode belum dikunci.
