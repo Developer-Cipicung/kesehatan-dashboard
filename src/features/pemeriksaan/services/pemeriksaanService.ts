@@ -12,7 +12,6 @@ export interface Pemeriksaan {
   lingkar_lengan?: number
   tekanan_darah?: string
   catatan?: string
-  catatan?: string
   created_at: string
   updated_at: string
 }

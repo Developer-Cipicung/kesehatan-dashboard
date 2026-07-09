@@ -69,17 +69,17 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
       }
 
       const created = await addWarga(payload as AddWargaPayload)
-      if (values.kategori === 'pasca_persalinan' && values.tanggal_persalinan && created?.data?.id) {
+      if (values.kategori === 'pasca_persalinan' && values.tanggal_persalinan && created?.id) {
         try {
-          await pemeriksaanService.createPasca({
-            warga_id: created.data.id,
+          await pemeriksaanService.create('pasca_persalinan', {
+            warga_id: created.id,
             tanggal_kunjungan: new Date().toISOString().split('T')[0],
             tanggal_persalinan: values.tanggal_persalinan,
             bb: 0,
             tekanan_darah_sistolik: 120,
             tekanan_darah_diastolik: 80,
             suhu_tubuh: 36.5,
-          })
+          } as any)
         } catch (err) {
           console.error('Gagal membuat data pasca persalinan awal', err)
         }

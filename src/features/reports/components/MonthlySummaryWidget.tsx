@@ -25,9 +25,6 @@ export function MonthlySummaryWidget({
   totalBumil,
   totalLansia,
 }: MonthlySummaryWidgetProps) {
-  const allCompleted = statuses.every((s) => s.status === 'selesai')
-  const totalCompleted = statuses.filter((s) => s.status === 'selesai').length
-
   const categoriesMap: Record<string, string> = {
     bumil: 'Ibu Hamil',
     pasca_persalinan: 'Pasca Persalinan',

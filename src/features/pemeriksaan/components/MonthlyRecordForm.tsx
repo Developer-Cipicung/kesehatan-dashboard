@@ -33,7 +33,7 @@ function Input({ register, name, type = 'text', placeholder }: { register: any; 
   )
 }
 
-function TdInput({ register, setValue, watch, name }: { register: any; setValue: any; watch: any; name: string }) {
+function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: string }) {
   const val = watch(name) || ''
   const parts = val.split('/')
   const s = parts[0] || ''
@@ -59,7 +59,7 @@ function TdInput({ register, setValue, watch, name }: { register: any; setValue:
   )
 }
 
-export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData }: MonthlyRecordFormProps) {
+export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }: MonthlyRecordFormProps) {
   const { mutateAsync: updateRecord, isPending } = useUpdatePemeriksaan()
   const rec: any = initialData || {}
 
@@ -198,7 +198,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="60" /></Field>
                 <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="160" /></Field>
                 <Field label="Tekanan Darah (mmHg)">
-                  <TdInput register={register} setValue={setValue} watch={watch} name="td" />
+                  <TdInput setValue={setValue} watch={watch} name="td" />
                 </Field>
                 <Field label="GDS (mg/dL)"><Input register={register} name="gula_darah_sewaktu" type="number" placeholder="110" /></Field>
               </div>
@@ -211,7 +211,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="Suhu Tubuh (°C)"><Input register={register} name="suhu_tubuh" type="number" placeholder="36.5" /></Field>
                 <div className="col-span-2">
                   <Field label="Tekanan Darah (mmHg)">
-                    <TdInput register={register} setValue={setValue} watch={watch} name="td" />
+                    <TdInput setValue={setValue} watch={watch} name="td" />
                   </Field>
                 </div>
                 <div className="col-span-2">

@@ -3,7 +3,7 @@ import { Warga } from '../services/wargaService'
 import { calculateAge } from './PatientTable'
 import { pemeriksaanService } from '../services/pemeriksaanService'
 import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog'
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Edit3, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'

@@ -3,7 +3,7 @@ import { Warga } from '../services/wargaService'
 import { pemeriksaanService } from '../services/pemeriksaanService'
 import { ActivitySquare, Edit3, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog'
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
@@ -331,7 +331,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
             // Build last-record display as placeholder hints
             let lastBb = ''
-            let lastTd = ''
+
             let lastTfuTb = ''
             let lastLingkarPerut = ''
             let lastLilaGds = ''
@@ -347,12 +347,12 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
               lastLilaGds = latestBalita.lingkar_lengan_atas?.toString()
             } else if (latestLansia) {
               lastBb = latestLansia.bb?.toString()
-              lastTd = `${latestLansia.tekanan_darah_sistolik}/${latestLansia.tekanan_darah_diastolik}`
+
               lastTfuTb = latestLansia.tb?.toString()
               lastLilaGds = latestLansia.gula_darah_sewaktu?.toString()
             } else if (latestPasca) {
               lastBb = latestPasca.bb?.toString()
-              lastTd = `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}`
+
               lastTfuTb = latestPasca.suhu_tubuh?.toString()
             }
 
