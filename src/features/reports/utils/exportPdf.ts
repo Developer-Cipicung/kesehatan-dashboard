@@ -30,16 +30,16 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
     switch (kategoriFilter) {
       case 'baduta':
       case 'balita':
-        tableColumn = ['No', 'Nama Balita', 'Umur (Bln)', 'BB (kg)', 'TB (cm)', 'Lingkar Kep.', 'Status Gizi']
+        tableColumn = ['No', 'Nama Balita', 'Umur (Bln)', 'BB (kg)', 'TB (cm)', 'Lingkar Kep.', 'Catatan', 'Imunisasi']
         break
       case 'bumil':
         tableColumn = ['No', 'Nama Ibu Hamil', 'Kehamilan (Mgg)', 'BB (kg)', 'TB (cm)', 'LILA (cm)', 'Ling. Perut']
         break
       case 'pasca_persalinan':
-        tableColumn = ['No', 'Nama Ibu', 'Tgl Persalinan', 'TD', 'Kondisi Ibu', 'Keluhan']
+        tableColumn = ['No', 'Nama Ibu', 'Tgl Persalinan', 'TD', 'Kondisi Ibu', 'Catatan']
         break
       case 'lansia':
-        tableColumn = ['No', 'Nama Lansia', 'Umur (Thn)', 'BB (kg)', 'TD', 'Gula Darah', 'Keluhan']
+        tableColumn = ['No', 'Nama Lansia', 'Umur (Thn)', 'BB (kg)', 'TD', 'Gula Darah', 'Catatan']
         break
       default:
         tableColumn = ['No', 'Nama Warga']
@@ -68,7 +68,8 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.bb || '-',
             item.tb || '-',
             item.lingkar_kepala || '-',
-            item.status_gizi || '-'
+            item.keluhan || '-',
+            (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'
           ])
           break
         case 'bumil':

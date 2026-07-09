@@ -57,7 +57,8 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
           'Berat Badan (kg)': item.bb || '-',
           'Tinggi Badan (cm)': item.tb || '-',
           'Lingkar Kepala (cm)': item.lingkar_kepala || '-',
-          'Status Gizi': item.status_gizi || '-',
+          'Catatan': item.keluhan || '-',
+          'Imunisasi': (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-',
         }
       case 'bumil':
         return {
@@ -74,7 +75,7 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
           'Tanggal Persalinan': item.tanggal_persalinan ? new Date(item.tanggal_persalinan).toLocaleDateString('id-ID') : '-',
           'Tekanan Darah': (item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-',
           'Kondisi Ibu': item.kondisi_ibu || '-',
-          'Keluhan': item.keluhan || '-',
+          'Catatan': item.keluhan || '-',
         }
       case 'lansia':
         return {
@@ -83,7 +84,7 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
           'Berat Badan (kg)': item.bb || '-',
           'Tekanan Darah': (item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-',
           'Gula Darah (mg/dL)': item.gula_darah_sewaktu || '-',
-          'Keluhan': item.keluhan || '-',
+          'Catatan': item.keluhan || '-',
         }
       default:
         return { ...baseData, Data: 'N/A' }

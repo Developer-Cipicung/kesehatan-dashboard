@@ -15,6 +15,7 @@ import { useAddWarga } from '../hooks/useWarga'
 import { AddWargaPayload } from '../services/wargaService'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormControl, FormItem, FormLabel, FormMessage, FormField as RHFFormField } from '@/components/ui/form'
+import { pemeriksaanService } from '../../pemeriksaan/services/pemeriksaanService'
 
 const formSchema = z.object({
   nik: z.string().min(16, 'NIK harus 16 digit').max(16, 'NIK harus 16 digit'),
@@ -25,6 +26,7 @@ const formSchema = z.object({
   kategori: z.string().min(1, 'Kategori wajib diisi'),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
+  tanggal_persalinan: z.string().optional(),
 })
 
 interface AddPatientDialogProps {
@@ -47,6 +49,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
       kategori: defaultCategory || '',
       nama_ayah: '',
       nama_ibu: '',
+      tanggal_persalinan: new Date().toISOString().split('T')[0],
     },
   })
 
@@ -65,7 +68,23 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
         payload.jenis_kelamin = 'P'
       }
 
-      await addWarga(payload as AddWargaPayload)
+      const created = await addWarga(payload as AddWargaPayload)
+      if (values.kategori === 'pasca_persalinan' && values.tanggal_persalinan && created?.data?.id) {
+        try {
+          await pemeriksaanService.createPasca({
+            warga_id: created.data.id,
+            tanggal_kunjungan: new Date().toISOString().split('T')[0],
+            tanggal_persalinan: values.tanggal_persalinan,
+            bb: 0,
+            tekanan_darah_sistolik: 120,
+            tekanan_darah_diastolik: 80,
+            suhu_tubuh: 36.5,
+          })
+        } catch (err) {
+          console.error('Gagal membuat data pasca persalinan awal', err)
+        }
+      }
+
       methods.reset()
       onOpenChange(false)
     } catch (error) {
@@ -89,21 +108,21 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
               <FormField
                 control={methods.control}
                 name="nik"
-                label="NIK"
+                label={<>NIK <span className="text-red-500">*</span></>}
                 placeholder="Masukkan 16 digit NIK"
                 type="text"
               />
               <FormField
                 control={methods.control}
                 name="nomor"
-                label="Nomor Telepon"
+                label={<>Nomor Telepon <span className="text-red-500">*</span></>}
                 placeholder="Contoh: 08123456789"
                 type="text"
               />
               <FormField
                 control={methods.control}
                 name="nama"
-                label="Nama Lengkap"
+                label={<>Nama Lengkap <span className="text-red-500">*</span></>}
                 placeholder="Masukkan nama lengkap"
                 type="text"
               />
@@ -113,7 +132,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                   name="jenis_kelamin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Jenis Kelamin</FormLabel>
+                      <FormLabel>Jenis Kelamin <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -133,16 +152,24 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
               <FormField
                 control={methods.control}
                 name="tanggal_lahir"
-                label="Tanggal Lahir"
+                label={<>Tanggal Lahir <span className="text-red-500">*</span></>}
                 type="date"
               />
               {!defaultCategory && (
                 <FormField
                   control={methods.control}
                   name="kategori"
-                  label="Kategori"
+                  label={<>Kategori <span className="text-red-500">*</span></>}
                   placeholder="Contoh: bumil, balita, lansia"
                   type="text"
+                />
+              )}
+              {watchKategori === 'pasca_persalinan' && (
+                <FormField
+                  control={methods.control}
+                  name="tanggal_persalinan"
+                  label={<>Tanggal Persalinan <span className="text-red-500">*</span></>}
+                  type="date"
                 />
               )}
               {isAnak && (

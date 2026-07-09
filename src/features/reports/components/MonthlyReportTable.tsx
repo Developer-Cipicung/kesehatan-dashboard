@@ -32,7 +32,8 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableHead>Berat Badan (kg)</TableHead>
             <TableHead>Tinggi Badan (cm)</TableHead>
             <TableHead>Lingkar Kepala (cm)</TableHead>
-            <TableHead>Status Gizi</TableHead>
+            <TableHead>Catatan</TableHead>
+            <TableHead>Imunisasi</TableHead>
           </>
         )
       case 'bumil':
@@ -53,7 +54,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableHead>Tanggal Persalinan</TableHead>
             <TableHead>Tekanan Darah</TableHead>
             <TableHead>Kondisi Ibu</TableHead>
-            <TableHead>Keluhan</TableHead>
+            <TableHead>Catatan</TableHead>
           </>
         )
       case 'lansia':
@@ -64,7 +65,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableHead>Berat Badan (kg)</TableHead>
             <TableHead>Tekanan Darah</TableHead>
             <TableHead>Gula Darah (mg/dL)</TableHead>
-            <TableHead>Keluhan</TableHead>
+            <TableHead>Catatan</TableHead>
           </>
         )
       default:
@@ -97,7 +98,8 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableCell>{item.bb || '-'}</TableCell>
             <TableCell>{item.tb || '-'}</TableCell>
             <TableCell>{item.lingkar_kepala || '-'}</TableCell>
-            <TableCell>{item.status_gizi || '-'}</TableCell>
+            <TableCell>{item.keluhan || '-'}</TableCell>
+            <TableCell>{(warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'}</TableCell>
           </>
         )
       case 'bumil':

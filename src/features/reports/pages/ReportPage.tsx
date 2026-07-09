@@ -43,13 +43,15 @@ export function ReportPage() {
     if (kategoriFilter === 'baduta') {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
-        const ageMonths = (new Date(item.tanggal_pemeriksaan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+        const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
+        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
         return ageMonths < 24
       })
     } else if (kategoriFilter === 'balita') {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
-        const ageMonths = (new Date(item.tanggal_pemeriksaan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+        const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
+        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
         return ageMonths >= 24 && ageMonths < 60
       })
     }

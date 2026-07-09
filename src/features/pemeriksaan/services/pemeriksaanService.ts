@@ -11,7 +11,7 @@ export interface Pemeriksaan {
   lingkar_kepala?: number
   lingkar_lengan?: number
   tekanan_darah?: string
-  keluhan?: string
+  catatan?: string
   catatan?: string
   created_at: string
   updated_at: string

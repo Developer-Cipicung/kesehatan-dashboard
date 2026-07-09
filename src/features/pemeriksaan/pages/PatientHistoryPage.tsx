@@ -7,10 +7,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { PatientProfileCard } from '../components/PatientProfileCard'
 import { HistoryTimeline } from '../components/HistoryTimeline'
 import { MonthlyRecordForm } from '../components/MonthlyRecordForm'
+import { ImunisasiCell } from '@/features/warga/components/ImunisasiCell'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
+import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog'
 import { Pemeriksaan } from '../services/pemeriksaanService'
 
 export function PatientHistoryPage() {
@@ -19,6 +21,7 @@ export function PatientHistoryPage() {
   
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingRecord, setEditingRecord] = useState<Pemeriksaan | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
@@ -48,8 +51,13 @@ export function PatientHistoryPage() {
   }
 
   const handleDelete = (recordId: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus riwayat pemeriksaan ini?')) {
-      deletePemeriksaan({ kategori: kategori!, id: recordId })
+    setConfirmDeleteId(recordId)
+  }
+
+  const handleConfirmDelete = () => {
+    if (confirmDeleteId) {
+      deletePemeriksaan({ kategori: kategori!, id: confirmDeleteId })
+      setConfirmDeleteId(null)
     }
   }
 
@@ -91,7 +99,16 @@ export function PatientHistoryPage() {
         )}
       </div>
 
-      <PatientProfileCard warga={warga} />
+      <PatientProfileCard warga={warga} kategori={kategori} />
+
+      {(kategori === 'balita' || kategori === 'baduta') && (
+        <div className="bg-white p-5 rounded-xl border border-slate-200 mt-6 shadow-sm">
+          <h3 className="text-lg font-bold mb-3">Kelola Imunisasi</h3>
+          <div className="max-w-md">
+            <ImunisasiCell wargaId={id!} disabled={isLocked || isReadOnly} />
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mt-8 mb-4">
         <h3 className="text-xl font-bold">Riwayat Pemeriksaan</h3>
@@ -117,6 +134,14 @@ export function PatientHistoryPage() {
         kategori={kategori!}
         wargaId={id!}
         initialData={editingRecord}
+      />
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => !open && setConfirmDeleteId(null)}
+        title="Hapus Riwayat Pemeriksaan"
+        description="Apakah Anda yakin ingin menghapus riwayat pemeriksaan ini? Data yang dihapus tidak dapat dikembalikan."
+        onConfirm={handleConfirmDelete}
       />
     </div>
   )

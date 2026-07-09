@@ -4,9 +4,11 @@ import { pemeriksaanService } from '../services/pemeriksaanService'
 import { ActivitySquare, Edit3, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUpdateWarga } from '../hooks/useWarga'
+import { ImunisasiCell } from './ImunisasiCell'
 
 interface PatientTableProps {
   data: Warga[]
@@ -49,7 +51,7 @@ interface RowState {
   lingkar_perut: string
   hpht: string
   htp: string
-  keluhan: string
+  catatan: string
   lingkar_kepala: string
   nama_ayah: string
   nama_ibu: string
@@ -71,7 +73,7 @@ const emptyRow = (): RowState => ({
   lingkar_perut: '',
   hpht: '',
   htp: '',
-  keluhan: '',
+  catatan: '',
   lingkar_kepala: '',
   nama_ayah: '',
   nama_ibu: '',
@@ -117,6 +119,33 @@ function Cell({
     )
   }
 
+  if (type === 'td') {
+    const parts = value.split('/')
+    const s = parts[0] || ''
+    const d = parts[1] || ''
+    return (
+      <div className={`flex items-center gap-1 ${width}`}>
+        <input
+          type="number"
+          value={s}
+          onChange={(e) => onChange(`${e.target.value}${d ? '/' + d : ''}`)}
+          placeholder="120"
+          disabled={disabled}
+          className="w-full min-w-0 px-1 py-1.5 border border-slate-200 rounded-md bg-white text-slate-700 text-center text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/10 disabled:bg-slate-100 placeholder:text-slate-300"
+        />
+        <span className="text-slate-400 font-medium">/</span>
+        <input
+          type="number"
+          value={d}
+          onChange={(e) => onChange(`${s || '0'}/${e.target.value}`)}
+          placeholder="80"
+          disabled={disabled}
+          className="w-full min-w-0 px-1 py-1.5 border border-slate-200 rounded-md bg-white text-slate-700 text-center text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/10 disabled:bg-slate-100 placeholder:text-slate-300"
+        />
+      </div>
+    )
+  }
+
   return (
     <input
       type={type}
@@ -135,6 +164,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
   const [rows, setRows] = useState<Record<string, RowState>>({})
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [tanggalPersalinan, setTanggalPersalinan] = useState(new Date().toISOString().split('T')[0])
 
   const getRow = (id: string): RowState => rows[id] ?? emptyRow()
 
@@ -164,7 +194,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           usia_kehamilan_minggu: parseInt(row.usia) || 0,
           hpht: row.hpht || row.tanggal,
           htp: row.htp || row.tanggal,
-          keluhan: row.keluhan || undefined,
+          catatan: row.catatan || undefined,
         })
       } else if (kategori === 'lansia') {
         const td = parseTd(row.td)
@@ -177,7 +207,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           tekanan_darah_sistolik: td.s,
           tekanan_darah_diastolik: td.d,
           gula_darah_sewaktu: parseFloat(row.lilaGds) || 0,
-          keluhan: row.keluhan || undefined,
+          catatan: row.catatan || undefined,
         })
       } else if (kategori === 'pasca_persalinan') {
         const td = parseTd(row.td)
@@ -191,7 +221,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           tekanan_darah_diastolik: td.d,
           suhu_tubuh: parseFloat(row.suhu_tubuh) || 0,
           kondisi_ibu: row.kondisi_ibu || undefined,
-          keluhan: row.keluhan || undefined,
+          catatan: row.catatan || undefined,
         })
       } else {
         // balita, batita, anak_sekolah
@@ -204,7 +234,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           lingkar_lengan_atas: parseFloat(row.lilaGds) || 0,
           nama_ayah: row.nama_ayah || undefined,
           nama_ibu: row.nama_ibu || undefined,
-          keluhan: row.keluhan || undefined,
+          catatan: row.catatan || undefined,
         })
       }
 
@@ -232,7 +262,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[160px]">NIK</th>
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[190px]">Nama</th>
 
-            <th colSpan={isBalita ? 8 : isBumil ? 9 : 6} className="px-4 py-3 border-l border-slate-100">
+            <th colSpan={isBalita ? 9 : isBumil ? 9 : 6} className="px-4 py-3 border-l border-slate-100">
               <div className="flex items-center text-primary font-bold text-xs uppercase tracking-wider">
                 <ActivitySquare className="w-4 h-4 mr-2" />
                 Record Pemeriksaan
@@ -247,44 +277,45 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
             <th className="px-3 py-3 font-semibold text-primary text-xs">Usia</th>
             {isBumil && (
-              <th className="px-3 py-3 font-semibold text-primary text-xs">Usia Kandungan (mgg)</th>
+              <th className="px-3 py-3 font-semibold text-primary text-xs">Usia Kandungan (mgg) <span className="text-red-500">*</span></th>
             )}
-            <th className="px-3 py-3 font-semibold text-primary text-xs">Berat Badan (kg)</th>
+            <th className="px-3 py-3 font-semibold text-primary text-xs">Berat Badan (kg) <span className="text-red-500">*</span></th>
 
             {isBalita && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Kepala (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm)</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Kepala (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Imunisasi</th>
               </>
             )}
 
             {isBumil && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Perut (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">HPHT</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">HTP</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Perut (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">HPHT <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">HTP <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
 
             {isLansia && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">GDS (mg/dL)</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">GDS (mg/dL) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
 
             {isPasca && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Suhu Tubuh (°C)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi Ibu</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Suhu Tubuh (°C) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi Ibu <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
@@ -375,7 +406,10 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '15'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />
+                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <ImunisasiCell wargaId={warga.id} disabled={isReadOnly} />
                     </td>
                   </>
                 )}
@@ -398,7 +432,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="date" value={row.htp} onChange={(v) => set(warga.id, 'htp', v)} width="w-[140px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />
+                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                   </>
                 )}
@@ -409,13 +443,13 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '120/80'} width="w-[90px]" disabled={isReadOnly} />
+                      <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '110'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />
+                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                   </>
                 )}
@@ -423,7 +457,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 {isPasca && (
                   <>
                     <td className="px-3 py-3">
-                      <Cell value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '120/80'} width="w-[90px]" disabled={isReadOnly} />
+                      <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="number" value={row.suhu_tubuh} onChange={(v) => set(warga.id, 'suhu_tubuh', v)} placeholder={lastTfuTb || '36.5'} width="w-[70px]" disabled={isReadOnly} />
@@ -432,7 +466,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="baik..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />
+                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                   </>
                 )}
@@ -485,19 +519,60 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
         </tbody>
       </table>
     </div>
-      <ConfirmDialog
-        open={!!confirmId}
-        onOpenChange={(open) => !open && setConfirmId(null)}
-        title="Tandai Telah Bersalin"
-        description="Tandai ibu ini telah bersalin? Data akan dipindah ke Pasca Persalinan."
-        confirmText="Ya, Pindahkan"
-        onConfirm={async () => {
-          if (confirmId) {
-            await updateWarga({ id: confirmId, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
-            setConfirmId(null)
-          }
-        }}
-      />
+      <Dialog open={!!confirmId} onOpenChange={(open) => !open && setConfirmId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tandai Telah Bersalin</DialogTitle>
+            <DialogDescription>
+              Tandai ibu ini telah bersalin? Masukkan tanggal persalinan untuk memindahkan data pasien ke Pasca Persalinan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="tanggal_persalinan" className="text-sm font-medium leading-none">
+                Tanggal Persalinan <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="tanggal_persalinan"
+                type="date"
+                value={tanggalPersalinan}
+                onChange={(e) => setTanggalPersalinan(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmId(null)}>
+              Batal
+            </Button>
+            <Button 
+              onClick={async () => {
+                if (!tanggalPersalinan || !confirmId) return;
+                try {
+                  await updateWarga({ id: confirmId, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
+                  await pemeriksaanService.createPasca({
+                    warga_id: confirmId,
+                    tanggal_kunjungan: new Date().toISOString().split('T')[0],
+                    tanggal_persalinan: tanggalPersalinan,
+                    bb: 0,
+                    tekanan_darah_sistolik: 120,
+                    tekanan_darah_diastolik: 80,
+                    suhu_tubuh: 36.5,
+                  })
+                  toast.success('Berhasil dipindahkan ke Pasca Persalinan')
+                  queryClient.invalidateQueries({ queryKey: ['warga'] })
+                } catch (e: any) {
+                  toast.error('Gagal menyimpan data persalinan')
+                }
+                setConfirmId(null)
+              }}
+              disabled={!tanggalPersalinan}
+            >
+              Ya, Pindahkan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -11,7 +11,7 @@ export interface CreateBumilPayload {
   usia_kehamilan_minggu: number
   hpht: string // YYYY-MM-DD
   htp: string  // YYYY-MM-DD
-  keluhan?: string
+  catatan?: string
 }
 
 // ---- Lansia ----
@@ -23,7 +23,7 @@ export interface CreateLansiaPayload {
   tekanan_darah_sistolik: number
   tekanan_darah_diastolik: number
   gula_darah_sewaktu: number
-  keluhan?: string
+  catatan?: string
 }
 
 // ---- Pasca Persalinan ----
@@ -36,7 +36,7 @@ export interface CreatePascaPayload {
   tekanan_darah_diastolik: number
   suhu_tubuh: number
   kondisi_ibu?: string
-  keluhan?: string
+  catatan?: string
 }
 
 // ---- Balita / Baduta ----
@@ -49,7 +49,7 @@ export interface CreateBalitaPayload {
   lingkar_lengan_atas: number
   nama_ayah?: string
   nama_ibu?: string
-  keluhan?: string
+  catatan?: string
 }
 
 export const pemeriksaanService = {

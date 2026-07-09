@@ -42,9 +42,6 @@ export function MonthlySummaryWidget({
       <CardHeader>
         <CardTitle className="text-xl flex justify-between items-center">
           <span>Ringkasan Bulan {bulan}/{tahun}</span>
-          <Badge variant={allCompleted ? 'default' : 'secondary'}>
-            {totalCompleted}/{statuses.length} Selesai
-          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>

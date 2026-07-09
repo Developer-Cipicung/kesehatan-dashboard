@@ -4,10 +4,12 @@ import { calculateAge } from './PatientTable'
 import { pemeriksaanService } from '../services/pemeriksaanService'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Edit3, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUpdateWarga } from '../hooks/useWarga'
+import { ImunisasiCell } from './ImunisasiCell'
 
 interface PatientCardProps {
   data: Warga
@@ -29,7 +31,7 @@ interface FormState {
   lingkar_perut: string
   hpht: string
   htp: string
-  keluhan: string
+  catatan: string
   lingkar_kepala: string
   nama_ayah: string
   nama_ibu: string
@@ -51,7 +53,7 @@ const emptyForm = (): FormState => ({
   lingkar_perut: '',
   hpht: '',
   htp: '',
-  keluhan: '',
+  catatan: '',
   lingkar_kepala: '',
   nama_ayah: '',
   nama_ibu: '',
@@ -69,11 +71,42 @@ function parseTd(td: string) {
   return { s, d }
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-2 py-2 border-b border-slate-100 last:border-0">
       <span className="text-xs text-slate-500 shrink-0 w-[140px]">{label}</span>
       {children}
+    </div>
+  )
+}
+
+function MobileInputTd({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
+  const parts = value.split('/')
+  const s = parts[0] || ''
+  const d = parts[1] || ''
+  return (
+    <div className="flex items-center gap-1 w-full">
+      <input
+        type="number"
+        value={s}
+        onChange={(e) => onChange(`${e.target.value}${d ? '/' + d : ''}`)}
+        placeholder="120"
+        className="flex-1 px-2 py-1 border border-slate-200 rounded text-center text-sm text-slate-700 bg-white focus:outline-none focus:border-primary placeholder:text-slate-300 w-full min-w-0"
+      />
+      <span className="text-slate-400 font-medium">/</span>
+      <input
+        type="number"
+        value={d}
+        onChange={(e) => onChange(`${s || '0'}/${e.target.value}`)}
+        placeholder="80"
+        className="flex-1 px-2 py-1 border border-slate-200 rounded text-center text-sm text-slate-700 bg-white focus:outline-none focus:border-primary placeholder:text-slate-300 w-full min-w-0"
+      />
     </div>
   )
 }
@@ -127,6 +160,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [tanggalPersalinan, setTanggalPersalinan] = useState(new Date().toISOString().split('T')[0])
 
   const set = (field: keyof FormState, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -165,7 +199,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           usia_kehamilan_minggu: parseInt(form.usia) || 0,
           hpht: form.hpht || form.tanggal,
           htp: form.htp || form.tanggal,
-          keluhan: form.keluhan || undefined,
+          catatan: form.catatan || undefined,
         })
       } else if (isLansia) {
         const td = parseTd(form.td)
@@ -178,7 +212,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           tekanan_darah_sistolik: td.s,
           tekanan_darah_diastolik: td.d,
           gula_darah_sewaktu: parseFloat(form.lilaGds) || 0,
-          keluhan: form.keluhan || undefined,
+          catatan: form.catatan || undefined,
         })
       } else if (isPasca) {
         const td = parseTd(form.td)
@@ -192,7 +226,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           tekanan_darah_diastolik: td.d,
           suhu_tubuh: parseFloat(form.suhu_tubuh) || 0,
           kondisi_ibu: form.kondisi_ibu || undefined,
-          keluhan: form.keluhan || undefined,
+          catatan: form.catatan || undefined,
         })
       } else {
         await pemeriksaanService.createBalita({
@@ -204,7 +238,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           lingkar_lengan_atas: parseFloat(form.lilaGds) || 0,
           nama_ayah: form.nama_ayah || undefined,
           nama_ibu: form.nama_ibu || undefined,
-          keluhan: form.keluhan || undefined,
+          catatan: form.catatan || undefined,
         })
       }
 
@@ -277,86 +311,86 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
 
 
-            <FieldRow label="Berat Badan (kg)">
-              <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="0" />
+            <FieldRow label={<>Berat Badan (kg) <span className="text-red-500">*</span></>}>
+              <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="50.5" />
             </FieldRow>
 
             {isBalita && (
               <>
-                <FieldRow label="Tinggi Badan (cm)">
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="0" />
+                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="85.5" />
                 </FieldRow>
-                <FieldRow label="Lingkar Kepala (cm)">
-                  <MobileInput type="number" value={form.lingkar_kepala} onChange={(v) => set('lingkar_kepala', v)} placeholder="0" />
+                <FieldRow label={<>Lingkar Kepala (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lingkar_kepala} onChange={(v) => set('lingkar_kepala', v)} placeholder="34.5" />
                 </FieldRow>
-                <FieldRow label="LILA (cm)">
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="0" />
+                <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="15" />
                 </FieldRow>
                 <FieldRow label="Catatan">
-                  <MobileTextarea value={form.keluhan} onChange={(v) => set('keluhan', v)} placeholder="tidak ada..." />
+                  <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
+                </FieldRow>
+                <FieldRow label="Imunisasi">
+                  <ImunisasiCell wargaId={data.id} disabled={isReadOnly} />
                 </FieldRow>
               </>
             )}
 
             {isBumil && (
               <>
-                <FieldRow label="Usia Kandungan (mgg)">
-                  <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="0" />
+                <FieldRow label={<>Usia Kandungan (mgg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="12" />
                 </FieldRow>
-                <FieldRow label="Tinggi Badan (cm)">
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="0" />
+                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
                 </FieldRow>
-                <FieldRow label="Lingkar Perut (cm)">
-                  <MobileInput type="number" value={form.lingkar_perut} onChange={(v) => set('lingkar_perut', v)} placeholder="0" />
+                <FieldRow label={<>Lingkar Perut (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lingkar_perut} onChange={(v) => set('lingkar_perut', v)} placeholder="85" />
                 </FieldRow>
-                <FieldRow label="LILA (cm)">
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="0" />
+                <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="24" />
                 </FieldRow>
-                <FieldRow label="HPHT">
+                <FieldRow label={<>HPHT <span className="text-red-500">*</span></>}>
                   <MobileInput type="date" value={form.hpht} onChange={(v) => set('hpht', v)} />
                 </FieldRow>
-                <FieldRow label="HTP">
+                <FieldRow label={<>HTP <span className="text-red-500">*</span></>}>
                   <MobileInput type="date" value={form.htp} onChange={(v) => set('htp', v)} />
                 </FieldRow>
                 <FieldRow label="Catatan">
-                  <MobileTextarea value={form.keluhan} onChange={(v) => set('keluhan', v)} placeholder="tidak ada..." />
+                  <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
                 </FieldRow>
               </>
             )}
 
             {isLansia && (
               <>
-                <FieldRow label="Tinggi Badan (cm)">
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="0" />
+                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
                 </FieldRow>
-                <FieldRow label="Tekanan Darah (mmHg)">
-                  <MobileInput value={form.td} onChange={(v) => set('td', v)} placeholder="120/80" />
+                <FieldRow label={<>Tekanan Darah (mmHg) <span className="text-red-500">*</span></>}>
+                  <MobileInputTd value={form.td} onChange={(v) => set('td', v)} />
                 </FieldRow>
-                <FieldRow label="GDS (mg/dL)">
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="0" />
+                <FieldRow label={<>GDS (mg/dL) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="110" />
                 </FieldRow>
                 <FieldRow label="Catatan">
-                  <MobileTextarea value={form.keluhan} onChange={(v) => set('keluhan', v)} placeholder="tidak ada..." />
+                  <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
                 </FieldRow>
               </>
             )}
 
             {isPasca && (
               <>
-                <FieldRow label="Tekanan Darah (mmHg)">
-                  <MobileInput value={form.td} onChange={(v) => set('td', v)} placeholder="120/80" />
+                <FieldRow label={<>Tekanan Darah (mmHg) <span className="text-red-500">*</span></>}>
+                  <MobileInputTd value={form.td} onChange={(v) => set('td', v)} />
                 </FieldRow>
-                <FieldRow label="Suhu Tubuh (°C)">
+                <FieldRow label={<>Suhu Tubuh (°C) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.suhu_tubuh} onChange={(v) => set('suhu_tubuh', v)} placeholder="36.5" />
                 </FieldRow>
-                <FieldRow label="Tgl Persalinan">
-                  <MobileInput type="date" value={form.tanggal_persalinan} onChange={(v) => set('tanggal_persalinan', v)} />
-                </FieldRow>
-                <FieldRow label="Kondisi Ibu">
+                <FieldRow label={<>Kondisi Ibu <span className="text-red-500">*</span></>}>
                   <MobileInput value={form.kondisi_ibu} onChange={(v) => set('kondisi_ibu', v)} placeholder="baik..." />
                 </FieldRow>
                 <FieldRow label="Catatan">
-                  <MobileTextarea value={form.keluhan} onChange={(v) => set('keluhan', v)} placeholder="tidak ada..." />
+                  <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
                 </FieldRow>
               </>
             )}
@@ -381,17 +415,60 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
         </div>
       )}
       {/* Confirm Dialog */}
-      <ConfirmDialog
-        open={showConfirm}
-        onOpenChange={setShowConfirm}
-        title="Tandai Telah Bersalin"
-        description="Tandai ibu ini telah bersalin? Data akan dipindah ke Pasca Persalinan."
-        confirmText="Ya, Pindahkan"
-        onConfirm={async () => {
-          setShowConfirm(false)
-          await updateWarga({ id: data.id, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
-        }}
-      />
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tandai Telah Bersalin</DialogTitle>
+            <DialogDescription>
+              Masukkan tanggal persalinan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="tanggal_persalinan_card" className="text-sm font-medium leading-none">
+                Tanggal Persalinan <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="tanggal_persalinan_card"
+                type="date"
+                value={tanggalPersalinan}
+                onChange={(e) => setTanggalPersalinan(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirm(false)}>
+              Batal
+            </Button>
+            <Button 
+              onClick={async () => {
+                if (!tanggalPersalinan) return;
+                try {
+                  await updateWarga({ id: data.id, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
+                  await pemeriksaanService.createPasca({
+                    warga_id: data.id,
+                    tanggal_kunjungan: new Date().toISOString().split('T')[0],
+                    tanggal_persalinan: tanggalPersalinan,
+                    bb: 0,
+                    tekanan_darah_sistolik: 120,
+                    tekanan_darah_diastolik: 80,
+                    suhu_tubuh: 36.5,
+                  })
+                  toast.success('Berhasil dipindahkan ke Pasca Persalinan')
+                  queryClient.invalidateQueries({ queryKey: ['warga'] })
+                } catch (e: any) {
+                  toast.error('Gagal menyimpan data persalinan')
+                }
+                setShowConfirm(false)
+              }}
+              disabled={!tanggalPersalinan}
+            >
+              Ya, Pindahkan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

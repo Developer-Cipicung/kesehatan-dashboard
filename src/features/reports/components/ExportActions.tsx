@@ -15,7 +15,7 @@ interface ExportActionsProps {
 
 export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kategoriFilter, setKategoriFilter }: ExportActionsProps) {
   const getFilteredWarga = () => {
-    return wargaList.filter(w => w.kategori.toLowerCase().includes(kategoriFilter.toLowerCase()))
+    return wargaList.filter(w => w.kategori?.toLowerCase().includes(kategoriFilter.toLowerCase()))
   }
 
   const handleExportPdf = () => {
