@@ -1,7 +1,8 @@
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 import { Warga } from '@/features/warga/services/wargaService'
 
-export function exportWargaToExcel(wargaList: Warga[], filename: string = 'Laporan_Warga.xlsx', pemeriksaanList: any[] = [], kategoriFilter: string = '') {
+export async function exportWargaToExcel(wargaList: Warga[], filename: string = 'Laporan_Warga.xlsx', pemeriksaanList: any[] = [], kategoriFilter: string = '') {
   // Use pemeriksaanList if provided, otherwise fallback to wargaList
   const usePemeriksaan = pemeriksaanList && pemeriksaanList.length > 0
   
@@ -88,11 +89,26 @@ export function exportWargaToExcel(wargaList: Warga[], filename: string = 'Lapor
         return { ...baseData, Data: 'N/A' }
     }
   })
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Data Laporan')
 
-  const worksheet = XLSX.utils.json_to_sheet(formattedData)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Laporan')
+  if (formattedData.length > 0) {
+    // Generate columns based on the keys of the first row
+    const columns = Object.keys(formattedData[0]).map(key => ({
+      header: key,
+      key: key,
+      width: 20
+    }))
+    worksheet.columns = columns
+    
+    // Add data
+    worksheet.addRows(formattedData)
+    
+    // Format headers to be bold
+    worksheet.getRow(1).font = { bold: true }
+  }
 
   // Export
-  XLSX.writeFile(workbook, filename)
+  const buffer = await workbook.xlsx.writeBuffer()
+  saveAs(new Blob([buffer]), filename)
 }

@@ -28,10 +28,10 @@ export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kate
     }
   }
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       // Pass the pemeriksaanList to the Excel exporter
-      exportWargaToExcel(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`, pemeriksaanList, kategoriFilter)
+      await exportWargaToExcel(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`, pemeriksaanList, kategoriFilter)
       toast.success('Laporan Excel berhasil diunduh.')
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengekspor Excel.')

@@ -1,6 +1,7 @@
 import { useDashboardStats } from '../hooks/useDashboardStats'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
+import { useAuthStore } from '@/stores/authStore'
 
 import {
   BarChart,
@@ -18,6 +19,15 @@ import {
 
 export function DashboardPage() {
   const { data, isLoading, error, refetch } = useDashboardStats()
+  const user = useAuthStore(state => state.user)
+  const posyandu = useAuthStore(state => state.posyandu)
+  
+  const currentDate = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date())
 
   if (isLoading) {
     return (
@@ -52,8 +62,12 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col max-w-full">
       <div className="mb-8">
-        <h1 className="text-[28px] font-bold text-slate-800 leading-tight">Selamat Datang, Petugas</h1>
-        <p className="text-sm text-slate-500 mt-1">Senin, 29 Juni 2026 · Pusat Pendataan Kesehatan Cipicung</p>
+        <h1 className="text-[28px] font-bold text-slate-800 leading-tight">
+          Selamat Datang, {(user as any)?.nama || 'Petugas'}
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          {currentDate} · {posyandu ? `Posyandu ${posyandu.nama}` : 'Pusat Pendataan Kesehatan Cipicung'}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">

@@ -16,7 +16,7 @@ export interface Warga {
   kabupaten: string
   provinsi: string
   golongan_darah?: string
-  no_hp?: string
+  nomor?: string
   pekerjaan?: string
   pendidikan?: string
   status_pernikahan: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati'

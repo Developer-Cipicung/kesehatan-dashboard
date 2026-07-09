@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -12,7 +13,7 @@ import { Posyandu } from '../pages/PosyanduManagementPage'
 
 const userSchema = z.object({
   nama: z.string().min(1, 'Nama wajib diisi'),
-  email: z.string().email('Format email tidak valid'),
+  username: z.string().min(1, 'Username wajib diisi'),
   password: z.string().optional(),
   role: z.enum(['kader', 'bidan', 'admin']),
   posyandu_id: z.string().optional(),
@@ -49,13 +50,26 @@ export function UserForm({ open, onOpenChange, initialData }: UserFormProps) {
     resolver: zodResolver(userSchema),
     defaultValues: {
       nama: initialData?.nama || '',
-      email: initialData?.email || '',
+      username: initialData?.username || '',
       password: '',
       role: initialData?.role || 'kader',
       posyandu_id: initialData?.posyandu_id || '',
       is_active: initialData?.is_active ?? true,
     },
   })
+
+  useEffect(() => {
+    if (open) {
+      methods.reset({
+        nama: initialData?.nama || '',
+        username: initialData?.username || '',
+        password: '',
+        role: initialData?.role || 'kader',
+        posyandu_id: initialData?.posyandu_id || '',
+        is_active: initialData?.is_active ?? true,
+      })
+    }
+  }, [open, initialData, methods])
 
   const { mutate: submitUser, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof userSchema>) => {
@@ -98,21 +112,19 @@ export function UserForm({ open, onOpenChange, initialData }: UserFormProps) {
               />
               <FormField
                 control={methods.control as any}
-                name="email"
-                label="Email"
-                placeholder="Contoh: kader@cicipung.com"
+                name="username"
+                label="Username"
+                placeholder="Contoh: kader_cipicung"
               />
             </div>
 
-            {!initialData && (
-              <FormField
-                control={methods.control as any}
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="Password untuk login kader"
-              />
-            )}
+            <FormField
+              control={methods.control as any}
+              name="password"
+              label="Password"
+              type="password"
+              placeholder={initialData ? "Biarkan kosong jika tidak ingin mengubah" : "Password untuk login akun"}
+            />
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Role</label>
@@ -136,7 +148,7 @@ export function UserForm({ open, onOpenChange, initialData }: UserFormProps) {
                   <option value="">-- Pilih Posyandu --</option>
                   {posyandus?.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.nama} ({p.kode})
+                      {p.nama} {p.rw ? `(RW ${p.rw})` : ''}
                     </option>
                   ))}
                 </select>

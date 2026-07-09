@@ -6,6 +6,7 @@ import { ErrorState } from '@/components/feedback/ErrorState'
 import { CheckCircle2, CircleDashed, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useAuthStore } from '@/stores/authStore'
 
 const MONTHS = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -17,13 +18,18 @@ export function AdminStatusPendataanPage() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const userPosyanduId = useAuthStore(state => state.posyandu?.id)
 
   const { data, isLoading, isError, refetch } = useGetAdminStatusPendataan(selectedYear)
 
   const filteredData = data?.filter(posyandu => 
     posyandu.nama.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
     posyandu.kode.toLowerCase().includes(debouncedSearch.toLowerCase())
-  )
+  ).sort((a, b) => {
+    if (a.id === userPosyanduId) return -1
+    if (b.id === userPosyanduId) return 1
+    return 0
+  })
 
   const renderStatusBadge = (status?: string) => {
     if (status === 'selesai') {
@@ -102,10 +108,14 @@ export function AdminStatusPendataanPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredData?.map(posyandu => (
-                    <tr key={posyandu.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-4 sticky left-0 bg-white">
-                        <div className="font-semibold text-slate-800">{posyandu.nama}</div>
+                  filteredData?.map(posyandu => {
+                    const isUserPosyandu = posyandu.id === userPosyanduId
+                    return (
+                    <tr key={posyandu.id} className={`${isUserPosyandu ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-slate-50/50'} transition-colors`}>
+                      <td className={`px-4 py-4 sticky left-0 ${isUserPosyandu ? 'bg-[#f0f6ff]' : 'bg-white'}`}>
+                        <div className="font-semibold text-slate-800">
+                          {posyandu.nama}
+                        </div>
                         <div className="text-xs text-slate-500 font-mono mt-0.5">{posyandu.kode}</div>
                       </td>
                       {MONTHS.map((_, index) => {
@@ -118,7 +128,7 @@ export function AdminStatusPendataanPage() {
                         )
                       })}
                     </tr>
-                  ))
+                  )})
                 )}
               </tbody>
             </table>

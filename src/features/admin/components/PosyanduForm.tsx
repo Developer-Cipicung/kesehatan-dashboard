@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,12 +11,8 @@ import { toast } from 'sonner'
 import { Posyandu } from '../pages/PosyanduManagementPage'
 
 const posyanduSchema = z.object({
-  kode: z.string().min(1, 'Kode wajib diisi'),
   nama: z.string().min(1, 'Nama wajib diisi'),
-  alamat: z.string().min(1, 'Alamat wajib diisi'),
-  kelurahan: z.string().min(1, 'Kelurahan wajib diisi'),
-  kecamatan: z.string().min(1, 'Kecamatan wajib diisi'),
-  kabupaten: z.string().min(1, 'Kabupaten wajib diisi'),
+  rw: z.string().min(1, 'RW wajib diisi'),
 })
 
 interface PosyanduFormProps {
@@ -30,14 +27,19 @@ export function PosyanduForm({ open, onOpenChange, initialData }: PosyanduFormPr
   const methods = useForm<z.infer<typeof posyanduSchema>>({
     resolver: zodResolver(posyanduSchema),
     defaultValues: {
-      kode: initialData?.kode || '',
       nama: initialData?.nama || '',
-      alamat: initialData?.alamat || '',
-      kelurahan: initialData?.kelurahan || '',
-      kecamatan: initialData?.kecamatan || '',
-      kabupaten: initialData?.kabupaten || '',
+      rw: initialData?.rw || '',
     },
   })
+
+  useEffect(() => {
+    if (open) {
+      methods.reset({
+        nama: initialData?.nama || '',
+        rw: initialData?.rw || '',
+      })
+    }
+  }, [open, initialData, methods])
 
   const { mutate: submitPosyandu, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof posyanduSchema>) => {
@@ -73,40 +75,15 @@ export function PosyanduForm({ open, onOpenChange, initialData }: PosyanduFormPr
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={methods.control as any}
-                name="kode"
-                label="Kode Unik"
-                placeholder="Contoh: P01"
-              />
-              <FormField
-                control={methods.control as any}
                 name="nama"
                 label="Nama Posyandu"
                 placeholder="Contoh: Mawar 1"
               />
-            </div>
-            
-            <FormField
-              control={methods.control as any}
-              name="alamat"
-              label="Alamat Lengkap"
-              placeholder="Contoh: Jl. Merdeka No.1"
-            />
-            
-            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={methods.control as any}
-                name="kelurahan"
-                label="Kelurahan"
-              />
-              <FormField
-                control={methods.control as any}
-                name="kecamatan"
-                label="Kecamatan"
-              />
-              <FormField
-                control={methods.control as any}
-                name="kabupaten"
-                label="Kabupaten"
+                name="rw"
+                label="RW"
+                placeholder="Contoh: 01"
               />
             </div>
 

@@ -23,7 +23,7 @@ export function LoginPage() {
   const form = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   })
@@ -41,7 +41,7 @@ export function LoginPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Login</CardTitle>
         <CardDescription className="text-center">
-          Masukkan email dan password untuk masuk ke dashboard kader.
+          Masukkan username dan password untuk masuk ke dashboard.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -52,17 +52,17 @@ export function LoginPage() {
                 <AlertCircle className="w-5 h-5 mr-3 shrink-0 text-white" />
                 <span className="font-medium">
                   {((error as any)?.response?.data?.message || '').includes('Invalid login credentials') 
-                    ? 'Email atau password yang Anda masukkan salah.' 
+                    ? 'Username atau password yang Anda masukkan salah.' 
                     : ((error as any)?.response?.data?.message || 'Login gagal. Periksa kembali data Anda.')}
                 </span>
               </div>
             )}
             <FormField
               control={form.control}
-              name="email"
-              label="Email"
-              placeholder="kader@cicipung.com"
-              type="email"
+              name="username"
+              label="Username"
+              placeholder="Contoh: kader_cipicung"
+              type="text"
               disabled={isPending}
             />
             <FormField

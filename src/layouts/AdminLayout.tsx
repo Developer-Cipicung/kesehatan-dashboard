@@ -28,9 +28,9 @@ export default function AdminLayout() {
           <img src='/logo-cipicung.webp' alt="Logo" className="w-8 h-8 object-contain" />
         </div>
         <div className="flex flex-col">
-          <h1 className="text-lg font-bold text-white tracking-tight leading-none flex items-center">
-            Cicipung <span className="text-[10px] font-bold uppercase ml-2 px-1.5 py-0.5 bg-red-500 text-white rounded">Admin</span>
-          </h1>
+          <span className="text-xl font-bold text-white tracking-tight leading-none flex items-center">
+            Cipicung <span className="text-[10px] font-bold uppercase ml-2 px-1.5 py-0.5 bg-red-500 text-white rounded">Admin</span>
+          </span>
         </div>
         <Button variant="ghost" size="icon" aria-label="Tutup Menu" className="md:hidden text-white hover:bg-slate-800" onClick={() => setIsMobileMenuOpen(false)}>
           <X className="h-5 w-5" />
@@ -108,7 +108,7 @@ export default function AdminLayout() {
           <Button variant="ghost" size="icon" aria-label="Buka Menu" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="ml-4 text-lg font-bold">Admin Cicipung</h1>
+          <span className="ml-4 text-lg font-bold">Admin Cipicung</span>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">

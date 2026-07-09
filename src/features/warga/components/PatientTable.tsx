@@ -351,7 +351,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       type="number"
                       value={row.usia}
                       onChange={(v) => set(warga.id, 'usia', v)}
-                      placeholder="mgg"
+                      placeholder="12"
                       width="w-[80px]"
                       disabled={isReadOnly}
                     />
@@ -360,19 +360,19 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
                 {/* BB */}
                 <td className="px-3 py-3">
-                  <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || 'kg'} width="w-[70px]" disabled={isReadOnly} />
+                  <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '50.5'} width="w-[70px]" disabled={isReadOnly} />
                 </td>
 
                 {isBalita && (
                   <>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '85.5'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lingkar_kepala} onChange={(v) => set(warga.id, 'lingkar_kepala', v)} placeholder="cm" width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lingkar_kepala} onChange={(v) => set(warga.id, 'lingkar_kepala', v)} placeholder="34.5" width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '15'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />
@@ -383,13 +383,13 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 {isBumil && (
                   <>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || '85'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '24'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="date" value={row.hpht} onChange={(v) => set(warga.id, 'hpht', v)} width="w-[140px]" disabled={isReadOnly} />
@@ -406,13 +406,13 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 {isLansia && (
                   <>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || 'cm'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '120/80'} width="w-[90px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || 'mg/dL'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '110'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="textarea" value={row.keluhan} onChange={(v) => set(warga.id, 'keluhan', v)} placeholder="keluhan..." width="w-[110px]" disabled={isReadOnly} />

@@ -10,12 +10,8 @@ import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 
 export interface Posyandu {
   id: string
-  kode: string
   nama: string
-  alamat: string
-  kelurahan: string
-  kecamatan: string
-  kabupaten: string
+  rw: string
 }
 
 export function PosyanduManagementPage() {
@@ -39,8 +35,8 @@ export function PosyanduManagementPage() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'posyandu'] })
       toast.success('Posyandu berhasil dihapus.')
     },
-    onError: () => {
-      toast.error('Gagal menghapus posyandu.')
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Gagal menghapus posyandu.')
     },
   })
 
@@ -75,22 +71,16 @@ export function PosyanduManagementPage() {
             <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b bg-muted/50">
                 <tr className="border-b transition-colors">
-                  <th className="h-12 px-4 text-left align-middle font-medium">Kode</th>
                   <th className="h-12 px-4 text-left align-middle font-medium">Nama Posyandu</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Alamat</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Wilayah</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">RW</th>
                   <th className="h-12 px-4 text-right align-middle font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {posyandus?.map((item) => (
                   <tr key={item.id} className="border-b transition-colors hover:bg-muted/50">
-                    <td className="p-4 align-middle font-medium">{item.kode}</td>
-                    <td className="p-4 align-middle">{item.nama}</td>
-                    <td className="p-4 align-middle truncate max-w-[200px]">{item.alamat}</td>
-                    <td className="p-4 align-middle">
-                      {item.kelurahan}, {item.kecamatan}, {item.kabupaten}
-                    </td>
+                    <td className="p-4 align-middle font-medium">{item.nama}</td>
+                    <td className="p-4 align-middle">{item.rw}</td>
                     <td className="p-4 align-middle text-right space-x-2">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                         <Edit2 className="h-4 w-4" />

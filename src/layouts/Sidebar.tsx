@@ -67,13 +67,13 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
   return (
     <div className={cn('flex h-full w-64 flex-col bg-slate-900 border-r border-slate-800 text-slate-300', className)}>
-      <div className="flex h-[72px] items-center px-6 border-b border-slate-800 gap-3">
-        <div className="bg-white rounded-full p-2 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-3 py-2 px-3">
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
           <img src='/logo-cipicung.webp' alt="Logo" className="w-10 h-10" />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-white leading-tight">Pusat Pendataan</span>
-          <span className="text-xs text-primary/70">Kesehatan Cipicung</span>
+          <span className="font-bold text-xl tracking-tight text-white leading-none">Cipicung</span>
+          <span className="text-xs text-primary/70">Dashboard Kesehatan Posyandu Cipicung</span>
         </div>
       </div>
       

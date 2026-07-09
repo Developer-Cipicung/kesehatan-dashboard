@@ -12,8 +12,7 @@ import {
 interface Posyandu {
   id: string
   nama: string
-  kelurahan: string
-  kecamatan: string
+  rw?: string
 }
 
 export function PosyanduSelector() {
@@ -50,9 +49,9 @@ export function PosyanduSelector() {
         <SelectValue>
           <div className="flex flex-col text-left">
             <span className="leading-none">{selectedPosyandu.nama}</span>
-            {(selectedPosyandu.kelurahan || selectedPosyandu.kecamatan) && (
+            {selectedPosyandu.rw && (
               <span className="text-slate-500 text-xs mt-1 leading-none font-normal">
-                {[selectedPosyandu.kelurahan, selectedPosyandu.kecamatan].filter(Boolean).join(', ')}
+                RW {selectedPosyandu.rw}
               </span>
             )}
           </div>
@@ -62,9 +61,9 @@ export function PosyanduSelector() {
         {posyandus?.map((p) => (
           <SelectItem key={p.id} value={p.id} className="text-sm">
             {p.nama}
-            {(p.kelurahan || p.kecamatan) && (
+            {p.rw && (
               <span className="text-slate-500 text-xs ml-1 font-normal">
-                ({[p.kelurahan, p.kecamatan].filter(Boolean).join(', ')})
+                (RW {p.rw})
               </span>
             )}
           </SelectItem>

@@ -17,7 +17,7 @@ export function PatientProfileCard({ warga }: PatientProfileCardProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground block text-xs">No. HP</span>
-            <span className="font-medium">{warga.no_hp || 'Tidak ada'}</span>
+            <span className="font-medium">{warga.nomor || 'Tidak ada'}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-xs">NIK</span>

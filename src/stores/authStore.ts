@@ -4,8 +4,7 @@ import { persist } from 'zustand/middleware'
 export interface PosyanduInfo {
   id: string
   nama: string
-  kelurahan?: string
-  kecamatan?: string
+  rw?: string
 }
 
 interface AuthState {

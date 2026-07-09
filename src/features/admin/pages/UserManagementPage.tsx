@@ -14,7 +14,7 @@ export interface User {
   auth_id: string
   posyandu_id: string
   nama: string
-  email: string
+  username: string
   role: 'kader' | 'bidan' | 'admin'
   is_active: boolean
   posyandu: {
@@ -80,7 +80,7 @@ export function UserManagementPage() {
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nama</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Username</th>
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Role</th>
                   <th className="h-12 px-4 text-left align-middle font-medium">Posyandu Assignment</th>
                   <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
@@ -91,7 +91,7 @@ export function UserManagementPage() {
                 {users?.map((item) => (
                   <tr key={item.id} className="border-b transition-colors hover:bg-muted/50">
                     <td className="p-4 align-middle font-medium">{item.nama}</td>
-                    <td className="p-4 align-middle">{item.email}</td>
+                    <td className="p-4 align-middle">{item.username}</td>
                     <td className="p-4 align-middle uppercase text-xs tracking-wider font-semibold">
                       {item.role}
                     </td>
