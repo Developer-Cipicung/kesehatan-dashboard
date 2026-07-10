@@ -2,6 +2,10 @@ import { Warga } from '@/features/warga/services/wargaService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useGetImunisasiByWarga } from '@/features/warga/hooks/useImunisasi'
 import { useGetWargaList } from '@/features/warga/hooks/useWarga'
+import { EditPatientDialog } from '@/features/warga/components/EditPatientDialog'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Edit2 } from 'lucide-react'
 
 interface PatientProfileCardProps {
   warga: Warga
@@ -21,13 +25,20 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
     a.pemeriksaan_balita_baduta?.[0]?.nama_ibu === warga.nama
   )
 
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl flex items-center justify-between">
-          <span>{warga.nama}</span>
-        </CardTitle>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl flex items-center justify-between">
+            <span>{warga.nama}</span>
+            <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit Profil
+            </Button>
+          </CardTitle>
+        </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
@@ -35,8 +46,8 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             <span className="font-medium">{warga.nik}</span>
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs">No. HP</span>
-            <span className="font-medium">{warga.nomor || 'Tidak ada'}</span>
+            <span className="text-muted-foreground block text-xs">Tempat Lahir</span>
+            <span className="font-medium">{warga.tempat_lahir || '-'}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-xs">Tanggal Lahir</span>
@@ -49,8 +60,12 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             </span>
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs">Tempat Lahir</span>
-            <span className="font-medium">{warga.tempat_lahir || '-'}</span>
+            <span className="text-muted-foreground block text-xs">Jenis Kelamin</span>
+            <span className="font-medium">{warga.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground block text-xs">No. HP</span>
+            <span className="font-medium">{warga.nomor || 'Tidak ada'}</span>
           </div>
           <div className="md:col-span-2">
             <span className="text-muted-foreground block text-xs">Alamat</span>
@@ -80,17 +95,16 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
           {isBalita && (
             <>
               <div>
-                <span className="text-muted-foreground block text-xs">Penggunaan Kontrasepsi Orang Tua</span>
+                <span className="text-muted-foreground block text-xs">Penggunaan Kontrasepsi Ibu</span>
                 <span className="font-medium">{warga.penggunaan_kontrasepsi || '-'}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block text-xs">Nama Orang Tua</span>
-                <span className="font-medium">
-                  {warga.pemeriksaan_balita_baduta?.[0]?.nama_ayah ? `Ayah: ${warga.pemeriksaan_balita_baduta[0].nama_ayah}` : ''}
-                  {warga.pemeriksaan_balita_baduta?.[0]?.nama_ayah && warga.pemeriksaan_balita_baduta?.[0]?.nama_ibu ? ', ' : ''}
-                  {warga.pemeriksaan_balita_baduta?.[0]?.nama_ibu ? `Ibu: ${warga.pemeriksaan_balita_baduta[0].nama_ibu}` : ''}
-                  {!warga.pemeriksaan_balita_baduta?.[0]?.nama_ayah && !warga.pemeriksaan_balita_baduta?.[0]?.nama_ibu ? '-' : ''}
-                </span>
+                <span className="text-muted-foreground block text-xs">Nama Ayah</span>
+                <span className="font-medium">{warga.nama_ayah || '-'}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block text-xs">Nama Ibu</span>
+                <span className="font-medium">{warga.nama_ibu || '-'}</span>
               </div>
             </>
           )}
@@ -115,10 +129,6 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             </div>
           )}
 
-          <div>
-            <span className="text-muted-foreground block text-xs">Jenis Kelamin</span>
-            <span className="font-medium">{warga.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
-          </div>
           {isBalita && (
             <div className="md:col-span-2">
               <span className="text-muted-foreground block text-xs mb-1">Riwayat Imunisasi</span>
@@ -141,5 +151,13 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
         </div>
       </CardContent>
     </Card>
+
+    <EditPatientDialog
+      warga={warga}
+      kategori={kategori}
+      open={isEditDialogOpen}
+      onOpenChange={setIsEditDialogOpen}
+    />
+    </>
   )
 }
