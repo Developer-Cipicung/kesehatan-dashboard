@@ -1,40 +1,94 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileText, FileSpreadsheet } from 'lucide-react'
+import { FileText, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { exportWargaToPdf } from '../utils/exportPdf'
 import { exportWargaToExcel } from '../utils/exportExcel'
-import { Warga } from '@/features/warga/services/wargaService'
+import { wargaService } from '@/features/warga/services/wargaService'
+import { pemeriksaanService } from '@/features/pemeriksaan/services/pemeriksaanService'
 import { toast } from 'sonner'
 
 interface ExportActionsProps {
-  wargaList: Warga[]
-  pemeriksaanList?: any[]
   isLoading: boolean
   kategoriFilter: string
+  posyanduIdParam?: string
+  bulan: number
+  tahun: number
   setKategoriFilter: (val: string) => void
 }
 
-export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kategoriFilter, setKategoriFilter }: ExportActionsProps) {
-  const getFilteredWarga = () => {
-    return wargaList.filter(w => w.kategori?.toLowerCase().includes(kategoriFilter.toLowerCase()))
+export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bulan, tahun, setKategoriFilter }: ExportActionsProps) {
+  const [isExporting, setIsExporting] = useState(false)
+
+  const fetchChunkedData = async () => {
+    let allWarga: any[] = [];
+    let allPemeriksaan: any[] = [];
+    
+    let page = 1;
+    let hasMore = true;
+    const limit = 500;
+    
+    // Fetch Warga
+    while (hasMore) {
+      const data = await wargaService.getWargaList({ kategori: kategoriFilter, posyanduId: posyanduIdParam, limit, page });
+      allWarga = [...allWarga, ...data.data];
+      if (!data.metadata || page >= data.metadata.totalPages) {
+        hasMore = false;
+      } else {
+        page++;
+      }
+    }
+    
+    // Fetch Pemeriksaan
+    page = 1;
+    hasMore = true;
+    while (hasMore) {
+      const data = await pemeriksaanService.getAll(kategoriFilter, { bulan, tahun, posyanduId: posyanduIdParam, limit, page });
+      allPemeriksaan = [...allPemeriksaan, ...data.data];
+      if (!data.metadata || page >= data.metadata.totalPages) {
+        hasMore = false;
+      } else {
+        page++;
+      }
+    }
+    
+    // Client-side filtering if baduta vs balita
+    let filteredPemeriksaan = allPemeriksaan;
+    if (kategoriFilter === 'baduta' || kategoriFilter === 'balita') {
+      filteredPemeriksaan = allPemeriksaan.filter((item: any) => {
+        if (!item.warga?.tanggal_lahir) return false
+        const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
+        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+        if (kategoriFilter === 'baduta') return ageMonths < 24;
+        return ageMonths >= 24 && ageMonths < 60;
+      })
+    }
+    
+    return { allWarga, filteredPemeriksaan };
   }
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     try {
-      // Pass the pemeriksaanList to the PDF exporter, along with the category
-      exportWargaToPdf(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`, pemeriksaanList, kategoriFilter)
+      setIsExporting(true)
+      const { allWarga, filteredPemeriksaan } = await fetchChunkedData()
+      exportWargaToPdf(allWarga, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`, filteredPemeriksaan, kategoriFilter)
       toast.success('Laporan PDF berhasil diunduh.')
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengekspor PDF.')
+    } finally {
+      setIsExporting(false)
     }
   }
 
   const handleExportExcel = async () => {
     try {
-      // Pass the pemeriksaanList to the Excel exporter
-      await exportWargaToExcel(getFilteredWarga(), `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`, pemeriksaanList, kategoriFilter)
+      setIsExporting(true)
+      const { allWarga, filteredPemeriksaan } = await fetchChunkedData()
+      await exportWargaToExcel(allWarga, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.xlsx`, filteredPemeriksaan, kategoriFilter)
       toast.success('Laporan Excel berhasil diunduh.')
     } catch (error: any) {
       toast.error(error.message || 'Gagal mengekspor Excel.')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -44,6 +98,7 @@ export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kate
         value={kategoriFilter}
         onChange={(e) => setKategoriFilter(e.target.value)}
         className="h-10 px-3 rounded-md border border-input bg-background w-full sm:w-auto"
+        disabled={isExporting}
       >
         <option value="baduta">Baduta</option>
         <option value="balita">Balita</option>
@@ -54,20 +109,20 @@ export function ExportActions({ wargaList, pemeriksaanList = [], isLoading, kate
       <Button 
         variant="outline" 
         onClick={handleExportPdf}
-        disabled={isLoading || !wargaList || wargaList.length === 0}
+        disabled={isLoading || isExporting}
         className="w-full sm:w-auto"
       >
-        <FileText className="mr-2 h-4 w-4" />
-        Download PDF
+        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
+        {isExporting ? 'Memproses...' : 'Download PDF'}
       </Button>
       <Button 
         variant="default"
         onClick={handleExportExcel}
-        disabled={isLoading || !wargaList || wargaList.length === 0}
+        disabled={isLoading || isExporting}
         className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
       >
-        <FileSpreadsheet className="mr-2 h-4 w-4" />
-        Download Excel
+        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}
+        {isExporting ? 'Memproses...' : 'Download Excel'}
       </Button>
     </div>
   )

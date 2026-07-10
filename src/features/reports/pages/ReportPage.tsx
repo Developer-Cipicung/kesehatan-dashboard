@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats'
 import { useGetPendataanGlobalStatus, useGetAdminStatusPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
-import { useGetWargaList } from '@/features/warga/hooks/useWarga'
 import { MonthlySummaryWidget } from '../components/MonthlySummaryWidget'
 import { ExportActions } from '../components/ExportActions'
 import { MonthlyReportTable } from '../components/MonthlyReportTable'
@@ -26,14 +25,11 @@ export function ReportPage() {
   // Fetch all posyandus status if filter is 'all'
   const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear)
 
-  // Fetch Warga List for exports — filter by kategori so backend only returns relevant rows
-  const { data: wargaData, isLoading: isWargaLoading } = useGetWargaList({ kategori: kategoriFilter, limit: 10000, posyanduId: posyanduIdParam })
-
-  // Fetch Pemeriksaan List for the selected category, month, and year
+  // Fetch Pemeriksaan List for the selected category, month, and year (limit 50 for preview)
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(kategoriFilter, {
     bulan: currentMonth,
     tahun: currentYear,
-    limit: 10000,
+    limit: 50,
     posyanduId: posyanduIdParam,
   })
 
@@ -131,10 +127,11 @@ export function ReportPage() {
         </div>
         
         <ExportActions 
-          wargaList={wargaData?.data || []} 
-          pemeriksaanList={filteredPemeriksaanList}
-          isLoading={isWargaLoading || isPemeriksaanLoading} 
+          isLoading={isPemeriksaanLoading} 
           kategoriFilter={kategoriFilter}
+          posyanduIdParam={posyanduIdParam}
+          bulan={currentMonth}
+          tahun={currentYear}
           setKategoriFilter={setKategoriFilter}
         />
       </div>

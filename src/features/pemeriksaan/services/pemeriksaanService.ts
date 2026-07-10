@@ -38,7 +38,7 @@ export interface PemeriksaanResponse {
 }
 
 export const pemeriksaanService = {
-  getAll: async (kategori: string, params: { bulan?: number; tahun?: number; limit?: number; posyanduId?: string }) => {
+  getAll: async (kategori: string, params: { bulan?: number; tahun?: number; limit?: number; page?: number; posyanduId?: string }) => {
     // API uses dash-case for endpoints (e.g. pasca-persalinan)
     const endpoint = kategori.replace('_', '-')
     // For baduta and balita, the endpoint is /balita
