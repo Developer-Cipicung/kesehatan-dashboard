@@ -233,6 +233,7 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
         defaultCategory={kategori}
+        onSuccess={() => setPage(1)}
       />
     </div>
   )

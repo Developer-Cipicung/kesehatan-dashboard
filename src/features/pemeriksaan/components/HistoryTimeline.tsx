@@ -44,6 +44,10 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
             {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">GDS</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Suhu & Kondisi</th>}
 
+            {isBalita && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Lainnya</th>}
+            {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Kehamilan</th>}
+            {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Bayi & Layanan</th>}
+
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Catatan</th>
             {!isLocked && (
               <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs text-right">Aksi</th>
@@ -125,6 +129,35 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                     {record.suhu_tubuh !== undefined && record.suhu_tubuh !== null && <div className="text-xs"><span className="text-muted-foreground">Suhu:</span> {record.suhu_tubuh}°C</div>}
                     {record.kondisi_ibu && <div className="text-xs mt-0.5"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi_ibu}</div>}
                     {(record.suhu_tubuh === undefined && !record.kondisi_ibu) && '-'}
+                  </td>
+                )}
+
+                {isBalita && (
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                    {record.kondisi && <div className="text-xs"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi}</div>}
+                    <div className="text-xs"><span className="text-muted-foreground">ASI Eksklusif:</span> {record.asi_eksklusif ? 'Ya' : 'Tidak'}</div>
+                    <div className="text-xs"><span className="text-muted-foreground">Bansos:</span> {record.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak'}</div>
+                  </td>
+                )}
+
+                {isBumil && (
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                    {record.jumlah_anak !== undefined && record.jumlah_anak !== null && <div className="text-xs"><span className="text-muted-foreground">Anak Ke-:</span> {record.jumlah_anak}</div>}
+                    {record.kadar_hemoglobin !== undefined && record.kadar_hemoglobin !== null && <div className="text-xs"><span className="text-muted-foreground">Hb:</span> {record.kadar_hemoglobin}</div>}
+                    {record.berat_janin !== undefined && record.berat_janin !== null && <div className="text-xs"><span className="text-muted-foreground">Berat Janin:</span> {record.berat_janin} g</div>}
+                    <div className="text-xs"><span className="text-muted-foreground">Rokok:</span> {record.terpapar_rokok ? 'Ya' : 'Tidak'}</div>
+                    <div className="text-xs"><span className="text-muted-foreground">KIE:</span> {record.kie ? 'Ya' : 'Tidak'}</div>
+                    <div className="text-xs"><span className="text-muted-foreground">TTD:</span> {record.suplemen_tambah_darah ? 'Ya' : 'Tidak'}</div>
+                  </td>
+                )}
+
+                {isPasca && (
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                    {record.tinggi_badan_bayi !== undefined && record.tinggi_badan_bayi !== null && <div className="text-xs"><span className="text-muted-foreground">Tinggi Bayi:</span> {record.tinggi_badan_bayi} cm</div>}
+                    {record.berat_badan_bayi !== undefined && record.berat_badan_bayi !== null && <div className="text-xs"><span className="text-muted-foreground">Berat Bayi:</span> {record.berat_badan_bayi} kg</div>}
+                    <div className="text-xs"><span className="text-muted-foreground">KIE:</span> {record.kie ? 'Ya' : 'Tidak'}</div>
+                    <div className="text-xs"><span className="text-muted-foreground">Rujukan:</span> {record.fasilitasi_rujukan ? 'Ya' : 'Tidak'}</div>
+                    <div className="text-xs"><span className="text-muted-foreground">Bansos:</span> {record.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak'}</div>
                   </td>
                 )}
 

@@ -38,6 +38,20 @@ interface FormState {
   tanggal_persalinan: string
   suhu_tubuh: string
   kondisi_ibu: string
+  kondisi: string
+  asi_eksklusif: boolean
+  fasilitasi_bantuan_sosial: boolean
+  jumlah_anak: string
+  riwayat_penyakit: string
+  kadar_hemoglobin: string
+  berat_janin: string
+  terpapar_rokok: boolean
+  kie: boolean
+  suplemen_tambah_darah: boolean
+  tinggi_badan_bayi: string
+  berat_badan_bayi: string
+  fasilitasi_rujukan: boolean
+  tanggal_kunjungan_berikut: string
 }
 
 const emptyForm = (): FormState => ({
@@ -60,6 +74,20 @@ const emptyForm = (): FormState => ({
   tanggal_persalinan: new Date().toISOString().slice(0, 10),
   suhu_tubuh: '',
   kondisi_ibu: '',
+  kondisi: '',
+  asi_eksklusif: false,
+  fasilitasi_bantuan_sosial: false,
+  jumlah_anak: '',
+  riwayat_penyakit: '',
+  kadar_hemoglobin: '',
+  berat_janin: '',
+  terpapar_rokok: false,
+  kie: false,
+  suplemen_tambah_darah: false,
+  tinggi_badan_bayi: '',
+  berat_badan_bayi: '',
+  fasilitasi_rujukan: false,
+  tanggal_kunjungan_berikut: '',
 })
 
 function parseTd(td: string) {
@@ -161,8 +189,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
   const [saving, setSaving] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [tanggalPersalinan, setTanggalPersalinan] = useState(new Date().toISOString().split('T')[0])
+  const [tempatPersalinan, setTempatPersalinan] = useState('')
 
-  const set = (field: keyof FormState, value: string) =>
+  const set = (field: keyof FormState, value: any) =>
     setForm((prev) => ({ ...prev, [field]: value }))
 
   const isBumil = kategori === 'bumil'
@@ -199,6 +228,14 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           usia_kehamilan_minggu: parseInt(form.usia) || 0,
           hpht: form.hpht || form.tanggal,
           htp: form.htp || form.tanggal,
+          jumlah_anak: parseInt(form.jumlah_anak) || undefined,
+          riwayat_penyakit: form.riwayat_penyakit || undefined,
+          kadar_hemoglobin: parseFloat(form.kadar_hemoglobin) || undefined,
+          berat_janin: parseFloat(form.berat_janin) || undefined,
+          terpapar_rokok: form.terpapar_rokok,
+          kie: form.kie,
+          suplemen_tambah_darah: form.suplemen_tambah_darah,
+          tanggal_kunjungan_berikut: form.tanggal_kunjungan_berikut || undefined,
           catatan: form.catatan || undefined,
         })
       } else if (isLansia) {
@@ -226,6 +263,12 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           tekanan_darah_diastolik: td.d,
           suhu_tubuh: parseFloat(form.suhu_tubuh) || 0,
           kondisi_ibu: form.kondisi_ibu || undefined,
+          tinggi_badan_bayi: parseFloat(form.tinggi_badan_bayi) || undefined,
+          berat_badan_bayi: parseFloat(form.berat_badan_bayi) || undefined,
+          kie: form.kie,
+          fasilitasi_rujukan: form.fasilitasi_rujukan,
+          fasilitasi_bantuan_sosial: form.fasilitasi_bantuan_sosial,
+          tanggal_kunjungan_berikut: form.tanggal_kunjungan_berikut || undefined,
           catatan: form.catatan || undefined,
         })
       } else {
@@ -236,6 +279,10 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           tb: parseFloat(form.tfuTb) || 0,
           lingkar_kepala: parseFloat(form.lingkar_kepala) || 0,
           lingkar_lengan_atas: parseFloat(form.lilaGds) || 0,
+          kondisi: form.kondisi || undefined,
+          asi_eksklusif: form.asi_eksklusif,
+          fasilitasi_bantuan_sosial: form.fasilitasi_bantuan_sosial,
+          tanggal_kunjungan_berikut: form.tanggal_kunjungan_berikut || undefined,
           nama_ayah: form.nama_ayah || undefined,
           nama_ibu: form.nama_ibu || undefined,
           catatan: form.catatan || undefined,
@@ -326,6 +373,15 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="15" />
                 </FieldRow>
+                <FieldRow label="Kondisi">
+                  <MobileInput value={form.kondisi} onChange={(v) => set('kondisi', v)} placeholder="Sehat" />
+                </FieldRow>
+                <FieldRow label="ASI Eksklusif">
+                  <input type="checkbox" checked={form.asi_eksklusif} onChange={(e) => set('asi_eksklusif', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="Bantuan Sosial">
+                  <input type="checkbox" checked={form.fasilitasi_bantuan_sosial} onChange={(e) => set('fasilitasi_bantuan_sosial', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
                 </FieldRow>
@@ -339,6 +395,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
               <>
                 <FieldRow label={<>Usia Kandungan (mgg) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="12" />
+                </FieldRow>
+                <FieldRow label="Jumlah Anak">
+                  <MobileInput type="number" value={form.jumlah_anak} onChange={(v) => set('jumlah_anak', v)} placeholder="1" />
                 </FieldRow>
                 <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
@@ -354,6 +413,24 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 </FieldRow>
                 <FieldRow label={<>HTP <span className="text-red-500">*</span></>}>
                   <MobileInput type="date" value={form.htp} onChange={(v) => set('htp', v)} />
+                </FieldRow>
+                <FieldRow label="Riwayat Penyakit">
+                  <MobileInput value={form.riwayat_penyakit} onChange={(v) => set('riwayat_penyakit', v)} placeholder="Tidak ada" />
+                </FieldRow>
+                <FieldRow label="Kadar HB">
+                  <MobileInput type="number" value={form.kadar_hemoglobin} onChange={(v) => set('kadar_hemoglobin', v)} placeholder="12" />
+                </FieldRow>
+                <FieldRow label="Berat Janin (g)">
+                  <MobileInput type="number" value={form.berat_janin} onChange={(v) => set('berat_janin', v)} placeholder="1500" />
+                </FieldRow>
+                <FieldRow label="Terpapar Rokok">
+                  <input type="checkbox" checked={form.terpapar_rokok} onChange={(e) => set('terpapar_rokok', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="KIE">
+                  <input type="checkbox" checked={form.kie} onChange={(e) => set('kie', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="Suplemen TTD">
+                  <input type="checkbox" checked={form.suplemen_tambah_darah} onChange={(e) => set('suplemen_tambah_darah', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
                 </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
@@ -389,10 +466,31 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <FieldRow label={<>Kondisi Ibu <span className="text-red-500">*</span></>}>
                   <MobileInput value={form.kondisi_ibu} onChange={(v) => set('kondisi_ibu', v)} placeholder="baik..." />
                 </FieldRow>
+                <FieldRow label="Tinggi Bayi (cm)">
+                  <MobileInput type="number" value={form.tinggi_badan_bayi} onChange={(v) => set('tinggi_badan_bayi', v)} placeholder="50" />
+                </FieldRow>
+                <FieldRow label="Berat Bayi (kg)">
+                  <MobileInput type="number" value={form.berat_badan_bayi} onChange={(v) => set('berat_badan_bayi', v)} placeholder="3.2" />
+                </FieldRow>
+                <FieldRow label="KIE">
+                  <input type="checkbox" checked={form.kie} onChange={(e) => set('kie', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="Fasilitasi Rujukan">
+                  <input type="checkbox" checked={form.fasilitasi_rujukan} onChange={(e) => set('fasilitasi_rujukan', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="Bantuan Sosial">
+                  <input type="checkbox" checked={form.fasilitasi_bantuan_sosial} onChange={(e) => set('fasilitasi_bantuan_sosial', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
                 </FieldRow>
               </>
+            )}
+
+            {!isLansia && (
+              <FieldRow label="Kunjungan Berikutnya">
+                <MobileInput type="date" value={form.tanggal_kunjungan_berikut} onChange={(v) => set('tanggal_kunjungan_berikut', v)} />
+              </FieldRow>
             )}
           </div>
 
@@ -415,12 +513,17 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
         </div>
       )}
       {/* Confirm Dialog */}
-      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+      <Dialog open={showConfirm} onOpenChange={(open) => {
+        if (!open) {
+          setShowConfirm(false)
+          setTempatPersalinan('')
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tandai Telah Bersalin</DialogTitle>
             <DialogDescription>
-              Masukkan tanggal persalinan.
+              Masukkan tanggal dan tempat persalinan.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -436,16 +539,32 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
+            <div className="space-y-2">
+              <label htmlFor="tempat_persalinan_card" className="text-sm font-medium leading-none">
+                Tempat Persalinan <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="tempat_persalinan_card"
+                type="text"
+                value={tempatPersalinan}
+                onChange={(e) => setTempatPersalinan(e.target.value)}
+                placeholder="Contoh: RSUD / Bidan"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirm(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowConfirm(false)
+              setTempatPersalinan('')
+            }}>
               Batal
             </Button>
             <Button 
               onClick={async () => {
-                if (!tanggalPersalinan) return;
+                if (!tanggalPersalinan || !tempatPersalinan) return;
                 try {
-                  await updateWarga({ id: data.id, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
+                  await updateWarga({ id: data.id, payload: { status_kehamilan: 'PASCA_PERSALINAN', tempat_persalinan: tempatPersalinan } })
                   await pemeriksaanService.createPasca({
                     warga_id: data.id,
                     tanggal_kunjungan: new Date().toISOString().split('T')[0],
@@ -461,8 +580,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                   toast.error('Gagal menyimpan data persalinan')
                 }
                 setShowConfirm(false)
+                setTempatPersalinan('')
               }}
-              disabled={!tanggalPersalinan}
+              disabled={!tanggalPersalinan || !tempatPersalinan}
             >
               Ya, Pindahkan
             </Button>

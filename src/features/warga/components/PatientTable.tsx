@@ -58,6 +58,20 @@ interface RowState {
   tanggal_persalinan: string
   suhu_tubuh: string
   kondisi_ibu: string
+  kondisi: string
+  asi_eksklusif: boolean
+  fasilitasi_bantuan_sosial: boolean
+  jumlah_anak: string
+  riwayat_penyakit: string
+  kadar_hemoglobin: string
+  berat_janin: string
+  terpapar_rokok: boolean
+  kie: boolean
+  suplemen_tambah_darah: boolean
+  tinggi_badan_bayi: string
+  berat_badan_bayi: string
+  fasilitasi_rujukan: boolean
+  tanggal_kunjungan_berikut: string
 }
 
 const emptyRow = (): RowState => ({
@@ -80,6 +94,20 @@ const emptyRow = (): RowState => ({
   tanggal_persalinan: new Date().toISOString().slice(0, 10),
   suhu_tubuh: '',
   kondisi_ibu: '',
+  kondisi: '',
+  asi_eksklusif: false,
+  fasilitasi_bantuan_sosial: false,
+  jumlah_anak: '',
+  riwayat_penyakit: '',
+  kadar_hemoglobin: '',
+  berat_janin: '',
+  terpapar_rokok: false,
+  kie: false,
+  suplemen_tambah_darah: false,
+  tinggi_badan_bayi: '',
+  berat_badan_bayi: '',
+  fasilitasi_rujukan: false,
+  tanggal_kunjungan_berikut: '',
 })
 
 function parseTd(td: string): { s: number; d: number } | null {
@@ -146,6 +174,20 @@ function Cell({
     )
   }
 
+  if (type === 'checkbox') {
+    return (
+      <div className={`flex items-center justify-center ${width}`}>
+        <input
+          type="checkbox"
+          checked={value as unknown as boolean}
+          onChange={(e) => onChange(e.target.checked as unknown as string)}
+          disabled={disabled}
+          className="w-4 h-4 rounded border-gray-300 text-primary"
+        />
+      </div>
+    )
+  }
+
   return (
     <input
       type={type}
@@ -165,10 +207,11 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [tanggalPersalinan, setTanggalPersalinan] = useState(new Date().toISOString().split('T')[0])
+  const [tempatPersalinan, setTempatPersalinan] = useState('')
 
   const getRow = (id: string): RowState => rows[id] ?? emptyRow()
 
-  const set = (id: string, field: keyof RowState, value: string) => {
+  const set = (id: string, field: keyof RowState, value: any) => {
     setRows((prev) => ({
       ...prev,
       [id]: { ...(prev[id] ?? emptyRow()), [field]: value },
@@ -194,6 +237,14 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           usia_kehamilan_minggu: parseInt(row.usia) || 0,
           hpht: row.hpht || row.tanggal,
           htp: row.htp || row.tanggal,
+          jumlah_anak: parseInt(row.jumlah_anak) || undefined,
+          riwayat_penyakit: row.riwayat_penyakit || undefined,
+          kadar_hemoglobin: parseFloat(row.kadar_hemoglobin) || undefined,
+          berat_janin: parseFloat(row.berat_janin) || undefined,
+          terpapar_rokok: row.terpapar_rokok,
+          kie: row.kie,
+          suplemen_tambah_darah: row.suplemen_tambah_darah,
+          tanggal_kunjungan_berikut: row.tanggal_kunjungan_berikut || undefined,
           catatan: row.catatan || undefined,
         })
       } else if (kategori === 'lansia') {
@@ -221,6 +272,12 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           tekanan_darah_diastolik: td.d,
           suhu_tubuh: parseFloat(row.suhu_tubuh) || 0,
           kondisi_ibu: row.kondisi_ibu || undefined,
+          tinggi_badan_bayi: parseFloat(row.tinggi_badan_bayi) || undefined,
+          berat_badan_bayi: parseFloat(row.berat_badan_bayi) || undefined,
+          kie: row.kie,
+          fasilitasi_rujukan: row.fasilitasi_rujukan,
+          fasilitasi_bantuan_sosial: row.fasilitasi_bantuan_sosial,
+          tanggal_kunjungan_berikut: row.tanggal_kunjungan_berikut || undefined,
           catatan: row.catatan || undefined,
         })
       } else {
@@ -232,6 +289,10 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           tb: parseFloat(row.tfuTb) || 0,
           lingkar_kepala: parseFloat(row.lingkar_kepala) || 0,
           lingkar_lengan_atas: parseFloat(row.lilaGds) || 0,
+          kondisi: row.kondisi || undefined,
+          asi_eksklusif: row.asi_eksklusif,
+          fasilitasi_bantuan_sosial: row.fasilitasi_bantuan_sosial,
+          tanggal_kunjungan_berikut: row.tanggal_kunjungan_berikut || undefined,
           nama_ayah: row.nama_ayah || undefined,
           nama_ibu: row.nama_ibu || undefined,
           catatan: row.catatan || undefined,
@@ -262,7 +323,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[160px]">NIK</th>
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[190px]">Nama</th>
 
-            <th colSpan={isBalita ? 9 : isBumil ? 9 : 6} className="px-4 py-3 border-l border-slate-100">
+            <th colSpan={isBalita ? 12 : isBumil ? 16 : isPasca ? 12 : 6} className="px-4 py-3 border-l border-slate-100">
               <div className="flex items-center text-primary font-bold text-xs uppercase tracking-wider">
                 <ActivitySquare className="w-4 h-4 mr-2" />
                 Record Pemeriksaan
@@ -286,6 +347,9 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Kepala (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">ASI<br/>Eksklusif</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bantuan<br/>Sosial</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Imunisasi</th>
               </>
@@ -293,11 +357,18 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
             {isBumil && (
               <>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Jumlah<br/>Anak</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Perut (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">HPHT <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">HTP <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Riwayat<br/>Penyakit</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Kadar<br/>Hb</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Berat<br/>Janin</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Rokok</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">KIE</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">TTD</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
@@ -316,9 +387,19 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Suhu Tubuh (°C) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi Ibu <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi<br/>Bayi</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Berat<br/>Bayi</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">KIE</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Rujukan</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bansos</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
+
+            {!isLansia && (
+              <th className="px-3 py-3 font-semibold text-primary text-xs">Tgl Kunjungan<br/>Berikutnya</th>
+            )}
+
             <th className="border-l border-slate-100"></th>
           </tr>
         </thead>
@@ -406,6 +487,15 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '15'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
+                      <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder="Sehat" width="w-[80px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.asi_eksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
                       <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
@@ -417,6 +507,9 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 {isBumil && (
                   <>
                     <td className="px-3 py-3">
+                      <Cell type="number" value={row.jumlah_anak} onChange={(v) => set(warga.id, 'jumlah_anak', v)} placeholder="1" width="w-[60px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
                       <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
@@ -426,10 +519,28 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '24'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="date" value={row.hpht} onChange={(v) => set(warga.id, 'hpht', v)} width="w-[140px]" disabled={isReadOnly} />
+                      <Cell type="date" value={row.hpht} onChange={(v) => set(warga.id, 'hpht', v)} width="w-[130px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="date" value={row.htp} onChange={(v) => set(warga.id, 'htp', v)} width="w-[140px]" disabled={isReadOnly} />
+                      <Cell type="date" value={row.htp} onChange={(v) => set(warga.id, 'htp', v)} width="w-[130px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell value={row.riwayat_penyakit} onChange={(v) => set(warga.id, 'riwayat_penyakit', v)} placeholder="-" width="w-[90px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder="12" width="w-[60px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder="1500" width="w-[70px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.terpapar_rokok as any} onChange={(v) => set(warga.id, 'terpapar_rokok', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.suplemen_tambah_darah as any} onChange={(v) => set(warga.id, 'suplemen_tambah_darah', v)} width="w-full" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
@@ -466,9 +577,30 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="baik..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
+                      <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder="50" width="w-[60px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="number" value={row.berat_badan_bayi} onChange={(v) => set(warga.id, 'berat_badan_bayi', v)} placeholder="3.2" width="w-[60px]" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={isReadOnly} />
+                    </td>
+                    <td className="px-3 py-3">
                       <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
                     </td>
                   </>
+                )}
+
+                {!isLansia && (
+                  <td className="px-3 py-3">
+                    <Cell type="date" value={row.tanggal_kunjungan_berikut} onChange={(v) => set(warga.id, 'tanggal_kunjungan_berikut', v)} width="w-[130px]" disabled={isReadOnly} />
+                  </td>
                 )}
 
                 {/* Aksi */}
@@ -519,12 +651,17 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
         </tbody>
       </table>
     </div>
-      <Dialog open={!!confirmId} onOpenChange={(open) => !open && setConfirmId(null)}>
+      <Dialog open={!!confirmId} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmId(null)
+          setTempatPersalinan('')
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tandai Telah Bersalin</DialogTitle>
             <DialogDescription>
-              Tandai ibu ini telah bersalin? Masukkan tanggal persalinan untuk memindahkan data pasien ke Pasca Persalinan.
+              Tandai ibu ini telah bersalin? Masukkan tanggal dan tempat persalinan untuk memindahkan data pasien ke Pasca Persalinan.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -540,16 +677,32 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
+            <div className="space-y-2">
+              <label htmlFor="tempat_persalinan" className="text-sm font-medium leading-none">
+                Tempat Persalinan <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="tempat_persalinan"
+                type="text"
+                value={tempatPersalinan}
+                onChange={(e) => setTempatPersalinan(e.target.value)}
+                placeholder="Contoh: RSUD / Bidan"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmId(null)}>
+            <Button variant="outline" onClick={() => {
+              setConfirmId(null)
+              setTempatPersalinan('')
+            }}>
               Batal
             </Button>
             <Button 
               onClick={async () => {
-                if (!tanggalPersalinan || !confirmId) return;
+                if (!tanggalPersalinan || !tempatPersalinan || !confirmId) return;
                 try {
-                  await updateWarga({ id: confirmId, payload: { status_kehamilan: 'PASCA_PERSALINAN' } })
+                  await updateWarga({ id: confirmId, payload: { status_kehamilan: 'PASCA_PERSALINAN', tempat_persalinan: tempatPersalinan } })
                   await pemeriksaanService.createPasca({
                     warga_id: confirmId,
                     tanggal_kunjungan: new Date().toISOString().split('T')[0],
@@ -565,8 +718,9 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                   toast.error('Gagal menyimpan data persalinan')
                 }
                 setConfirmId(null)
+                setTempatPersalinan('')
               }}
-              disabled={!tanggalPersalinan}
+              disabled={!tanggalPersalinan || !tempatPersalinan}
             >
               Ya, Pindahkan
             </Button>

@@ -27,15 +27,20 @@ const formSchema = z.object({
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
   tanggal_persalinan: z.string().optional(),
+  tempat_lahir: z.string().optional(),
+  alamat: z.string().optional(),
+  tempat_persalinan: z.string().optional(),
+  penggunaan_kontrasepsi: z.string().optional(),
 })
 
 interface AddPatientDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultCategory?: string
+  onSuccess?: () => void
 }
 
-export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPatientDialogProps) {
+export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSuccess }: AddPatientDialogProps) {
   const { mutateAsync: addWarga, isPending } = useAddWarga()
 
   const methods = useForm<z.infer<typeof formSchema>>({
@@ -50,6 +55,10 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
       nama_ayah: '',
       nama_ibu: '',
       tanggal_persalinan: new Date().toISOString().split('T')[0],
+      tempat_lahir: '',
+      alamat: '',
+      tempat_persalinan: '',
+      penggunaan_kontrasepsi: '',
     },
   })
 
@@ -87,6 +96,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
 
       methods.reset()
       onOpenChange(false)
+      if (onSuccess) onSuccess()
     } catch (error) {
       console.error(error)
     }
@@ -155,6 +165,13 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                 label={<>Tanggal Lahir <span className="text-red-500">*</span></>}
                 type="date"
               />
+              <FormField
+                control={methods.control}
+                name="tempat_lahir"
+                label={<>Tempat Lahir</>}
+                placeholder="Contoh: Jakarta"
+                type="text"
+              />
               {!defaultCategory && (
                 <FormField
                   control={methods.control}
@@ -165,12 +182,21 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                 />
               )}
               {watchKategori === 'pasca_persalinan' && (
-                <FormField
-                  control={methods.control}
-                  name="tanggal_persalinan"
-                  label={<>Tanggal Persalinan <span className="text-red-500">*</span></>}
-                  type="date"
-                />
+                <>
+                  <FormField
+                    control={methods.control}
+                    name="tanggal_persalinan"
+                    label={<>Tanggal Persalinan <span className="text-red-500">*</span></>}
+                    type="date"
+                  />
+                  <FormField
+                    control={methods.control}
+                    name="tempat_persalinan"
+                    label={<>Tempat Persalinan</>}
+                    placeholder="Contoh: RSUD / Bidan"
+                    type="text"
+                  />
+                </>
               )}
               {isAnak && (
                 <>
@@ -188,8 +214,24 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory }: AddPat
                     placeholder="Contoh: Siti"
                     type="text"
                   />
+                  <FormField
+                    control={methods.control}
+                    name="penggunaan_kontrasepsi"
+                    label="Penggunaan Kontrasepsi"
+                    placeholder="Contoh: Pil / IUD"
+                    type="text"
+                  />
                 </>
               )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <FormField
+                control={methods.control}
+                name="alamat"
+                label="Alamat Lengkap"
+                placeholder="Contoh: Jl. Mawar No. 12"
+                type="text"
+              />
             </div>
             
             <div className="flex justify-end pt-4 space-x-2">

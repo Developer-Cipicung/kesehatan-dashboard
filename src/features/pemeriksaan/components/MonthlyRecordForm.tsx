@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -61,33 +62,50 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
 
 export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }: MonthlyRecordFormProps) {
   const { mutateAsync: updateRecord, isPending } = useUpdatePemeriksaan()
-  const rec: any = initialData || {}
 
   const isBumil = kategori === 'bumil'
   const isLansia = kategori === 'lansia'
   const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
   const isBalita = kategori === 'balita' || kategori === 'baduta'
 
-  const methods = useForm<any>({
-    defaultValues: {
-      tanggal_kunjungan: rec.tanggal_kunjungan ? new Date(rec.tanggal_kunjungan).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      bb: rec.bb ?? '',
-      tb: rec.tb ?? '',
-      lingkar_kepala: rec.lingkar_kepala ?? '',
-      lingkar_lengan_atas: rec.lingkar_lengan_atas ?? '',
-      lingkar_perut: rec.lingkar_perut ?? '',
-      usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
-      hpht: rec.hpht ? new Date(rec.hpht).toISOString().split('T')[0] : '',
-      htp: rec.htp ? new Date(rec.htp).toISOString().split('T')[0] : '',
-      td: (rec.tekanan_darah_sistolik && rec.tekanan_darah_diastolik) ? `${rec.tekanan_darah_sistolik}/${rec.tekanan_darah_diastolik}` : '',
-      gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
-      suhu_tubuh: rec.suhu_tubuh ?? '',
-      kondisi_ibu: rec.kondisi_ibu ?? '',
-      catatan: rec.catatan ?? '',
-    },
-  })
+  const methods = useForm<any>()
+  const { register, handleSubmit, watch, setValue, reset } = methods
 
-  const { register, handleSubmit, watch, setValue } = methods
+  useEffect(() => {
+    if (open) {
+      const rec: any = initialData || {}
+      reset({
+        tanggal_kunjungan: rec.tanggal_kunjungan ? new Date(rec.tanggal_kunjungan).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        bb: rec.bb ?? '',
+        tb: rec.tb ?? '',
+        lingkar_kepala: rec.lingkar_kepala ?? '',
+        lingkar_lengan_atas: rec.lingkar_lengan_atas ?? '',
+        lingkar_perut: rec.lingkar_perut ?? '',
+        usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
+        hpht: rec.hpht ? new Date(rec.hpht).toISOString().split('T')[0] : '',
+        htp: rec.htp ? new Date(rec.htp).toISOString().split('T')[0] : '',
+        td: (rec.tekanan_darah_sistolik && rec.tekanan_darah_diastolik) ? `${rec.tekanan_darah_sistolik}/${rec.tekanan_darah_diastolik}` : '',
+        gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
+        suhu_tubuh: rec.suhu_tubuh ?? '',
+        kondisi_ibu: rec.kondisi_ibu ?? '',
+        catatan: rec.catatan ?? '',
+        kondisi: rec.kondisi ?? '',
+        asi_eksklusif: rec.asi_eksklusif ?? false,
+        fasilitasi_bantuan_sosial: rec.fasilitasi_bantuan_sosial ?? false,
+        jumlah_anak: rec.jumlah_anak ?? '',
+        riwayat_penyakit: rec.riwayat_penyakit ?? '',
+        kadar_hemoglobin: rec.kadar_hemoglobin ?? '',
+        berat_janin: rec.berat_janin ?? '',
+        terpapar_rokok: rec.terpapar_rokok ?? false,
+        kie: rec.kie ?? false,
+        suplemen_tambah_darah: rec.suplemen_tambah_darah ?? false,
+        tinggi_badan_bayi: rec.tinggi_badan_bayi ?? '',
+        berat_badan_bayi: rec.berat_badan_bayi ?? '',
+        fasilitasi_rujukan: rec.fasilitasi_rujukan ?? false,
+        tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? new Date(rec.tanggal_kunjungan_berikut).toISOString().split('T')[0] : '',
+      })
+    }
+  }, [open, initialData, reset])
 
   const parseTd = (td: string) => {
     const p = td.split('/')
@@ -104,6 +122,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
       let payload: any = {
         tanggal_kunjungan: values.tanggal_kunjungan,
         catatan: values.catatan || undefined,
+        tanggal_kunjungan_berikut: values.tanggal_kunjungan_berikut || undefined,
       }
 
       if (isBalita) {
@@ -113,6 +132,9 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
           tb: parseFloat(values.tb) || undefined,
           lingkar_kepala: parseFloat(values.lingkar_kepala) || undefined,
           lingkar_lengan_atas: parseFloat(values.lingkar_lengan_atas) || undefined,
+          kondisi: values.kondisi || undefined,
+          asi_eksklusif: values.asi_eksklusif ?? undefined,
+          fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
         }
       } else if (isBumil) {
         payload = {
@@ -124,6 +146,13 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
           usia_kehamilan_minggu: parseInt(values.usia_kehamilan_minggu) || undefined,
           hpht: values.hpht || undefined,
           htp: values.htp || undefined,
+          jumlah_anak: parseInt(values.jumlah_anak) || undefined,
+          riwayat_penyakit: values.riwayat_penyakit || undefined,
+          kadar_hemoglobin: parseFloat(values.kadar_hemoglobin) || undefined,
+          berat_janin: parseFloat(values.berat_janin) || undefined,
+          terpapar_rokok: values.terpapar_rokok ?? undefined,
+          kie: values.kie ?? undefined,
+          suplemen_tambah_darah: values.suplemen_tambah_darah ?? undefined,
         }
       } else if (isLansia) {
         const td = parseTd(values.td)
@@ -144,6 +173,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
           tekanan_darah_diastolik: td?.d,
           suhu_tubuh: parseFloat(values.suhu_tubuh) || undefined,
           kondisi_ibu: values.kondisi_ibu || undefined,
+          tinggi_badan_bayi: parseFloat(values.tinggi_badan_bayi) || undefined,
+          berat_badan_bayi: parseFloat(values.berat_badan_bayi) || undefined,
+          kie: values.kie ?? undefined,
+          fasilitasi_rujukan: values.fasilitasi_rujukan ?? undefined,
+          fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
         }
       }
 
@@ -176,6 +210,15 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
                 <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="85.5" /></Field>
                 <Field label="Lingkar Kepala (cm)"><Input register={register} name="lingkar_kepala" type="number" placeholder="34.5" /></Field>
                 <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="15" /></Field>
+                <Field label="Kondisi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
+                <div className="flex items-center gap-2 mt-6">
+                  <input type="checkbox" id="asi_eksklusif" {...register('asi_eksklusif')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                  <label htmlFor="asi_eksklusif" className="text-sm font-medium text-slate-700">ASI Eksklusif</label>
+                </div>
+                <div className="flex items-center gap-2 mt-6">
+                  <input type="checkbox" id="fasilitasi_bantuan_sosial" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                  <label htmlFor="fasilitasi_bantuan_sosial" className="text-sm font-medium text-slate-700">Bantuan Sosial</label>
+                </div>
               </div>
             )}
 
@@ -183,12 +226,30 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
             {isBumil && (
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Usia Kandungan (mgg)"><Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="24" /></Field>
+                <Field label="Jumlah Anak"><Input register={register} name="jumlah_anak" type="number" placeholder="1" /></Field>
                 <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="65" /></Field>
                 <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="160" /></Field>
                 <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="90" /></Field>
                 <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="25" /></Field>
                 <Field label="HPHT"><Input register={register} name="hpht" type="date" /></Field>
                 <Field label="HTP"><Input register={register} name="htp" type="date" /></Field>
+                <Field label="Riwayat Penyakit"><Input register={register} name="riwayat_penyakit" placeholder="Tidak ada" /></Field>
+                <Field label="Kadar HB"><Input register={register} name="kadar_hemoglobin" type="number" placeholder="12" /></Field>
+                <Field label="Berat Janin (g)"><Input register={register} name="berat_janin" type="number" placeholder="1500" /></Field>
+                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="terpapar_rokok" {...register('terpapar_rokok')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="terpapar_rokok" className="text-sm font-medium text-slate-700">Terpapar Rokok</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="kie" {...register('kie')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="kie" className="text-sm font-medium text-slate-700">KIE</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="suplemen_tambah_darah" {...register('suplemen_tambah_darah')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="suplemen_tambah_darah" className="text-sm font-medium text-slate-700">Suplemen TTD</label>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -214,10 +275,31 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
                     <TdInput setValue={setValue} watch={watch} name="td" />
                   </Field>
                 </div>
-                <div className="col-span-2">
-                  <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="baik..." /></Field>
+                <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="baik..." /></Field>
+                <Field label="Tinggi Bayi (cm)"><Input register={register} name="tinggi_badan_bayi" type="number" placeholder="50" /></Field>
+                <Field label="Berat Bayi (kg)"><Input register={register} name="berat_badan_bayi" type="number" placeholder="3.2" /></Field>
+                
+                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="kie_pasca" {...register('kie')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="kie_pasca" className="text-sm font-medium text-slate-700">KIE</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="fasilitasi_rujukan" {...register('fasilitasi_rujukan')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="fasilitasi_rujukan" className="text-sm font-medium text-slate-700">Fasilitasi Rujukan</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="fasilitasi_bantuan_sosial_pasca" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="fasilitasi_bantuan_sosial_pasca" className="text-sm font-medium text-slate-700">Bantuan Sosial</label>
+                  </div>
                 </div>
               </div>
+            )}
+
+            {!isLansia && (
+              <Field label="Tgl Kunjungan Berikutnya">
+                <Input register={register} name="tanggal_kunjungan_berikut" type="date" />
+              </Field>
             )}
 
             <Field label="Catatan">

@@ -105,7 +105,7 @@ export function PatientHistoryPage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 mt-6 shadow-sm">
           <h3 className="text-lg font-bold mb-3">Kelola Imunisasi</h3>
           <div className="max-w-md">
-            <ImunisasiCell wargaId={id!} disabled={isLocked || isReadOnly} />
+            <ImunisasiCell wargaId={id!} disabled={isReadOnly} />
           </div>
         </div>
       )}
@@ -123,7 +123,7 @@ export function PatientHistoryPage() {
       <HistoryTimeline
         history={history || []}
         kategori={kategori!}
-        isLocked={isLocked || isReadOnly}
+        isLocked={isReadOnly}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

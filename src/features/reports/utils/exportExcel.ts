@@ -43,20 +43,41 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
       }
     }
 
+    const visitDate = item.tanggal_kunjungan ? new Date(item.tanggal_kunjungan).toLocaleDateString('id-ID') : '-'
+    const visitTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
+
+    const visitData = {
+      'Tgl Kunjungan': visitDate,
+      'Jam Kunjungan': visitTime,
+    }
+
     const baseData = {
       No: index + 1,
+      ...visitData,
       Nama: warga.nama || '-',
+      NIK: warga.nik || '-',
+      'No. HP': warga.nomor || '-',
+      'Tempat Lahir': warga.tempat_lahir || '-',
+      'Tanggal Lahir': warga.tanggal_lahir ? new Date(warga.tanggal_lahir).toLocaleDateString('id-ID') : '-',
+      Alamat: warga.alamat || '-',
+      'Jenis Kelamin': warga.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'
     }
 
     switch (kategoriFilter) {
       case 'baduta':
       case 'balita':
+        const namaIbu = item.nama_ibu || '-'
         return {
           ...baseData,
           'Umur (Bulan)': ageText,
+          'Nama Ibu': namaIbu,
+          'Kontrasepsi Ibu': warga.penggunaan_kontrasepsi || '-',
           'Berat Badan (kg)': item.bb || '-',
           'Tinggi Badan (cm)': item.tb || '-',
           'Lingkar Kepala (cm)': item.lingkar_kepala || '-',
+          'Kondisi': item.kondisi || '-',
+          'ASI Eksklusif': item.asi_eksklusif ? 'Ya' : 'Tidak',
+          'Bansos': item.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak',
           'Catatan': item.catatan || '-',
           'Imunisasi': (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-',
         }
@@ -68,13 +89,25 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
           'Tinggi Badan (cm)': item.tb || '-',
           'LILA (cm)': item.lingkar_lengan_atas || '-',
           'Lingkar Perut (cm)': item.lingkar_perut || '-',
+          'Anak Ke-': item.jumlah_anak || '-',
+          'Kadar Hb': item.kadar_hemoglobin || '-',
+          'Berat Janin': item.berat_janin || '-',
+          'Rokok': item.terpapar_rokok ? 'Ya' : 'Tidak',
+          'KIE': item.kie ? 'Ya' : 'Tidak',
+          'TTD': item.suplemen_tambah_darah ? 'Ya' : 'Tidak',
         }
       case 'pasca_persalinan':
         return {
           ...baseData,
+          'Tempat Persalinan': warga.tempat_persalinan || '-',
           'Tanggal Persalinan': item.tanggal_persalinan ? new Date(item.tanggal_persalinan).toLocaleDateString('id-ID') : '-',
           'Tekanan Darah': (item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-',
           'Kondisi Ibu': item.kondisi_ibu || '-',
+          'Tinggi Bayi': item.tinggi_badan_bayi || '-',
+          'Berat Bayi': item.berat_badan_bayi || '-',
+          'KIE': item.kie ? 'Ya' : 'Tidak',
+          'Rujukan': item.fasilitasi_rujukan ? 'Ya' : 'Tidak',
+          'Bansos': item.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak',
           'Catatan': item.catatan || '-',
         }
       case 'lansia':
