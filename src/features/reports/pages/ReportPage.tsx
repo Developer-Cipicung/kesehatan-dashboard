@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats'
 import { useGetPendataanGlobalStatus, useGetAdminStatusPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
+import { lazy, Suspense } from 'react'
 import { MonthlySummaryWidget } from '../components/MonthlySummaryWidget'
-import { ExportActions } from '../components/ExportActions'
+
+// Lazy load ExportActions to prevent loading heavy jsPDF & exceljs on page load
+const ExportActions = lazy(() => import('../components/ExportActions').then(m => ({ default: m.ExportActions })))
 import { MonthlyReportTable } from '../components/MonthlyReportTable'
 import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
@@ -126,14 +129,16 @@ export function ReportPage() {
           </p>
         </div>
         
-        <ExportActions 
-          isLoading={isPemeriksaanLoading} 
-          kategoriFilter={kategoriFilter}
-          posyanduIdParam={posyanduIdParam}
-          bulan={currentMonth}
-          tahun={currentYear}
-          setKategoriFilter={setKategoriFilter}
-        />
+        <Suspense fallback={<div className="h-10 w-32 bg-slate-100 animate-pulse rounded-md"></div>}>
+          <ExportActions 
+            isLoading={isPemeriksaanLoading} 
+            kategoriFilter={kategoriFilter}
+            posyanduIdParam={posyanduIdParam}
+            bulan={currentMonth}
+            tahun={currentYear}
+            setKategoriFilter={setKategoriFilter}
+          />
+        </Suspense>
       </div>
 
       <div className="bg-card p-6 rounded-lg border mt-6 overflow-hidden">

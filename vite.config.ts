@@ -14,15 +14,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) return 'vendor';
-            if (id.includes('@radix-ui') || id.includes('lucide-react')) return 'ui';
-            if (id.includes('@tanstack') || id.includes('zustand') || id.includes('axios') || id.includes('zod') || id.includes('react-hook-form')) return 'data';
-            if (id.includes('jspdf') || id.includes('xlsx') || id.includes('html2canvas')) return 'export';
-            return 'deps';
-          }
-        }
+        // Remove manualChunks to let Vite optimize chunks automatically
       }
     }
   }
