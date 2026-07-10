@@ -20,6 +20,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
+
 import { useGetPendataanStatus, useSubmitPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -45,10 +53,19 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const isLocked = pendataanStatus?.status === 'selesai'
   const isReadOnly = posyandu?.id !== selectedPosyanduId
 
+  const [page, setPage] = useState(1)
+  const LIMIT = 10
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val)
+    setPage(1) // Reset ke halaman 1 jika mencari
+  }
+
   const { data, isLoading, error, refetch } = useGetWargaList({
     search: debouncedSearch,
     kategori,
-    limit: 10000,
+    page,
+    limit: LIMIT,
     posyanduId: selectedPosyanduId || undefined,
   })
 
@@ -63,9 +80,9 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
       <PatientToolbar
         title={title}
         searchQuery={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
+        totalPatients={data?.metadata.total || 0}
         onAddPatient={() => setIsAddOpen(true)}
-        totalPatients={filteredWarga.length}
         isReadOnly={isReadOnly}
       />
 
@@ -113,6 +130,35 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {data?.metadata && data.metadata.totalPages > 1 && (
+            <div className="mt-4 pt-4 border-t">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  <PaginationItem>
+                    <span className="text-sm font-medium mx-4">
+                      Halaman {page} dari {data.metadata.totalPages}
+                    </span>
+                  </PaginationItem>
+
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setPage(p => Math.min(data.metadata.totalPages, p + 1))}
+                      className={page === data.metadata.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </>
       )}
 

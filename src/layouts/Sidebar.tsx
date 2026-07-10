@@ -54,7 +54,6 @@ interface SidebarProps {
   className?: string
   onClose?: () => void
 }
-
 export function Sidebar({ className, onClose }: SidebarProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     'Ibu-ibu': true,
@@ -67,13 +66,13 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
   return (
     <div className={cn('flex h-full w-64 flex-col bg-slate-900 border-r border-slate-800 text-slate-300', className)}>
-      <div className="flex items-center gap-3 py-2 px-3">
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
-          <img src='/logo-cipicung.webp' alt="Logo" className="w-10 h-10" />
+      <div className="flex items-center mt-2 gap-3 py-2 px-3">
+        <div className="w-15 h-12 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
+          <img src='/logo-cipicung.webp' alt="Logo" className="w-12 h-12" />
         </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-xl tracking-tight text-white leading-none">Cipicung</span>
-          <span className="text-xs text-primary/70">Dashboard Kesehatan Posyandu Cipicung</span>
+        <div className="flex flex-col gap-2">
+          <span className="font-bold text-lg tracking-tight text-white leading-none">Dashboard Kader Posyandu</span>
+          <span className="text-xs text-primary/70">Desa Cipicung</span>
         </div>
       </div>
       
