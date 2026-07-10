@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Warga } from '../services/wargaService'
 import { useGetWargaList } from '../hooks/useWarga'
 import { PatientToolbar } from './PatientToolbar'
 import { PatientTable } from './PatientTable'
@@ -29,54 +28,6 @@ interface SharedPatientListProps {
   kategori: string
 }
 
-function getAgeInMonths(tanggalLahir: string, referenceDate = new Date()) {
-  const birthDate = new Date(tanggalLahir)
-
-  if (Number.isNaN(birthDate.getTime())) {
-    return 0
-  }
-
-  let months = (referenceDate.getFullYear() - birthDate.getFullYear()) * 12 + (referenceDate.getMonth() - birthDate.getMonth())
-
-  if (referenceDate.getDate() < birthDate.getDate()) {
-    months--
-  }
-
-  return Math.max(0, months)
-}
-
-function matchesKategori(warga: Warga, kategori: string) {
-  const statusKehamilan = (warga.status_kehamilan || 'TIDAK_HAMIL').toUpperCase()
-
-  if (kategori === 'bumil') {
-    return statusKehamilan === 'HAMIL'
-  }
-
-  if (kategori === 'pasca_persalinan') {
-    return statusKehamilan === 'PASCA_PERSALINAN'
-  }
-
-  if (statusKehamilan !== 'TIDAK_HAMIL') {
-    return false
-  }
-
-  const ageInMonths = getAgeInMonths(warga.tanggal_lahir)
-
-  if (kategori === 'baduta') {
-    return ageInMonths < 24
-  }
-
-  if (kategori === 'balita') {
-    return ageInMonths >= 24 && ageInMonths < 60
-  }
-
-  if (kategori === 'lansia') {
-    return ageInMonths >= 720
-  }
-
-  return warga.kategori === kategori
-}
-
 export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
@@ -96,15 +47,12 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
 
   const { data, isLoading, error, refetch } = useGetWargaList({
     search: debouncedSearch,
+    kategori,
     limit: 10000,
     posyanduId: selectedPosyanduId || undefined,
   })
 
-  const wargaList = data?.data || []
-  const filteredWarga = useMemo(
-    () => wargaList.filter((warga) => matchesKategori(warga, kategori)),
-    [kategori, wargaList],
-  )
+  const filteredWarga = data?.data || []
 
   const handleView = (id: string) => {
     navigate(`/${kategori.replace('_', '-')}/${id}`)

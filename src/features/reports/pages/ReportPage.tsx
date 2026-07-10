@@ -26,8 +26,8 @@ export function ReportPage() {
   // Fetch all posyandus status if filter is 'all'
   const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear)
 
-  // Fetch Warga List for exports (set limit very high to get all)
-  const { data: wargaData, isLoading: isWargaLoading } = useGetWargaList({ limit: 10000, posyanduId: posyanduIdParam })
+  // Fetch Warga List for exports — filter by kategori so backend only returns relevant rows
+  const { data: wargaData, isLoading: isWargaLoading } = useGetWargaList({ kategori: kategoriFilter, limit: 10000, posyanduId: posyanduIdParam })
 
   // Fetch Pemeriksaan List for the selected category, month, and year
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(kategoriFilter, {
