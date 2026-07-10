@@ -49,7 +49,7 @@ export function ImunisasiCell({ wargaId, disabled }: ImunisasiCellProps) {
             </div>
           ))}
           {imunisasiList.length === 0 && (
-            <span className="text-slate-300 text-[10px]">Belum ada</span>
+            <span className="text-slate-400 font-medium text-sm md:text-md">Belum ada</span>
           )}
         </div>
       )}

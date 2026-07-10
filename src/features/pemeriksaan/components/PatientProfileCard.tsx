@@ -68,7 +68,7 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
                     </span>
                   ))
                 ) : (
-                  <span className="text-slate-400 font-medium text-xs">Belum ada data imunisasi</span>
+                  <span className="text-slate-400 font-medium text-xs md:text-md">Belum ada data imunisasi</span>
                 )}
               </div>
             </div>
