@@ -129,8 +129,8 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                 )}
 
                 <td className="px-4 py-3 text-slate-600 max-w-[200px]">
-                  {record.keluhan
-                    ? <span className="text-xs">{record.keluhan}</span>
+                  {record.catatan
+                    ? <span className="text-xs">{record.catatan}</span>
                     : <span className="text-slate-300">-</span>
                   }
                 </td>

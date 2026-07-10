@@ -98,7 +98,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableCell>{item.bb || '-'}</TableCell>
             <TableCell>{item.tb || '-'}</TableCell>
             <TableCell>{item.lingkar_kepala || '-'}</TableCell>
-            <TableCell>{item.keluhan || '-'}</TableCell>
+            <TableCell>{item.catatan || '-'}</TableCell>
             <TableCell>{(warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'}</TableCell>
           </>
         )
@@ -120,7 +120,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableCell>{item.tanggal_persalinan ? new Date(item.tanggal_persalinan).toLocaleDateString('id-ID') : '-'}</TableCell>
             <TableCell>{(item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-'}</TableCell>
             <TableCell>{item.kondisi_ibu || '-'}</TableCell>
-            <TableCell>{item.keluhan || '-'}</TableCell>
+            <TableCell>{item.catatan || '-'}</TableCell>
           </>
         )
       case 'lansia':
@@ -131,7 +131,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableCell>{item.bb || '-'}</TableCell>
             <TableCell>{(item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-'}</TableCell>
             <TableCell>{item.gula_darah_sewaktu || '-'}</TableCell>
-            <TableCell>{item.keluhan || '-'}</TableCell>
+            <TableCell>{item.catatan || '-'}</TableCell>
           </>
         )
       default:

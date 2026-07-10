@@ -83,7 +83,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
       gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
       suhu_tubuh: rec.suhu_tubuh ?? '',
       kondisi_ibu: rec.kondisi_ibu ?? '',
-      keluhan: rec.keluhan ?? '',
+      catatan: rec.catatan ?? '',
     },
   })
 
@@ -103,7 +103,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
     try {
       let payload: any = {
         tanggal_kunjungan: values.tanggal_kunjungan,
-        keluhan: values.keluhan || undefined,
+        catatan: values.catatan || undefined,
       }
 
       if (isBalita) {
@@ -222,7 +222,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
 
             <Field label="Catatan">
               <textarea
-                {...register('keluhan')}
+                {...register('catatan')}
                 rows={2}
                 placeholder="Catatan pemeriksaan..."
                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground resize-none"

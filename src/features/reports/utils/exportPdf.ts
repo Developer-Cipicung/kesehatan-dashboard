@@ -68,7 +68,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.bb || '-',
             item.tb || '-',
             item.lingkar_kepala || '-',
-            item.keluhan || '-',
+            item.catatan || '-',
             (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'
           ])
           break
@@ -90,7 +90,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.tanggal_persalinan ? new Date(item.tanggal_persalinan).toLocaleDateString('id-ID') : '-',
             (item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-',
             item.kondisi_ibu || '-',
-            item.keluhan || '-'
+            item.catatan || '-'
           ])
           break
         case 'lansia':
@@ -101,7 +101,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.bb || '-',
             (item.tekanan_darah_sistolik && item.tekanan_darah_diastolik) ? `${item.tekanan_darah_sistolik}/${item.tekanan_darah_diastolik}` : '-',
             item.gula_darah_sewaktu || '-',
-            item.keluhan || '-'
+            item.catatan || '-'
           ])
           break
         default:
