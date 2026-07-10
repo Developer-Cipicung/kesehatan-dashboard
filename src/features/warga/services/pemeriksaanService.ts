@@ -11,6 +11,14 @@ export interface CreateBumilPayload {
   usia_kehamilan_minggu: number
   hpht: string // YYYY-MM-DD
   htp: string  // YYYY-MM-DD
+  jumlah_anak?: number
+  riwayat_penyakit?: string
+  kadar_hemoglobin?: number
+  berat_janin?: number
+  terpapar_rokok?: boolean
+  kie?: boolean
+  suplemen_tambah_darah?: boolean
+  tanggal_kunjungan_berikut?: string
   catatan?: string
 }
 
@@ -36,6 +44,12 @@ export interface CreatePascaPayload {
   tekanan_darah_diastolik: number
   suhu_tubuh: number
   kondisi_ibu?: string
+  tinggi_badan_bayi?: number
+  berat_badan_bayi?: number
+  kie?: boolean
+  fasilitasi_rujukan?: boolean
+  fasilitasi_bantuan_sosial?: boolean
+  tanggal_kunjungan_berikut?: string
   catatan?: string
 }
 
@@ -49,6 +63,10 @@ export interface CreateBalitaPayload {
   lingkar_lengan_atas: number
   nama_ayah?: string
   nama_ibu?: string
+  kondisi?: string
+  asi_eksklusif?: boolean
+  fasilitasi_bantuan_sosial?: boolean
+  tanggal_kunjungan_berikut?: string
   catatan?: string
 }
 

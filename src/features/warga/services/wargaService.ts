@@ -22,6 +22,10 @@ export interface Warga {
   status_pernikahan: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati'
   kategori: string
   status_kehamilan?: 'HAMIL' | 'PASCA_PERSALINAN' | 'TIDAK_HAMIL'
+  tempat_persalinan?: string
+  penggunaan_kontrasepsi?: string
+  nama_ayah?: string
+  nama_ibu?: string
   posyandu_id?: string
   created_at: string
   updated_at: string
@@ -68,6 +72,10 @@ export interface AddWargaPayload {
   jenis_kelamin: 'L' | 'P'
   kategori: string
   status_kehamilan?: 'HAMIL' | 'PASCA_PERSALINAN' | 'TIDAK_HAMIL'
+  tempat_lahir?: string
+  alamat?: string
+  tempat_persalinan?: string
+  penggunaan_kontrasepsi?: string
   nama_ayah?: string
   nama_ibu?: string
   posyandu_id?: string
