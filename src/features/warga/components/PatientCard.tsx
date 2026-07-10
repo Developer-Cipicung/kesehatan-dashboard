@@ -199,6 +199,14 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
   const isPasca = kategori === 'pasca_persalinan'
   const isBalita = kategori === 'balita' || kategori === 'baduta'
 
+  const invalidateAfterPemeriksaanChange = () => {
+    queryClient.invalidateQueries({ queryKey: ['warga'] })
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    queryClient.invalidateQueries({ queryKey: ['pendataan'] })
+    queryClient.invalidateQueries({ queryKey: ['history', kategori] })
+    queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', kategori] })
+  }
+
   // Last checkup summary
   const latestBumil = data.pemeriksaan_bumil?.[0]
   const latestLansia = data.pemeriksaan_lansia?.[0]
@@ -292,7 +300,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
       toast.success(`Data ${data.nama} tersimpan`)
       setForm(emptyForm())
       setOpen(false)
-      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      invalidateAfterPemeriksaanChange()
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Gagal menyimpan data')
     } finally {
@@ -358,20 +366,20 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
 
 
-            <FieldRow label={<>Berat Badan (kg) <span className="text-red-500">*</span></>}>
-              <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="50.5" />
+            <FieldRow label={<>{isBalita ? 'Berat Badan Anak' : isBumil || isPasca ? 'Berat Badan Ibu' : 'Berat Badan Lansia'} (kg) <span className="text-red-500">*</span></>}>
+              <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder={isBalita ? '8.5' : isBumil ? '55.5' : isPasca ? '62' : '58'} />
             </FieldRow>
 
             {isBalita && (
               <>
-                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="85.5" />
+                <FieldRow label={<>Tinggi/Panjang Badan Anak (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="72" />
                 </FieldRow>
                 <FieldRow label={<>Lingkar Kepala (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.lingkar_kepala} onChange={(v) => set('lingkar_kepala', v)} placeholder="34.5" />
+                  <MobileInput type="number" value={form.lingkar_kepala} onChange={(v) => set('lingkar_kepala', v)} placeholder="44" />
                 </FieldRow>
-                <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="15" />
+                <FieldRow label={<>Lingkar Lengan Atas (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="13.5" />
                 </FieldRow>
                 <FieldRow label="Kondisi">
                   <MobileInput value={form.kondisi} onChange={(v) => set('kondisi', v)} placeholder="Sehat" />
@@ -393,14 +401,14 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
             {isBumil && (
               <>
-                <FieldRow label={<>Usia Kandungan (mgg) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="12" />
+                <FieldRow label={<>Usia Kehamilan (mgg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="28" />
                 </FieldRow>
                 <FieldRow label="Jumlah Anak">
                   <MobileInput type="number" value={form.jumlah_anak} onChange={(v) => set('jumlah_anak', v)} placeholder="1" />
                 </FieldRow>
-                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
+                <FieldRow label={<>Tinggi Badan Ibu (cm) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="155" />
                 </FieldRow>
                 <FieldRow label={<>Lingkar Perut (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.lingkar_perut} onChange={(v) => set('lingkar_perut', v)} placeholder="85" />
@@ -440,14 +448,14 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
             {isLansia && (
               <>
-                <FieldRow label={<>Tinggi Badan (cm) <span className="text-red-500">*</span></>}>
+                <FieldRow label={<>Tinggi Badan Lansia (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
                 </FieldRow>
                 <FieldRow label={<>Tekanan Darah (mmHg) <span className="text-red-500">*</span></>}>
                   <MobileInputTd value={form.td} onChange={(v) => set('td', v)} />
                 </FieldRow>
-                <FieldRow label={<>GDS (mg/dL) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="110" />
+                <FieldRow label={<>Gula Darah Sewaktu (mg/dL) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="120" />
                 </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
@@ -464,7 +472,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                   <MobileInput type="number" value={form.suhu_tubuh} onChange={(v) => set('suhu_tubuh', v)} placeholder="36.5" />
                 </FieldRow>
                 <FieldRow label={<>Kondisi Ibu <span className="text-red-500">*</span></>}>
-                  <MobileInput value={form.kondisi_ibu} onChange={(v) => set('kondisi_ibu', v)} placeholder="baik..." />
+                  <MobileInput value={form.kondisi_ibu} onChange={(v) => set('kondisi_ibu', v)} placeholder="Baik, tidak ada keluhan" />
                 </FieldRow>
                 <FieldRow label="Tinggi Bayi (cm)">
                   <MobileInput type="number" value={form.tinggi_badan_bayi} onChange={(v) => set('tinggi_badan_bayi', v)} placeholder="50" />
@@ -575,7 +583,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                     suhu_tubuh: 36.5,
                   })
                   toast.success('Berhasil dipindahkan ke Pasca Persalinan')
-                  queryClient.invalidateQueries({ queryKey: ['warga'] })
+                  invalidateAfterPemeriksaanChange()
                 } catch (e: any) {
                   toast.error('Gagal menyimpan data persalinan')
                 }

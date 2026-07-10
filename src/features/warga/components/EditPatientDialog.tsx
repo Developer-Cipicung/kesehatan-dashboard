@@ -24,6 +24,7 @@ const formSchema = z.object({
   nama: z.string().min(1, 'Nama wajib diisi'),
   tanggal_lahir: z.string().min(1, 'Tanggal lahir wajib diisi'),
   jenis_kelamin: z.enum(['L', 'P']),
+  status_kehamilan: z.enum(['TIDAK_HAMIL', 'HAMIL', 'PASCA_PERSALINAN']).optional(),
   nama_ayah: z.string().optional(),
   nama_ibu: z.string().optional(),
   tempat_lahir: z.string().optional(),
@@ -51,6 +52,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
       nama: warga.nama || '',
       tanggal_lahir: warga.tanggal_lahir ? new Date(warga.tanggal_lahir).toISOString().split('T')[0] : '',
       jenis_kelamin: warga.jenis_kelamin || 'L',
+      status_kehamilan: warga.status_kehamilan || 'TIDAK_HAMIL',
       nama_ayah: warga.nama_ayah || '',
       nama_ibu: warga.nama_ibu || '',
       tempat_lahir: warga.tempat_lahir || '',
@@ -68,6 +70,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
         nama: warga.nama || '',
         tanggal_lahir: warga.tanggal_lahir ? new Date(warga.tanggal_lahir).toISOString().split('T')[0] : '',
         jenis_kelamin: warga.jenis_kelamin || 'L',
+        status_kehamilan: warga.status_kehamilan || 'TIDAK_HAMIL',
         nama_ayah: warga.nama_ayah || '',
         nama_ibu: warga.nama_ibu || '',
         tempat_lahir: warga.tempat_lahir || '',
@@ -150,6 +153,30 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
                         <SelectContent>
                           <SelectItem value="L">Laki-laki</SelectItem>
                           <SelectItem value="P">Perempuan</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {isIbuIbu && (
+                <RHFFormField
+                  control={methods.control}
+                  name="status_kehamilan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status Kehamilan</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih status kehamilan" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="HAMIL">Hamil</SelectItem>
+                          <SelectItem value="PASCA_PERSALINAN">Pasca Persalinan</SelectItem>
+                          <SelectItem value="TIDAK_HAMIL">Tidak Hamil</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

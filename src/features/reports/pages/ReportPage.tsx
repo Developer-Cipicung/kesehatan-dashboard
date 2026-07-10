@@ -10,6 +10,7 @@ import { MonthlyReportTable } from '../components/MonthlyReportTable'
 import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
+import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
 
 export function ReportPage() {
   const currentMonth = new Date().getMonth() + 1
@@ -43,15 +44,13 @@ export function ReportPage() {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
         const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
-        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-        return ageMonths < 24
+        return isBadutaByBirthDate(item.warga.tanggal_lahir, tglKunjungan)
       })
     } else if (kategoriFilter === 'balita') {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
         const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
-        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-        return ageMonths >= 24 && ageMonths < 60
+        return isBalitaByBirthDate(item.warga.tanggal_lahir, tglKunjungan)
       })
     }
     return list

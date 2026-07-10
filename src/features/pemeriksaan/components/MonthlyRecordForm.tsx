@@ -226,10 +226,10 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Balita / Baduta */}
             {isBalita && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="50.5" /></Field>
-                <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="85.5" /></Field>
-                <Field label="Lingkar Kepala (cm)"><Input register={register} name="lingkar_kepala" type="number" placeholder="34.5" /></Field>
-                <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="15" /></Field>
+                <Field label="Berat Badan Anak (kg)"><Input register={register} name="bb" type="number" placeholder="8.5" /></Field>
+                <Field label="Tinggi/Panjang Badan Anak (cm)"><Input register={register} name="tb" type="number" placeholder="72" /></Field>
+                <Field label="Lingkar Kepala (cm)"><Input register={register} name="lingkar_kepala" type="number" placeholder="44" /></Field>
+                <Field label="Lingkar Lengan Atas (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="13.5" /></Field>
                 <Field label="Kondisi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
                 <div className="flex items-center gap-2 mt-6">
                   <input type="checkbox" id="asi_eksklusif" {...register('asi_eksklusif')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
@@ -245,12 +245,12 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Ibu Hamil */}
             {isBumil && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Usia Kandungan (mgg)"><Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="24" /></Field>
+                <Field label="Usia Kehamilan (mgg)"><Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="28" /></Field>
                 <Field label="Jumlah Anak"><Input register={register} name="jumlah_anak" type="number" placeholder="1" /></Field>
-                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="65" /></Field>
-                <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="160" /></Field>
-                <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="90" /></Field>
-                <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="25" /></Field>
+                <Field label="Berat Badan Ibu (kg)"><Input register={register} name="bb" type="number" placeholder="55.5" /></Field>
+                <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
+                <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="85" /></Field>
+                <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="24" /></Field>
                 <Field label="HPHT"><Input register={register} name="hpht" type="date" /></Field>
                 <Field label="HTP"><Input register={register} name="htp" type="date" /></Field>
                 <Field label="Riwayat Penyakit"><Input register={register} name="riwayat_penyakit" placeholder="Tidak ada" /></Field>
@@ -276,12 +276,12 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Lansia */}
             {isLansia && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="60" /></Field>
-                <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="160" /></Field>
+                <Field label="Berat Badan Lansia (kg)"><Input register={register} name="bb" type="number" placeholder="58" /></Field>
+                <Field label="Tinggi Badan Lansia (cm)"><Input register={register} name="tb" type="number" placeholder="160" /></Field>
                 <Field label="Tekanan Darah (mmHg)">
                   <TdInput setValue={setValue} watch={watch} name="td" />
                 </Field>
-                <Field label="GDS (mg/dL)"><Input register={register} name="gula_darah_sewaktu" type="number" placeholder="110" /></Field>
+                <Field label="Gula Darah Sewaktu (mg/dL)"><Input register={register} name="gula_darah_sewaktu" type="number" placeholder="120" /></Field>
               </div>
             )}
 
@@ -289,14 +289,14 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {isPasca && (
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Tanggal Persalinan"><Input register={register} name="tanggal_persalinan" type="date" /></Field>
-                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="62" /></Field>
+                <Field label="Berat Badan Ibu (kg)"><Input register={register} name="bb" type="number" placeholder="62" /></Field>
                 <Field label="Suhu Tubuh (°C)"><Input register={register} name="suhu_tubuh" type="number" placeholder="36.5" /></Field>
                 <div className="col-span-2">
                   <Field label="Tekanan Darah (mmHg)">
                     <TdInput setValue={setValue} watch={watch} name="td" />
                   </Field>
                 </div>
-                <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="baik..." /></Field>
+                <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 <Field label="Tinggi Bayi (cm)"><Input register={register} name="tinggi_badan_bayi" type="number" placeholder="50" /></Field>
                 <Field label="Berat Bayi (kg)"><Input register={register} name="berat_badan_bayi" type="number" placeholder="3.2" /></Field>
                 

@@ -222,6 +222,14 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
     setRows((prev) => { const n = { ...prev }; delete n[id]; return n })
   }
 
+  const invalidateAfterPemeriksaanChange = () => {
+    queryClient.invalidateQueries({ queryKey: ['warga'] })
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    queryClient.invalidateQueries({ queryKey: ['pendataan'] })
+    queryClient.invalidateQueries({ queryKey: ['history', kategori] })
+    queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', kategori] })
+  }
+
   const handleSave = async (warga: Warga) => {
     const row = getRow(warga.id)
     setSaving((p) => ({ ...p, [warga.id]: true }))
@@ -301,7 +309,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
       toast.success(`Data ${warga.nama} tersimpan`)
       reset(warga.id)
-      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      invalidateAfterPemeriksaanChange()
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Gagal menyimpan data')
     } finally {
@@ -340,13 +348,15 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             {isBumil && (
               <th className="px-3 py-3 font-semibold text-primary text-xs">Usia Kandungan (mgg) <span className="text-red-500">*</span></th>
             )}
-            <th className="px-3 py-3 font-semibold text-primary text-xs">Berat Badan (kg) <span className="text-red-500">*</span></th>
+            <th className="px-3 py-3 font-semibold text-primary text-xs">
+              {isBalita ? 'Berat Badan Anak' : isBumil || isPasca ? 'Berat Badan Ibu' : 'Berat Badan Lansia'} (kg) <span className="text-red-500">*</span>
+            </th>
 
             {isBalita && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi/Panjang Badan Anak (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Kepala (cm) <span className="text-red-500">*</span></th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Lengan Atas (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">ASI<br/>Eksklusif</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bantuan<br/>Sosial</th>
@@ -358,7 +368,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
             {isBumil && (
               <>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Jumlah<br/>Anak</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan Ibu (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Lingkar Perut (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">LILA (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">HPHT <span className="text-red-500">*</span></th>
@@ -375,9 +385,9 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
             {isLansia && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan (cm) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan Lansia (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg) <span className="text-red-500">*</span></th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">GDS (mg/dL) <span className="text-red-500">*</span></th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Gula Darah Sewaktu (mg/dL) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
             )}
@@ -463,7 +473,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       type="number"
                       value={row.usia}
                       onChange={(v) => set(warga.id, 'usia', v)}
-                      placeholder="12"
+                      placeholder="28"
                       width="w-[80px]"
                       disabled={isReadOnly}
                     />
@@ -472,19 +482,19 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
 
                 {/* BB */}
                 <td className="px-3 py-3">
-                  <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '50.5'} width="w-[70px]" disabled={isReadOnly} />
+                  <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || (isBalita ? '8.5' : isBumil ? '55.5' : isPasca ? '62' : '58')} width="w-[70px]" disabled={isReadOnly} />
                 </td>
 
                 {isBalita && (
                   <>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '85.5'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '72'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lingkar_kepala} onChange={(v) => set(warga.id, 'lingkar_kepala', v)} placeholder="34.5" width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lingkar_kepala} onChange={(v) => set(warga.id, 'lingkar_kepala', v)} placeholder="44" width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '15'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '13.5'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder="Sehat" width="w-[80px]" disabled={isReadOnly} />
@@ -510,7 +520,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.jumlah_anak} onChange={(v) => set(warga.id, 'jumlah_anak', v)} placeholder="1" width="w-[60px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '155'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || '85'} width="w-[70px]" disabled={isReadOnly} />
@@ -557,7 +567,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '110'} width="w-[70px]" disabled={isReadOnly} />
+                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '120'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={isReadOnly} />
@@ -574,7 +584,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                       <Cell type="number" value={row.suhu_tubuh} onChange={(v) => set(warga.id, 'suhu_tubuh', v)} placeholder={lastTfuTb || '36.5'} width="w-[70px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="baik..." width="w-[110px]" disabled={isReadOnly} />
+                      <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="Baik, tidak ada keluhan" width="w-[150px]" disabled={isReadOnly} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder="50" width="w-[60px]" disabled={isReadOnly} />
@@ -713,7 +723,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                     suhu_tubuh: 36.5,
                   })
                   toast.success('Berhasil dipindahkan ke Pasca Persalinan')
-                  queryClient.invalidateQueries({ queryKey: ['warga'] })
+                  invalidateAfterPemeriksaanChange()
                 } catch (e: any) {
                   toast.error('Gagal menyimpan data persalinan')
                 }

@@ -6,6 +6,7 @@ import { exportWargaToExcel } from '../utils/exportExcel'
 import { wargaService } from '@/features/warga/services/wargaService'
 import { pemeriksaanService } from '@/features/pemeriksaan/services/pemeriksaanService'
 import { toast } from 'sonner'
+import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
 
 interface ExportActionsProps {
   isLoading: boolean
@@ -57,9 +58,8 @@ export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bula
       filteredPemeriksaan = allPemeriksaan.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
         const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
-        const ageMonths = (new Date(tglKunjungan).getTime() - new Date(item.warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-        if (kategoriFilter === 'baduta') return ageMonths < 24;
-        return ageMonths >= 24 && ageMonths < 60;
+        if (kategoriFilter === 'baduta') return isBadutaByBirthDate(item.warga.tanggal_lahir, tglKunjungan);
+        return isBalitaByBirthDate(item.warga.tanggal_lahir, tglKunjungan);
       })
     }
     

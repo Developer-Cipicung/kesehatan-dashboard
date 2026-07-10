@@ -6,6 +6,7 @@ import { EditPatientDialog } from '@/features/warga/components/EditPatientDialog
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit2 } from 'lucide-react'
+import { calculateAgeInMonths, isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
 
 interface PatientProfileCardProps {
   warga: Warga
@@ -18,13 +19,16 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
   const isIbu = kategori === 'bumil' || isPasca
   const { data: imunisasiList = [] } = useGetImunisasiByWarga(isBalita ? warga.id : '')
   
-  // To get list anak, we fetch all warga in the posyandu and filter by nama_ibu
-  const { data: wargaListRes } = useGetWargaList({ posyanduId: warga.posyandu_id, limit: 1000 })
-  const allWarga = wargaListRes?.data || []
-  const listAnak = allWarga.filter(a => 
-    (a.kategori === 'balita' || a.kategori === 'baduta') && 
-    a.pemeriksaan_balita_baduta?.[0]?.nama_ibu === warga.nama
+  // Fetch anak terkait hanya saat profil ibu/pasca dibuka.
+  const { data: wargaListRes } = useGetWargaList(
+    { posyanduId: warga.posyandu_id, limit: 1000 },
+    { enabled: isIbu && !!warga.posyandu_id },
   )
+  const allWarga = wargaListRes?.data || []
+  const listAnak = allWarga.filter(a => {
+    const isAnak = a.tanggal_lahir && (isBadutaByBirthDate(a.tanggal_lahir) || isBalitaByBirthDate(a.tanggal_lahir))
+    return isAnak && (a.nama_ibu === warga.nama || a.pemeriksaan_balita_baduta?.[0]?.nama_ibu === warga.nama)
+  })
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
@@ -119,7 +123,7 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
                     <div key={anak.id} className="text-sm border border-slate-100 bg-slate-50 rounded px-3 py-2 flex items-center justify-between">
                       <span className="font-medium">{anak.nama}</span>
                       <span className="text-xs text-slate-500">
-                        {anak.tanggal_lahir ? `${Math.floor((new Date().getTime() - new Date(anak.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44))} bln` : ''}
+                        {anak.tanggal_lahir ? `${calculateAgeInMonths(anak.tanggal_lahir)} bln` : ''}
                       </span>
                     </div>
                   ))

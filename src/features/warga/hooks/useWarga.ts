@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { wargaService, GetWargaParams, AddWargaPayload } from '../services/wargaService'
 import { toast } from 'sonner'
 
-export function useGetWargaList(params?: GetWargaParams) {
+export function useGetWargaList(params?: GetWargaParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['warga', 'list', params],
     queryFn: () => wargaService.getWargaList(params),
+    enabled: options?.enabled ?? true,
     staleTime: 2 * 60 * 1000,
   })
 }

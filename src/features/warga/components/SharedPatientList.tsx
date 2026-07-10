@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useGetWargaList } from '../hooks/useWarga'
 import { PatientToolbar } from './PatientToolbar'
@@ -59,33 +59,17 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
     setPage(1) // Reset ke halaman 1 jika mencari
   }
 
-  // Fetch semua data dari backend sekali saja (limit sangat besar)
   const { data, isLoading, error, refetch } = useGetWargaList({
-    search: '', // Tidak pakai server search
+    search: search.trim() || undefined,
     kategori,
-    page: 1,
-    limit: 5000, // Asumsi maksimal 5000 pasien per posyandu
+    page,
+    limit: LIMIT,
     posyanduId: selectedPosyanduId || undefined,
   })
 
-  const allWarga = data?.data || []
-
-  // Pencarian fuzzy secara lokal (instan tanpa loading)
-  const { filteredWarga, paginatedWarga, totalPages } = useMemo(() => {
-    const searchLower = search.toLowerCase()
-    const matched = allWarga.filter(w => {
-      if (!searchLower) return true
-      return (
-        w.nama.toLowerCase().includes(searchLower) ||
-        w.nik.includes(searchLower)
-      )
-    })
-
-    const totalPages = Math.ceil(matched.length / LIMIT) || 1
-    const paginated = matched.slice((page - 1) * LIMIT, page * LIMIT)
-
-    return { filteredWarga: matched, paginatedWarga: paginated, totalPages }
-  }, [allWarga, search, page, LIMIT])
+  const paginatedWarga = data?.data || []
+  const totalPatients = data?.metadata.total || 0
+  const totalPages = data?.metadata.totalPages || 1
 
   const handleView = (id: string) => {
     navigate(`/${kategori.replace('_', '-')}/${id}`)
@@ -97,7 +81,7 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         title={title}
         searchQuery={search}
         onSearchChange={handleSearchChange}
-        totalPatients={filteredWarga.length} // Update dengan jumlah hasil pencarian lokal
+        totalPatients={totalPatients}
         onAddPatient={() => setIsAddOpen(true)}
         isReadOnly={isReadOnly}
       />
@@ -216,11 +200,13 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
             </Button>
             <Button 
               onClick={() => {
-                if (!tanggalPelaksanaan) return;
-                submitPendataan({ id: pendataanStatus?.id!, tanggal_pelaksanaan: new Date(tanggalPelaksanaan).toISOString() })
-                setIsSubmitOpen(false)
+                if (!tanggalPelaksanaan || !pendataanStatus?.id) return
+                submitPendataan(
+                  { id: pendataanStatus.id, tanggal_pelaksanaan: new Date(tanggalPelaksanaan).toISOString() },
+                  { onSuccess: () => setIsSubmitOpen(false) },
+                )
               }}
-              disabled={isSubmitting || !tanggalPelaksanaan}
+              disabled={isSubmitting || !tanggalPelaksanaan || !pendataanStatus?.id}
             >
               Ya, Kunci Pendataan
             </Button>

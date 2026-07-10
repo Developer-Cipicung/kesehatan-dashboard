@@ -16,6 +16,7 @@ import { AddWargaPayload } from '../services/wargaService'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormControl, FormItem, FormLabel, FormMessage, FormField as RHFFormField } from '@/components/ui/form'
 import { pemeriksaanService } from '../../pemeriksaan/services/pemeriksaanService'
+import { useQueryClient } from '@tanstack/react-query'
 
 const formSchema = z.object({
   nik: z.string().min(16, 'NIK harus 16 digit').max(16, 'NIK harus 16 digit'),
@@ -42,6 +43,7 @@ interface AddPatientDialogProps {
 
 export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSuccess }: AddPatientDialogProps) {
   const { mutateAsync: addWarga, isPending } = useAddWarga()
+  const queryClient = useQueryClient()
 
   const methods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,6 +91,9 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
             tekanan_darah_diastolik: 80,
             suhu_tubuh: 36.5,
           } as any)
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+          queryClient.invalidateQueries({ queryKey: ['pendataan'] })
+          queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', 'pasca_persalinan'] })
         } catch (err) {
           console.error('Gagal membuat data pasca persalinan awal', err)
         }
