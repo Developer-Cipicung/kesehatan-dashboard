@@ -7,6 +7,7 @@ export function useGetHistory(kategori: string, wargaId: string, posyanduId?: st
     queryKey: ['history', kategori, wargaId, posyanduId],
     queryFn: () => pemeriksaanService.getHistory(kategori, wargaId, posyanduId),
     enabled: !!kategori && !!wargaId,
+    staleTime: 60 * 1000,
   })
 }
 
@@ -15,6 +16,7 @@ export function useGetPemeriksaanList(kategori: string, params: { bulan?: number
     queryKey: ['pemeriksaan_list', kategori, params],
     queryFn: () => pemeriksaanService.getAll(kategori, params),
     enabled: !!kategori,
+    staleTime: 60 * 1000,
   })
 }
 
@@ -23,6 +25,7 @@ export function useGetPemeriksaanById(kategori: string, id: string, posyanduId?:
     queryKey: ['pemeriksaan', kategori, id, posyanduId],
     queryFn: () => pemeriksaanService.getById(kategori, id, posyanduId),
     enabled: !!kategori && !!id,
+    staleTime: 60 * 1000,
   })
 }
 
@@ -34,6 +37,10 @@ export function useCreatePemeriksaan() {
       pemeriksaanService.create(kategori, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['pendataan'] })
       toast.success('Pemeriksaan berhasil ditambahkan.')
     },
     onError: (error: any) => {
@@ -51,6 +58,10 @@ export function useUpdatePemeriksaan() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
       queryClient.invalidateQueries({ queryKey: ['pemeriksaan', variables.kategori, variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['pendataan'] })
       toast.success('Pemeriksaan berhasil diubah.')
     },
     onError: (error: any) => {
@@ -67,6 +78,10 @@ export function useDeletePemeriksaan() {
       pemeriksaanService.delete(kategori, id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['history', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', variables.kategori] })
+      queryClient.invalidateQueries({ queryKey: ['warga'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['pendataan'] })
       toast.success('Pemeriksaan berhasil dihapus.')
     },
     onError: (error: any) => {

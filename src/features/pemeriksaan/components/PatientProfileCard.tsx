@@ -14,7 +14,8 @@ interface PatientProfileCardProps {
 
 export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps) {
   const isBalita = kategori === 'balita' || kategori === 'baduta'
-  const isIbu = kategori === 'bumil' || kategori === 'pasca_persalinan'
+  const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
+  const isIbu = kategori === 'bumil' || isPasca
   const { data: imunisasiList = [] } = useGetImunisasiByWarga(isBalita ? warga.id : '')
   
   // To get list anak, we fetch all warga in the posyandu and filter by nama_ibu
@@ -72,7 +73,7 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             <span className="font-medium">{warga.alamat || '-'}</span>
           </div>
 
-          {(kategori === 'pasca_persalinan' || warga.pemeriksaan_pasca_persalinan?.[0]?.tanggal_persalinan) && (
+          {(isPasca || warga.pemeriksaan_pasca_persalinan?.[0]?.tanggal_persalinan) && (
             <div>
               <span className="text-muted-foreground block text-xs">Tanggal Persalinan</span>
               <span className="font-medium">
@@ -85,7 +86,7 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             </div>
           )}
           
-          {(kategori === 'pasca_persalinan') && (
+          {isPasca && (
             <div>
               <span className="text-muted-foreground block text-xs">Tempat Persalinan</span>
               <span className="font-medium">{warga.tempat_persalinan || '-'}</span>

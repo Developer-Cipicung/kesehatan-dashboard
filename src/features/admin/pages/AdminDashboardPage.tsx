@@ -9,6 +9,7 @@ export function AdminDashboardPage() {
       const response = await api.get('/posyandu')
       return response.data.data
     },
+    staleTime: 5 * 60 * 1000,
   })
 
   const { data: users, isLoading: isUserLoading } = useQuery({
@@ -17,6 +18,7 @@ export function AdminDashboardPage() {
       const response = await api.get('/users')
       return response.data.data
     },
+    staleTime: 5 * 60 * 1000,
   })
 
   if (isPosyanduLoading || isUserLoading) {

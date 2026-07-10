@@ -3,7 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Pemeriksaan } from '../services/pemeriksaanService'
-import { useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
+import { useCreatePemeriksaan, useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
 
 interface MonthlyRecordFormProps {
   open: boolean
@@ -11,6 +11,7 @@ interface MonthlyRecordFormProps {
   kategori: string
   wargaId: string
   initialData?: Pemeriksaan | null
+  defaultTanggalPersalinan?: string
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -60,30 +61,40 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
   )
 }
 
-export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }: MonthlyRecordFormProps) {
-  const { mutateAsync: updateRecord, isPending } = useUpdatePemeriksaan()
+const toDateInputValue = (value?: string | Date | null) => {
+  if (!value) return ''
+  return new Date(value).toISOString().split('T')[0]
+}
+
+export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData, defaultTanggalPersalinan }: MonthlyRecordFormProps) {
+  const { mutateAsync: createRecord, isPending: isCreating } = useCreatePemeriksaan()
+  const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdatePemeriksaan()
 
   const isBumil = kategori === 'bumil'
   const isLansia = kategori === 'lansia'
   const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
   const isBalita = kategori === 'balita' || kategori === 'baduta'
+  const isEdit = !!initialData
+  const mutationPending = isCreating || isUpdating
 
   const methods = useForm<any>()
   const { register, handleSubmit, watch, setValue, reset } = methods
+  const isPending = mutationPending || methods.formState.isSubmitting
 
   useEffect(() => {
     if (open) {
       const rec: any = initialData || {}
       reset({
-        tanggal_kunjungan: rec.tanggal_kunjungan ? new Date(rec.tanggal_kunjungan).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        tanggal_kunjungan: rec.tanggal_kunjungan ? toDateInputValue(rec.tanggal_kunjungan) : new Date().toISOString().split('T')[0],
+        tanggal_persalinan: toDateInputValue(rec.tanggal_persalinan || defaultTanggalPersalinan) || new Date().toISOString().split('T')[0],
         bb: rec.bb ?? '',
         tb: rec.tb ?? '',
         lingkar_kepala: rec.lingkar_kepala ?? '',
         lingkar_lengan_atas: rec.lingkar_lengan_atas ?? '',
         lingkar_perut: rec.lingkar_perut ?? '',
         usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
-        hpht: rec.hpht ? new Date(rec.hpht).toISOString().split('T')[0] : '',
-        htp: rec.htp ? new Date(rec.htp).toISOString().split('T')[0] : '',
+        hpht: rec.hpht ? toDateInputValue(rec.hpht) : '',
+        htp: rec.htp ? toDateInputValue(rec.htp) : '',
         td: (rec.tekanan_darah_sistolik && rec.tekanan_darah_diastolik) ? `${rec.tekanan_darah_sistolik}/${rec.tekanan_darah_diastolik}` : '',
         gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
         suhu_tubuh: rec.suhu_tubuh ?? '',
@@ -102,10 +113,10 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
         tinggi_badan_bayi: rec.tinggi_badan_bayi ?? '',
         berat_badan_bayi: rec.berat_badan_bayi ?? '',
         fasilitasi_rujukan: rec.fasilitasi_rujukan ?? false,
-        tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? new Date(rec.tanggal_kunjungan_berikut).toISOString().split('T')[0] : '',
+        tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : '',
       })
     }
-  }, [open, initialData, reset])
+  }, [open, initialData, defaultTanggalPersalinan, reset])
 
   const parseTd = (td: string) => {
     const p = td.split('/')
@@ -117,7 +128,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
   }
 
   const onSubmit = async (values: any) => {
-    if (!initialData) return
     try {
       let payload: any = {
         tanggal_kunjungan: values.tanggal_kunjungan,
@@ -168,6 +178,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
         const td = parseTd(values.td)
         payload = {
           ...payload,
+          tanggal_persalinan: values.tanggal_persalinan || undefined,
           bb: parseFloat(values.bb) || undefined,
           tekanan_darah_sistolik: td?.s,
           tekanan_darah_diastolik: td?.d,
@@ -181,8 +192,13 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
         }
       }
 
-      await updateRecord({ kategori, id: initialData.id, payload })
-      methods.reset()
+      if (isEdit && initialData) {
+        await updateRecord({ kategori, id: initialData.id, payload })
+      } else {
+        await createRecord({ kategori, payload: { ...payload, warga_id: wargaId } })
+      }
+
+      reset()
       onOpenChange(false)
     } catch (err) {
       console.error(err)
@@ -190,11 +206,15 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(nextOpen) => {
+      if (!isPending) onOpenChange(nextOpen)
+    }}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Pemeriksaan</DialogTitle>
-          <DialogDescription>Perbarui data hasil pemeriksaan.</DialogDescription>
+          <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
+          <DialogDescription>
+            {isEdit ? 'Perbarui data hasil pemeriksaan.' : 'Tambahkan data hasil pemeriksaan baru.'}
+          </DialogDescription>
         </DialogHeader>
 
         <FormProvider {...methods}>
@@ -268,6 +288,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
             {/* Pasca Persalinan */}
             {isPasca && (
               <div className="grid grid-cols-2 gap-3">
+                <Field label="Tanggal Persalinan"><Input register={register} name="tanggal_persalinan" type="date" /></Field>
                 <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="62" /></Field>
                 <Field label="Suhu Tubuh (°C)"><Input register={register} name="suhu_tubuh" type="number" placeholder="36.5" /></Field>
                 <div className="col-span-2">
@@ -312,7 +333,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, initialData }:
             </Field>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Batal</Button>
+              <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>Batal</Button>
               <Button type="submit" disabled={isPending}>{isPending ? 'Menyimpan...' : 'Simpan'}</Button>
             </div>
           </form>

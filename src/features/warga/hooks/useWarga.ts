@@ -6,6 +6,7 @@ export function useGetWargaList(params?: GetWargaParams) {
   return useQuery({
     queryKey: ['warga', 'list', params],
     queryFn: () => wargaService.getWargaList(params),
+    staleTime: 2 * 60 * 1000,
   })
 }
 
@@ -14,6 +15,7 @@ export function useGetWargaById(id: string, posyanduId?: string) {
     queryKey: ['warga', 'detail', id, posyanduId],
     queryFn: () => wargaService.getWargaById(id, posyanduId),
     enabled: !!id,
+    staleTime: 2 * 60 * 1000,
   })
 }
 

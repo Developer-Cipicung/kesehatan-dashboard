@@ -26,7 +26,7 @@ export function ReportPage() {
   const { isLoading: isStatusLoading } = useGetPendataanGlobalStatus(currentMonth, currentYear)
 
   // Fetch all posyandus status if filter is 'all'
-  const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear)
+  const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear, posyanduFilter === 'all')
 
   // Fetch Pemeriksaan List for the selected category, month, and year (limit 50 for preview)
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(kategoriFilter, {

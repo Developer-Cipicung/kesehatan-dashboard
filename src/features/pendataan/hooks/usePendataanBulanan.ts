@@ -9,6 +9,7 @@ export function useGetPendataanStatus(bulan: number, tahun: number, posyanduId?:
     queryKey: ['pendataan', 'status', bulan, tahun, posyanduId],
     queryFn: () => pendataanBulananService.getStatus(bulan, tahun, posyanduId),
     enabled: !!bulan && !!tahun,
+    staleTime: 60 * 1000,
   })
 }
 
@@ -17,14 +18,16 @@ export function useGetPendataanGlobalStatus(bulan: number, tahun: number, posyan
     queryKey: ['pendataan', 'global', bulan, tahun, posyanduId],
     queryFn: () => pendataanBulananService.getGlobalStatus(bulan, tahun, posyanduId),
     enabled: !!bulan && !!tahun,
+    staleTime: 60 * 1000,
   })
 }
 
-export function useGetAdminStatusPendataan(tahun: number) {
+export function useGetAdminStatusPendataan(tahun: number, enabled = true) {
   return useQuery({
     queryKey: ['pendataan', 'admin', 'status', tahun],
     queryFn: () => pendataanBulananService.getAdminStatus(tahun),
-    enabled: !!tahun,
+    enabled: !!tahun && enabled,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -35,6 +38,10 @@ export function useSubmitPendataan() {
     mutationFn: (data: { id: string, tanggal_pelaksanaan: string }) => pendataanBulananService.submit(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pendataan'] })
+      queryClient.invalidateQueries({ queryKey: ['history'] })
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['warga'] })
       toast.success('Pendataan berhasil diselesaikan dan dikunci.')
     },
     onError: (error: any) => {

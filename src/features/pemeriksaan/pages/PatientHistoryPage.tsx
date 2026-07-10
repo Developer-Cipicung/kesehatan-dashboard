@@ -43,6 +43,11 @@ export function PatientHistoryPage() {
     setIsFormOpen(true)
   }
 
+  const handleAdd = () => {
+    setEditingRecord(null)
+    setIsFormOpen(true)
+  }
+
   const handleCloseForm = (open: boolean) => {
     setIsFormOpen(open)
     if (!open) {
@@ -113,7 +118,7 @@ export function PatientHistoryPage() {
       <div className="flex items-center justify-between mt-8 mb-4">
         <h3 className="text-xl font-bold">Riwayat Pemeriksaan</h3>
         {!isLocked && !isReadOnly && (
-          <Button onClick={() => setIsFormOpen(true)}>
+          <Button onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Riwayat
           </Button>
@@ -134,6 +139,7 @@ export function PatientHistoryPage() {
         kategori={kategori!}
         wargaId={id!}
         initialData={editingRecord}
+        defaultTanggalPersalinan={warga.pemeriksaan_pasca_persalinan?.[0]?.tanggal_persalinan}
       />
 
       <ConfirmDialog
