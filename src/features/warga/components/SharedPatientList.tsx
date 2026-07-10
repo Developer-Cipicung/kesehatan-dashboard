@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { useGetWargaList } from '../hooks/useWarga'
 import { PatientToolbar } from './PatientToolbar'
@@ -7,7 +7,6 @@ import { PatientCard } from './PatientCard'
 import { AddPatientDialog } from './AddPatientDialog'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
-import { useDebounce } from '@/hooks/useDebounce'
 import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
@@ -38,7 +37,6 @@ interface SharedPatientListProps {
 
 export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [search, setSearch] = useState('')
-  const debouncedSearch = useDebounce(search, 500)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isSubmitOpen, setIsSubmitOpen] = useState(false)
   const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState(new Date().toISOString().split('T')[0])
@@ -61,15 +59,33 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
     setPage(1) // Reset ke halaman 1 jika mencari
   }
 
+  // Fetch semua data dari backend sekali saja (limit sangat besar)
   const { data, isLoading, error, refetch } = useGetWargaList({
-    search: debouncedSearch,
+    search: '', // Tidak pakai server search
     kategori,
-    page,
-    limit: LIMIT,
+    page: 1,
+    limit: 5000, // Asumsi maksimal 5000 pasien per posyandu
     posyanduId: selectedPosyanduId || undefined,
   })
 
-  const filteredWarga = data?.data || []
+  const allWarga = data?.data || []
+
+  // Pencarian fuzzy secara lokal (instan tanpa loading)
+  const { filteredWarga, paginatedWarga, totalPages } = useMemo(() => {
+    const searchLower = search.toLowerCase()
+    const matched = allWarga.filter(w => {
+      if (!searchLower) return true
+      return (
+        w.nama.toLowerCase().includes(searchLower) ||
+        w.nik.includes(searchLower)
+      )
+    })
+
+    const totalPages = Math.ceil(matched.length / LIMIT) || 1
+    const paginated = matched.slice((page - 1) * LIMIT, page * LIMIT)
+
+    return { filteredWarga: matched, paginatedWarga: paginated, totalPages }
+  }, [allWarga, search, page, LIMIT])
 
   const handleView = (id: string) => {
     navigate(`/${kategori.replace('_', '-')}/${id}`)
@@ -81,12 +97,10 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         title={title}
         searchQuery={search}
         onSearchChange={handleSearchChange}
-        totalPatients={data?.metadata.total || 0}
+        totalPatients={filteredWarga.length} // Update dengan jumlah hasil pencarian lokal
         onAddPatient={() => setIsAddOpen(true)}
         isReadOnly={isReadOnly}
       />
-
-
 
       {isLoading ? (
         <div className="space-y-4">
@@ -105,7 +119,7 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
           {/* Desktop View */}
           <div className="hidden md:block">
             <PatientTable
-              data={filteredWarga}
+              data={paginatedWarga}
               kategori={kategori}
               onView={handleView}
               isReadOnly={isReadOnly}
@@ -114,12 +128,12 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
 
           {/* Mobile View */}
           <div className="block md:hidden">
-            {filteredWarga.length === 0 ? (
+            {paginatedWarga.length === 0 ? (
               <div className="text-center py-10 text-muted-foreground bg-card rounded-lg border">
                 Tidak ada pasien ditemukan.
               </div>
             ) : (
-              filteredWarga.map((warga) => (
+              paginatedWarga.map((warga) => (
                 <PatientCard
                   key={warga.id}
                   data={warga}
@@ -132,7 +146,7 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
           </div>
 
           {/* Pagination */}
-          {data?.metadata && data.metadata.totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="mt-4 pt-4 border-t">
               <Pagination>
                 <PaginationContent>
@@ -145,14 +159,14 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
                   
                   <PaginationItem>
                     <span className="text-sm font-medium mx-4">
-                      Halaman {page} dari {data.metadata.totalPages}
+                      Halaman {page} dari {totalPages}
                     </span>
                   </PaginationItem>
 
                   <PaginationItem>
                     <PaginationNext 
-                      onClick={() => setPage(p => Math.min(data.metadata.totalPages, p + 1))}
-                      className={page === data.metadata.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
                 </PaginationContent>
