@@ -8,16 +8,6 @@ import { AddPatientDialog } from './AddPatientDialog'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { useNavigate } from 'react-router-dom'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 import {
   Pagination,
@@ -27,7 +17,6 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-import { useGetPendataanStatus, useSubmitPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
 import { useAuthStore } from '@/stores/authStore'
 
 interface SharedPatientListProps {
@@ -38,17 +27,9 @@ interface SharedPatientListProps {
 export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [isSubmitOpen, setIsSubmitOpen] = useState(false)
-  const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState(new Date().toISOString().split('T')[0])
-  const navigate = useNavigate()
   const { selectedPosyanduId, posyandu } = useAuthStore()
+  const navigate = useNavigate()
   
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
-
-  const { data: pendataanStatus } = useGetPendataanStatus(currentMonth, currentYear, selectedPosyanduId || undefined)
-  const { mutate: submitPendataan, isPending: isSubmitting } = useSubmitPendataan()
-  const isLocked = pendataanStatus?.status === 'selesai'
   const isReadOnly = posyandu?.id !== selectedPosyanduId
 
   const [page, setPage] = useState(1)
@@ -160,59 +141,6 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         </>
       )}
 
-      {!isLocked && (
-        <div className="fixed bottom-8 right-8 z-50">
-          <Button 
-            className="bg-slate-900 hover:bg-slate-800 text-white shadow-xl rounded-xl px-6 py-6 text-sm font-semibold"
-            disabled={isSubmitting}
-            onClick={() => setIsSubmitOpen(true)}
-          >
-            <div className="bg-primary/50/20 text-primary/70 p-1 rounded mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            Selesai Pendataan Bulan Ini
-          </Button>
-        </div>
-      )}
-
-      <Dialog open={isSubmitOpen} onOpenChange={setIsSubmitOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Kunci Pendataan Bulan Ini</DialogTitle>
-            <DialogDescription>
-              Tentukan tanggal pelaksanaan Posyandu. Semua data pemeriksaan yang baru diinput akan disimpan dengan tanggal ini. Data yang sudah dikunci tidak dapat diubah lagi.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="tanggal_pelaksanaan">Tanggal Pelaksanaan Posyandu</Label>
-              <Input
-                id="tanggal_pelaksanaan"
-                type="date"
-                value={tanggalPelaksanaan}
-                onChange={(e) => setTanggalPelaksanaan(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSubmitOpen(false)}>
-              Batal
-            </Button>
-            <Button 
-              onClick={() => {
-                if (!tanggalPelaksanaan || !pendataanStatus?.id) return
-                submitPendataan(
-                  { id: pendataanStatus.id, tanggal_pelaksanaan: new Date(tanggalPelaksanaan).toISOString() },
-                  { onSuccess: () => setIsSubmitOpen(false) },
-                )
-              }}
-              disabled={isSubmitting || !tanggalPelaksanaan || !pendataanStatus?.id}
-            >
-              Ya, Kunci Pendataan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <AddPatientDialog
         key={kategori}

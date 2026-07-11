@@ -11,6 +11,63 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useUpdateWarga } from '../hooks/useWarga'
 import { ImunisasiCell } from './ImunisasiCell'
 
+const calculateUsiaKandungan = (hphtStr?: string, kunjunganStr?: string): string => {
+  if (!hphtStr) return ''
+  const hpht = new Date(hphtStr)
+  const kunjungan = kunjunganStr ? new Date(kunjunganStr) : new Date()
+  const diffTime = Math.abs(kunjungan.getTime() - hpht.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const weeks = Math.floor(diffDays / 7)
+  if (weeks > 45 || weeks < 0) return ''
+  return weeks.toString()
+}
+
+const calculateHpl = (hphtStr?: string): string => {
+  if (!hphtStr) return ''
+  const hpht = new Date(hphtStr)
+  const hplDate = new Date(hpht)
+  hplDate.setDate(hplDate.getDate() + 280)
+  return hplDate.toISOString().split('T')[0]
+}
+
+const calculateHplRange = (hphtStr?: string): string => {
+  if (!hphtStr) return '-'
+  const hpht = new Date(hphtStr)
+  const start = new Date(hpht)
+  start.setDate(start.getDate() + 259)
+  const end = new Date(hpht)
+  end.setDate(end.getDate() + 294)
+  const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+  return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
+}
+
+const calculateBMI = (bbStr?: string, tbStr?: string) => {
+  if (!bbStr || !tbStr) return null;
+  const bb = parseFloat(bbStr);
+  const tb = parseFloat(tbStr);
+  if (bb > 0 && tb > 0) {
+    const tbMeters = tb / 100;
+    const bmi = bb / (tbMeters * tbMeters);
+    let status = '';
+    let color = '';
+    if (bmi < 18.5) {
+      status = 'Kurus';
+      color = 'text-amber-600 bg-amber-50 border-amber-200';
+    } else if (bmi < 25.0) {
+      status = 'Normal';
+      color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
+    } else if (bmi <= 27.0) {
+      status = 'Gemuk';
+      color = 'text-amber-600 bg-amber-50 border-amber-200';
+    } else {
+      status = 'Obesitas';
+      color = 'text-red-600 bg-red-50 border-red-200';
+    }
+    return { value: bmi.toFixed(1), status, color };
+  }
+  return null;
+}
+
 interface PatientCardProps {
   data: Warga
   kategori: string
@@ -29,6 +86,7 @@ interface FormState {
   hb: string
   tb: string
   lingkar_perut: string
+  tinggi_fundus: string
   hpht: string
   htp: string
   catatan: string
@@ -47,7 +105,8 @@ interface FormState {
   berat_janin: string
   terpapar_rokok: boolean
   kie: boolean
-  suplemen_tambah_darah: boolean
+  suplemen_tambah_darah: string
+  mms: string
   tinggi_badan_bayi: string
   berat_badan_bayi: string
   fasilitasi_rujukan: boolean
@@ -65,6 +124,7 @@ const emptyForm = (): FormState => ({
   hb: '',
   tb: '',
   lingkar_perut: '',
+  tinggi_fundus: '',
   hpht: '',
   htp: '',
   catatan: '',
@@ -83,11 +143,16 @@ const emptyForm = (): FormState => ({
   berat_janin: '',
   terpapar_rokok: false,
   kie: false,
-  suplemen_tambah_darah: false,
+  suplemen_tambah_darah: '',
+  mms: '',
   tinggi_badan_bayi: '',
   berat_badan_bayi: '',
   fasilitasi_rujukan: false,
-  tanggal_kunjungan_berikut: '',
+  tanggal_kunjungan_berikut: (() => {
+    const d = new Date()
+    d.setMonth(d.getMonth() + 1)
+    return d.toISOString().split('T')[0]
+  })(),
 })
 
 function parseTd(td: string) {
@@ -222,6 +287,8 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
     ? new Date(lastDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     : null
 
+  const fallbackHpht = latestBumil?.hpht ? new Date(latestBumil.hpht).toISOString().split('T')[0] : form.tanggal
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -232,17 +299,19 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           bb: parseFloat(form.bb) || 0,
           tb: parseFloat(form.tfuTb) || 0,
           lingkar_perut: parseFloat(form.lingkar_perut) || 0,
+          tinggi_fundus: parseFloat(form.tinggi_fundus) || undefined,
           lingkar_lengan_atas: parseFloat(form.lilaGds) || 0,
-          usia_kehamilan_minggu: parseInt(form.usia) || 0,
-          hpht: form.hpht || form.tanggal,
-          htp: form.htp || form.tanggal,
+          usia_kehamilan_minggu: parseInt(form.usia || calculateUsiaKandungan(form.hpht || fallbackHpht, form.tanggal)) || 0,
+          hpht: form.hpht || fallbackHpht,
+          htp: form.htp || calculateHpl(form.hpht || fallbackHpht),
           jumlah_anak: parseInt(form.jumlah_anak) || undefined,
           riwayat_penyakit: form.riwayat_penyakit || undefined,
           kadar_hemoglobin: parseFloat(form.kadar_hemoglobin) || undefined,
           berat_janin: parseFloat(form.berat_janin) || undefined,
           terpapar_rokok: form.terpapar_rokok,
           kie: form.kie,
-          suplemen_tambah_darah: form.suplemen_tambah_darah,
+          suplemen_tambah_darah: parseInt(form.suplemen_tambah_darah) || undefined,
+          mms: parseInt(form.mms) || undefined,
           tanggal_kunjungan_berikut: form.tanggal_kunjungan_berikut || undefined,
           catatan: form.catatan || undefined,
         })
@@ -364,14 +433,11 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
               </div>
             </FieldRow>
 
-
-
-            <FieldRow label={<>{isBalita ? 'Berat Badan Anak' : isBumil || isPasca ? 'Berat Badan Ibu' : 'Berat Badan Lansia'} (kg) <span className="text-red-500">*</span></>}>
-              <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder={isBalita ? '8.5' : isBumil ? '55.5' : isPasca ? '62' : '58'} />
-            </FieldRow>
-
             {isBalita && (
               <>
+                <FieldRow label={<>Berat Badan Anak (kg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="8.5" />
+                </FieldRow>
                 <FieldRow label={<>Tinggi/Panjang Badan Anak (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="72" />
                 </FieldRow>
@@ -401,35 +467,73 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
             {isBumil && (
               <>
-                <FieldRow label={<>Usia Kehamilan (mgg) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.usia} onChange={(v) => set('usia', v)} placeholder="28" />
-                </FieldRow>
                 <FieldRow label="Jumlah Anak">
-                  <MobileInput type="number" value={form.jumlah_anak} onChange={(v) => set('jumlah_anak', v)} placeholder="1" />
+                  <MobileInput type="number" value={form.jumlah_anak || latestBumil?.jumlah_anak?.toString() || ''} onChange={(v) => set('jumlah_anak', v)} placeholder="1" />
+                </FieldRow>
+                <FieldRow label={<>HPHT <span className="text-red-500">*</span></>}>
+                  <MobileInput type="date" value={form.hpht || fallbackHpht} onChange={(v) => set('hpht', v)} />
+                </FieldRow>
+                <FieldRow label="Rentang HPL">
+                  <div className="flex-1 w-full min-w-0 px-2 py-1 bg-slate-50 border border-slate-100 rounded text-xs text-slate-700 font-medium text-center">
+                    {calculateHplRange(form.hpht || fallbackHpht)}
+                  </div>
+                </FieldRow>
+                <FieldRow label={<>Usia Kehamilan (mgg) <span className="text-red-500">*</span></>}>
+                  <div className="flex-1 w-full flex flex-col gap-1 min-w-0">
+                    <MobileInput type="number" value={form.usia || calculateUsiaKandungan(form.hpht || fallbackHpht, form.tanggal)} onChange={(v) => set('usia', v)} placeholder="28" />
+                    {parseInt(form.usia || calculateUsiaKandungan(form.hpht || fallbackHpht, form.tanggal) || '0') > 42 && (
+                      <span className="text-[10px] text-red-500 font-bold leading-tight">⚠️ Lewat Waktu (Normal 37-42 mgg)</span>
+                    )}
+                  </div>
                 </FieldRow>
                 <FieldRow label={<>Tinggi Badan Ibu (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="155" />
+                  <MobileInput type="number" value={form.tfuTb || latestBumil?.tb?.toString() || ''} onChange={(v) => set('tfuTb', v)} placeholder="155" />
+                </FieldRow>
+                <FieldRow label={<>Berat Badan Ibu (kg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="55.5" />
+                </FieldRow>
+                <FieldRow label="IMT">
+                  <div className="flex-1 w-full min-w-0">
+                    {(() => {
+                      const bmiData = calculateBMI(form.bb, form.tfuTb || latestBumil?.tb?.toString());
+                      return bmiData ? (
+                        <div className={`flex items-center justify-between rounded border px-2 py-1 text-sm font-bold ${bmiData.color}`}>
+                          <span>{bmiData.value}</span>
+                          <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/50">{bmiData.status}</span>
+                        </div>
+                      ) : (
+                        <div className="px-2 py-1 border border-slate-200 rounded text-sm text-slate-400 bg-slate-50 text-center">-</div>
+                      )
+                    })()}
+                  </div>
                 </FieldRow>
                 <FieldRow label={<>Lingkar Perut (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.lingkar_perut} onChange={(v) => set('lingkar_perut', v)} placeholder="85" />
                 </FieldRow>
-                <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
-                  <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="24" />
-                </FieldRow>
-                <FieldRow label={<>HPHT <span className="text-red-500">*</span></>}>
-                  <MobileInput type="date" value={form.hpht} onChange={(v) => set('hpht', v)} />
-                </FieldRow>
-                <FieldRow label={<>HTP <span className="text-red-500">*</span></>}>
-                  <MobileInput type="date" value={form.htp} onChange={(v) => set('htp', v)} />
+                <FieldRow label="Tinggi Fundus (cm)">
+                  <MobileInput type="number" value={form.tinggi_fundus} onChange={(v) => set('tinggi_fundus', v)} placeholder="20" />
                 </FieldRow>
                 <FieldRow label="Riwayat Penyakit">
-                  <MobileInput value={form.riwayat_penyakit} onChange={(v) => set('riwayat_penyakit', v)} placeholder="Tidak ada" />
+                  <MobileInput value={form.riwayat_penyakit || latestBumil?.riwayat_penyakit || ''} onChange={(v) => set('riwayat_penyakit', v)} placeholder="Tidak ada" />
                 </FieldRow>
                 <FieldRow label="Kadar HB">
-                  <MobileInput type="number" value={form.kadar_hemoglobin} onChange={(v) => set('kadar_hemoglobin', v)} placeholder="12" />
+                  <div className="flex-1 w-full flex flex-col gap-1 min-w-0">
+                    <MobileInput type="number" value={form.kadar_hemoglobin} onChange={(v) => set('kadar_hemoglobin', v)} placeholder="12" />
+                    {parseFloat(form.kadar_hemoglobin) > 0 && parseFloat(form.kadar_hemoglobin) < 11 && (
+                      <span className="text-[10px] text-red-500 font-bold leading-tight">⚠️ Risiko Anemia</span>
+                    )}
+                  </div>
                 </FieldRow>
-                <FieldRow label="Berat Janin (g)">
-                  <MobileInput type="number" value={form.berat_janin} onChange={(v) => set('berat_janin', v)} placeholder="1500" />
+                <FieldRow label={<>LILA (cm) <span className="text-red-500">*</span></>}>
+                  <div className="flex-1 w-full flex flex-col gap-1 min-w-0">
+                    <MobileInput type="number" value={form.lilaGds} onChange={(v) => set('lilaGds', v)} placeholder="24" />
+                    {parseFloat(form.lilaGds) > 0 && parseFloat(form.lilaGds) < 23.5 && (
+                      <span className="text-[10px] text-red-500 font-bold leading-tight">⚠️ Risiko KEK</span>
+                    )}
+                  </div>
+                </FieldRow>
+                <FieldRow label="Berat Janin (kg)">
+                  <MobileInput type="number" value={form.berat_janin} onChange={(v) => set('berat_janin', v)} placeholder="1.5" />
                 </FieldRow>
                 <FieldRow label="Terpapar Rokok">
                   <input type="checkbox" checked={form.terpapar_rokok} onChange={(e) => set('terpapar_rokok', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
@@ -437,8 +541,17 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <FieldRow label="KIE">
                   <input type="checkbox" checked={form.kie} onChange={(e) => set('kie', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
                 </FieldRow>
-                <FieldRow label="Suplemen TTD">
-                  <input type="checkbox" checked={form.suplemen_tambah_darah} onChange={(e) => set('suplemen_tambah_darah', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                <FieldRow label="Suplemen TTD (Tablet)">
+                  <MobileInput type="number" value={form.suplemen_tambah_darah} onChange={(v) => set('suplemen_tambah_darah', v)} placeholder="30" />
+                </FieldRow>
+                <FieldRow label="MMS (Tablet)">
+                  <MobileInput type="number" value={form.mms} onChange={(v) => set('mms', v)} placeholder="30" />
+                </FieldRow>
+                <FieldRow label="Fasilitasi Rujukan">
+                  <input type="checkbox" checked={form.fasilitasi_rujukan} onChange={(e) => set('fasilitasi_rujukan', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
+                </FieldRow>
+                <FieldRow label="Bantuan Sosial">
+                  <input type="checkbox" checked={form.fasilitasi_bantuan_sosial} onChange={(e) => set('fasilitasi_bantuan_sosial', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary" />
                 </FieldRow>
                 <FieldRow label="Catatan">
                   <MobileTextarea value={form.catatan} onChange={(v) => set('catatan', v)} placeholder="tidak ada..." />
@@ -448,6 +561,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
             {isLansia && (
               <>
+                <FieldRow label={<>Berat Badan Lansia (kg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="58" />
+                </FieldRow>
                 <FieldRow label={<>Tinggi Badan Lansia (cm) <span className="text-red-500">*</span></>}>
                   <MobileInput type="number" value={form.tfuTb} onChange={(v) => set('tfuTb', v)} placeholder="160" />
                 </FieldRow>
@@ -465,6 +581,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
             {isPasca && (
               <>
+                <FieldRow label={<>Berat Badan Ibu (kg) <span className="text-red-500">*</span></>}>
+                  <MobileInput type="number" value={form.bb} onChange={(v) => set('bb', v)} placeholder="62" />
+                </FieldRow>
                 <FieldRow label={<>Tekanan Darah (mmHg) <span className="text-red-500">*</span></>}>
                   <MobileInputTd value={form.td} onChange={(v) => set('td', v)} />
                 </FieldRow>

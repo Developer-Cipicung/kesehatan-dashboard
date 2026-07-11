@@ -11,6 +11,7 @@ interface MonthlyRecordFormProps {
   kategori: string
   wargaId: string
   initialData?: Pemeriksaan | null
+  previousRecord?: Pemeriksaan | null
   defaultTanggalPersalinan?: string
 }
 
@@ -23,13 +24,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-function Input({ register, name, type = 'text', placeholder }: { register: any; name: string; type?: string; placeholder?: string }) {
+function Input({ register, name, type = 'text', placeholder, min, max }: { register: any; name: string; type?: string; placeholder?: string; min?: number; max?: number }) {
   return (
     <input
-      {...register(name)}
+      {...register(name, { valueAsNumber: type === 'number' ? true : false })}
       type={type}
+      min={min}
+      max={max}
       placeholder={placeholder}
-      step={type === 'number' ? 'any' : undefined}
       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
     />
   )
@@ -66,7 +68,21 @@ const toDateInputValue = (value?: string | Date | null) => {
   return new Date(value).toISOString().split('T')[0]
 }
 
-export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData, defaultTanggalPersalinan }: MonthlyRecordFormProps) {
+const calculateHplRange = (hphtStr?: string): string => {
+  if (!hphtStr) return '-'
+  const hpht = new Date(hphtStr)
+  
+  const start = new Date(hpht)
+  start.setDate(start.getDate() + 259) // 37 weeks
+  
+  const end = new Date(hpht)
+  end.setDate(end.getDate() + 294) // 42 weeks
+  
+  const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+  return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
+}
+
+export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData, previousRecord, defaultTanggalPersalinan }: MonthlyRecordFormProps) {
   const { mutateAsync: createRecord, isPending: isCreating } = useCreatePemeriksaan()
   const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdatePemeriksaan()
 
@@ -83,15 +99,19 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
 
   useEffect(() => {
     if (open) {
+      const isNew = !initialData;
       const rec: any = initialData || {}
+      const prev: any = previousRecord || {}
+
       reset({
         tanggal_kunjungan: rec.tanggal_kunjungan ? toDateInputValue(rec.tanggal_kunjungan) : new Date().toISOString().split('T')[0],
         tanggal_persalinan: toDateInputValue(rec.tanggal_persalinan || defaultTanggalPersalinan) || new Date().toISOString().split('T')[0],
         bb: rec.bb ?? '',
-        tb: rec.tb ?? '',
+        tb: rec.tb ?? (isNew && isBumil ? (prev.tb ?? '') : ''),
         lingkar_kepala: rec.lingkar_kepala ?? '',
         lingkar_lengan_atas: rec.lingkar_lengan_atas ?? '',
         lingkar_perut: rec.lingkar_perut ?? '',
+        tinggi_fundus: rec.tinggi_fundus ?? '',
         usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
         hpht: rec.hpht ? toDateInputValue(rec.hpht) : '',
         htp: rec.htp ? toDateInputValue(rec.htp) : '',
@@ -103,20 +123,47 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         kondisi: rec.kondisi ?? '',
         asi_eksklusif: rec.asi_eksklusif ?? false,
         fasilitasi_bantuan_sosial: rec.fasilitasi_bantuan_sosial ?? false,
-        jumlah_anak: rec.jumlah_anak ?? '',
-        riwayat_penyakit: rec.riwayat_penyakit ?? '',
+        jumlah_anak: rec.jumlah_anak ?? (isNew && isBumil ? (prev.jumlah_anak ?? '') : ''),
+        riwayat_penyakit: rec.riwayat_penyakit ?? (isNew && isBumil ? (prev.riwayat_penyakit ?? '') : ''),
         kadar_hemoglobin: rec.kadar_hemoglobin ?? '',
         berat_janin: rec.berat_janin ?? '',
         terpapar_rokok: rec.terpapar_rokok ?? false,
         kie: rec.kie ?? false,
-        suplemen_tambah_darah: rec.suplemen_tambah_darah ?? false,
+        suplemen_tambah_darah: rec.suplemen_tambah_darah ?? '',
+        mms: rec.mms ?? '',
         tinggi_badan_bayi: rec.tinggi_badan_bayi ?? '',
         berat_badan_bayi: rec.berat_badan_bayi ?? '',
         fasilitasi_rujukan: rec.fasilitasi_rujukan ?? false,
-        tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : '',
+        tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : (isNew ? (() => {
+          const d = new Date()
+          d.setMonth(d.getMonth() + 1)
+          return d.toISOString().split('T')[0]
+        })() : ''),
       })
     }
-  }, [open, initialData, defaultTanggalPersalinan, reset])
+  }, [open, initialData, previousRecord, defaultTanggalPersalinan, reset, isBumil])
+
+  const hphtWatch = watch('hpht')
+  const tglWatch = watch('tanggal_kunjungan')
+
+  useEffect(() => {
+    if (isBumil && hphtWatch && tglWatch) {
+      const hphtDate = new Date(hphtWatch)
+      const tglDate = new Date(tglWatch)
+      const diffTime = tglDate.getTime() - hphtDate.getTime()
+      if (diffTime >= 0) {
+        const weeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7))
+        if (weeks <= 45 && !initialData?.usia_kehamilan_minggu) {
+          setValue('usia_kehamilan_minggu', weeks)
+        }
+      }
+      if (!initialData?.htp) {
+        const hplDate = new Date(hphtWatch)
+        hplDate.setDate(hplDate.getDate() + 280)
+        setValue('htp', hplDate.toISOString().split('T')[0])
+      }
+    }
+  }, [hphtWatch, tglWatch, isBumil, setValue, initialData])
 
   const parseTd = (td: string) => {
     const p = td.split('/')
@@ -153,6 +200,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           tb: parseFloat(values.tb) || undefined,
           lingkar_perut: parseFloat(values.lingkar_perut) || undefined,
           lingkar_lengan_atas: parseFloat(values.lingkar_lengan_atas) || undefined,
+          tinggi_fundus: parseFloat(values.tinggi_fundus) || undefined,
           usia_kehamilan_minggu: parseInt(values.usia_kehamilan_minggu) || undefined,
           hpht: values.hpht || undefined,
           htp: values.htp || undefined,
@@ -162,7 +210,10 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           berat_janin: parseFloat(values.berat_janin) || undefined,
           terpapar_rokok: values.terpapar_rokok ?? undefined,
           kie: values.kie ?? undefined,
-          suplemen_tambah_darah: values.suplemen_tambah_darah ?? undefined,
+          suplemen_tambah_darah: parseInt(values.suplemen_tambah_darah) || undefined,
+          mms: parseInt(values.mms) || undefined,
+          fasilitasi_rujukan: values.fasilitasi_rujukan ?? undefined,
+          fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
         }
       } else if (isLansia) {
         const td = parseTd(values.td)
@@ -245,17 +296,75 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Ibu Hamil */}
             {isBumil && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Usia Kehamilan (mgg)"><Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="28" /></Field>
-                <Field label="Jumlah Anak"><Input register={register} name="jumlah_anak" type="number" placeholder="1" /></Field>
-                <Field label="Berat Badan Ibu (kg)"><Input register={register} name="bb" type="number" placeholder="55.5" /></Field>
-                <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
-                <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="85" /></Field>
-                <Field label="LILA (cm)"><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="24" /></Field>
+                <Field label="Usia Kandungan (Minggu)">
+                  <Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="28" max={45} min={0} />
+                  {watch('usia_kehamilan_minggu') > 42 && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Lewat Waktu (Normal 37-42 mgg)</p>
+                  )}
+                </Field>
+                <Field label="Jumlah Anak"><Input register={register} name="jumlah_anak" type="number" placeholder="1" max={20} min={0} /></Field>
+                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="60.5" max={200} min={0} /></Field>
+                <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="155" max={250} min={0} /></Field>
+                <Field label="IMT">
+                  {(() => {
+                    const bb = watch('bb')
+                    const tb = watch('tb')
+                    if (bb && tb && bb > 0 && tb > 0) {
+                      const tbM = tb / 100
+                      const bmi = bb / (tbM * tbM)
+                      
+                      let status = ''
+                      let color = ''
+                      if (bmi < 18.5) {
+                        status = 'Kurus'
+                        color = 'text-amber-700 bg-amber-50 border-amber-200'
+                      } else if (bmi < 25.0) {
+                        status = 'Normal'
+                        color = 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                      } else if (bmi <= 27.0) {
+                        status = 'Gemuk'
+                        color = 'text-amber-700 bg-amber-50 border-amber-200'
+                      } else {
+                        status = 'Obesitas'
+                        color = 'text-red-700 bg-red-50 border-red-200'
+                      }
+
+                      return (
+                        <div className={`flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold ${color}`}>
+                          <span>{bmi.toFixed(1)}</span>
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{status}</span>
+                        </div>
+                      )
+                    }
+                    return (
+                      <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+                        -
+                      </div>
+                    )
+                  })()}
+                </Field>
+                <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="85" max={200} min={0} /></Field>
+                <Field label="Tinggi Fundus (cm)"><Input register={register} name="tinggi_fundus" type="number" placeholder="20" max={100} min={0} /></Field>
+                <Field label="LILA (cm)">
+                  <Input register={register} name="lingkar_lengan_atas" type="number" placeholder="24" max={60} min={0} />
+                  {watch('lingkar_lengan_atas') > 0 && watch('lingkar_lengan_atas') < 23.5 && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Risiko KEK</p>
+                  )}
+                </Field>
                 <Field label="HPHT"><Input register={register} name="hpht" type="date" /></Field>
-                <Field label="HTP"><Input register={register} name="htp" type="date" /></Field>
+                <Field label="Rentang HPL">
+                  <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+                    {calculateHplRange(hphtWatch)}
+                  </div>
+                </Field>
                 <Field label="Riwayat Penyakit"><Input register={register} name="riwayat_penyakit" placeholder="Tidak ada" /></Field>
-                <Field label="Kadar HB"><Input register={register} name="kadar_hemoglobin" type="number" placeholder="12" /></Field>
-                <Field label="Berat Janin (g)"><Input register={register} name="berat_janin" type="number" placeholder="1500" /></Field>
+                <Field label="Kadar HB">
+                  <Input register={register} name="kadar_hemoglobin" type="number" placeholder="12" max={30} min={0} />
+                  {watch('kadar_hemoglobin') > 0 && watch('kadar_hemoglobin') < 11 && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Risiko Anemia</p>
+                  )}
+                </Field>
+                <Field label="Berat Janin (kg)"><Input register={register} name="berat_janin" type="number" placeholder="1.5" max={10} min={0} /></Field>
                 <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
                   <div className="flex items-center gap-2">
                     <input type="checkbox" id="terpapar_rokok" {...register('terpapar_rokok')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
@@ -265,9 +374,19 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                     <input type="checkbox" id="kie" {...register('kie')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="kie" className="text-sm font-medium text-slate-700">KIE</label>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <Field label="TTD (Tablet)"><Input register={register} name="suplemen_tambah_darah" type="number" placeholder="30" min={0} /></Field>
+                  <Field label="MMS (Tablet)"><Input register={register} name="mms" type="number" placeholder="30" min={0} /></Field>
+                </div>
+                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
                   <div className="flex items-center gap-2">
-                    <input type="checkbox" id="suplemen_tambah_darah" {...register('suplemen_tambah_darah')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
-                    <label htmlFor="suplemen_tambah_darah" className="text-sm font-medium text-slate-700">Suplemen TTD</label>
+                    <input type="checkbox" id="bumil_rujukan" {...register('fasilitasi_rujukan')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="bumil_rujukan" className="text-sm font-medium text-slate-700">Rujukan</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="bumil_bansos" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                    <label htmlFor="bumil_bansos" className="text-sm font-medium text-slate-700">Bansos</label>
                   </div>
                 </div>
               </div>
