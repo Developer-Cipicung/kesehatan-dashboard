@@ -8,7 +8,8 @@ import {
   Users,
   Baby,
   BarChart2,
-  ClipboardList
+  ClipboardList,
+  CheckSquare
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +47,7 @@ const navigation: NavItem[] = [
     ],
   },
   { name: 'LAPORAN', isHeader: true },
+  { name: 'Verifikasi Pendataan', href: '/verifikasi-pendataan', icon: CheckSquare },
   { name: 'Status Pendataan', href: '/status-pendataan', icon: ClipboardList },
   { name: 'Rekapitulasi Bulanan', href: '/laporan', icon: BarChart2 },
 ]

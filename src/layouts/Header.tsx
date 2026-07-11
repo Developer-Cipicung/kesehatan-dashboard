@@ -8,11 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 
-interface HeaderProps {
-  onMenuClick: () => void
-}
-
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header() {
   const logout = useAuthStore((state) => state.logout)
   const user = useAuthStore((state) => state.user)
   const posyandu = useAuthStore((state) => state.posyandu)
@@ -21,15 +17,6 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-4 md:px-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={onMenuClick}
-        >
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
-        </Button>
         {posyandu ? (
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-primary shrink-0" />
@@ -47,7 +34,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         ) : (
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-primary shrink-0" />
-            <span className="font-semibold text-slate-800 text-sm">Posyandu</span>
+            <span className="font-semibold text-slate-800 text-sm">Cipicung</span>
           </div>
         )}
       </div>
@@ -65,9 +52,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           <PopoverContent className="w-56" align="end">
             <div className="flex flex-col space-y-2 p-2">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Kader</p>
+                <p className="text-sm font-medium leading-none capitalize">{(user as any)?.role || 'Kader'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email as string || 'kader@posyandu.com'}
+                  {(user as any)?.email || 'user@cipicung.com'}
                 </p>
                 {posyandu && (
                   <p className="text-xs leading-none text-primary mt-1">

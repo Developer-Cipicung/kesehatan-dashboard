@@ -20,6 +20,17 @@ export interface PendataanGlobalStatusResponse {
   }
 }
 
+export interface PendataanSummaryResponse {
+  success: boolean
+  data: {
+    balita: { id: string; nama: string; tanggal: string; bb: number; tb: number }[]
+    bumil: { id: string; nama: string; tanggal: string; bb: number; usia_kehamilan_minggu: number; lingkar_lengan_atas: number }[]
+    pasca_persalinan: { id: string; nama: string; tanggal: string; td_sistolik: number; td_diastolik: number }[]
+    lansia: { id: string; nama: string; tanggal: string; bb: number; td_sistolik: number; td_diastolik: number; gula_darah_sewaktu: number }[]
+    warga_baru: { id: string; nama: string; nik: string; jenis_kelamin: string; tanggal_daftar: string }[]
+  }
+}
+
 export interface AdminPosyanduStatusResponse {
   success: boolean
   data: {
@@ -36,6 +47,12 @@ export interface AdminPosyanduStatusResponse {
 export const pendataanBulananService = {
   getStatus: async (bulan: number, tahun: number, posyanduId?: string) => {
     const response = await api.get<PendataanStatusResponse>('/pendataan-bulanan', {
+      params: { bulan, tahun, posyanduId },
+    })
+    return response.data.data
+  },
+  getSummary: async (bulan: number, tahun: number, posyanduId?: string) => {
+    const response = await api.get<PendataanSummaryResponse>('/pendataan-bulanan/summary', {
       params: { bulan, tahun, posyanduId },
     })
     return response.data.data

@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
+import { Link } from 'react-router-dom'
+import { ClipboardList, MapPin, Users } from 'lucide-react'
 
 export function AdminDashboardPage() {
   const { data: posyandus, isLoading: isPosyanduLoading } = useQuery({
@@ -43,6 +45,31 @@ export function AdminDashboardPage() {
       <div className="mb-8">
         <h1 className="text-[28px] font-bold text-slate-800 leading-tight">Selamat Datang, Super Admin</h1>
         <p className="text-sm text-slate-500 mt-1">{currentDate} · Pusat Pendataan Kesehatan Cipicung</p>
+      </div>
+
+      <h2 className="text-xl font-bold text-slate-800 mb-4">Navigasi Utama Admin</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Link to="/admin/status-pendataan" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-primary transition-all duration-200">
+          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <ClipboardList className="w-6 h-6" />
+          </div>
+          <span className="font-semibold text-slate-700">Status Pendataan</span>
+          <span className="text-xs text-slate-500 mt-1">Pantau pelaporan bulanan kader</span>
+        </Link>
+        <Link to="/admin/posyandu" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-emerald-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <MapPin className="w-6 h-6" />
+          </div>
+          <span className="font-semibold text-slate-700">Data Posyandu</span>
+          <span className="text-xs text-slate-500 mt-1">Kelola data wilayah posyandu</span>
+        </Link>
+        <Link to="/admin/users" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-violet-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-violet-50 text-violet-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <Users className="w-6 h-6" />
+          </div>
+          <span className="font-semibold text-slate-700">Manajemen User</span>
+          <span className="text-xs text-slate-500 mt-1">Kelola akun bidan dan kader</span>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mb-8">

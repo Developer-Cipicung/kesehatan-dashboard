@@ -13,6 +13,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
+import { Link } from 'react-router-dom'
+import { Baby, HeartPulse, PersonStanding, Users, Activity, FileBarChart, ClipboardList } from 'lucide-react'
 
 
 
@@ -53,7 +55,8 @@ export function DashboardPage() {
     total_warga,
     total_lansia,
     kategori_breakdown,
-    kunjungan_6_bulan
+    kunjungan_6_bulan,
+    pendataan_status
   } = data
 
   const totalIbu = kategori_breakdown.ibu_hamil + kategori_breakdown.pasca_persalinan
@@ -61,69 +64,82 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-col max-w-full">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-bold text-slate-800 leading-tight">
-          Selamat Datang, {(user as any)?.nama || 'Petugas'}
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          {currentDate} · {posyandu ? `Posyandu ${posyandu.nama}` : 'Pusat Pendataan Kesehatan Cipicung'}
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[28px] font-bold text-slate-800 leading-tight">
+            Selamat Datang, {(user as any)?.nama || 'Petugas'}
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            {currentDate} · {posyandu ? `Posyandu ${posyandu.nama}` : 'Pusat Pendataan Kesehatan Cipicung'}
+          </p>
+        </div>
+        {pendataan_status === 'draft' ? (
+          <Link to="/verifikasi-pendataan" className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-200">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <ClipboardList className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg">Selesai Pendataan Bulan Ini</span>
+              <span className="text-xs text-white/80">Kunci data & verifikasi riwayat</span>
+            </div>
+          </Link>
+        ) : (
+          <Link to="/verifikasi-pendataan" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-200">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <ClipboardList className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg">Pendataan Selesai</span>
+              <span className="text-xs text-white/80">Lihat rekapitulasi terkunci</span>
+            </div>
+          </Link>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary-dark p-6 flex flex-col justify-between">
-          <div>
-            <div className="text-4xl font-bold text-slate-800 mb-2">{total_warga}</div>
-            <div className="font-semibold text-slate-700 text-sm">Total Terdaftar</div>
+      <h2 className="text-xl font-bold text-slate-800 mb-4">Navigasi Utama</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <Link to="/balita" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-primary transition-all duration-200">
+          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <Baby className="w-6 h-6" />
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400">
-            semua kategori
+          <span className="font-semibold text-slate-700 mb-1">Balita</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">{kategori_breakdown.balita} Terdaftar</span>
+        </Link>
+        <Link to="/baduta" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-primary transition-all duration-200">
+          <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <Baby className="w-6 h-6" />
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary p-6 flex flex-col justify-between">
-          <div>
-            <div className="text-4xl font-bold text-slate-800 mb-2">{totalIbu}</div>
-            <div className="font-semibold text-slate-700 text-sm">Ibu-ibu</div>
+          <span className="font-semibold text-slate-700 mb-1">Baduta</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">{kategori_breakdown.baduta} Terdaftar</span>
+        </Link>
+        <Link to="/bumil" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-pink-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-pink-50 text-pink-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <HeartPulse className="w-6 h-6" />
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <span className="block text-slate-500">Ibu Hamil</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.ibu_hamil}</span>
-            </div>
-            <div>
-              <span className="block text-slate-500">Pasca Salin</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.pasca_persalinan}</span>
-            </div>
+          <span className="font-semibold text-slate-700 mb-1">Ibu Hamil</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">{kategori_breakdown.ibu_hamil} Terdaftar</span>
+        </Link>
+        <Link to="/pasca-persalinan" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-rose-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <Activity className="w-6 h-6" />
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-primary-light p-6 flex flex-col justify-between">
-          <div>
-            <div className="text-4xl font-bold text-slate-800 mb-2">{total_lansia}</div>
-            <div className="font-semibold text-slate-700 text-sm">Lansia</div>
+          <span className="font-semibold text-slate-700 mb-1">Pasca Salin</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">{kategori_breakdown.pasca_persalinan} Terdaftar</span>
+        </Link>
+        <Link to="/lansia" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-amber-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <PersonStanding className="w-6 h-6" />
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 gap-2 text-xs">
-            <div>
-              <span className="block text-slate-500">Terdaftar Aktif</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.lansia}</span>
-            </div>
+          <span className="font-semibold text-slate-700 mb-1">Lansia</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">{kategori_breakdown.lansia} Terdaftar</span>
+        </Link>
+        <Link to="/laporan" className="group bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md hover:border-emerald-500 transition-all duration-200">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+            <FileBarChart className="w-6 h-6" />
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-t-4 border-t-accent p-6 flex flex-col justify-between">
-          <div>
-            <div className="text-4xl font-bold text-slate-800 mb-2">{totalAnak}</div>
-            <div className="font-semibold text-slate-700 text-sm">Anak-anak</div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <span className="block text-slate-500">Baduta</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.baduta}</span>
-            </div>
-            <div>
-              <span className="block text-slate-500">Balita</span>
-              <span className="font-semibold text-slate-700">{kategori_breakdown.balita}</span>
-            </div>
-          </div>
-        </div>
+          <span className="font-semibold text-slate-700 mb-1">Laporan</span>
+          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Rekap Bulanan</span>
+        </Link>
       </div>
 
       <div className="mb-8">

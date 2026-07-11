@@ -17,6 +17,7 @@ interface FormFieldProps<T extends FieldValues> {
   description?: string
   type?: React.HTMLInputTypeAttribute
   disabled?: boolean
+  required?: boolean
   children?: (field: unknown) => React.ReactNode
 }
 
@@ -28,6 +29,7 @@ export function FormField<T extends FieldValues>({
   description,
   type = 'text',
   disabled,
+  required = false,
   children,
 }: FormFieldProps<T>) {
   return (
@@ -36,7 +38,10 @@ export function FormField<T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel>
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </FormLabel>
           <FormControl>
             {children ? (
               children(field)

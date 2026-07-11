@@ -13,6 +13,15 @@ export function useGetPendataanStatus(bulan: number, tahun: number, posyanduId?:
   })
 }
 
+export function useGetPendataanSummary(bulan: number, tahun: number, posyanduId?: string) {
+  return useQuery({
+    queryKey: ['pendataan', 'summary', bulan, tahun, posyanduId],
+    queryFn: () => pendataanBulananService.getSummary(bulan, tahun, posyanduId),
+    enabled: !!bulan && !!tahun,
+    staleTime: 60 * 1000,
+  })
+}
+
 export function useGetPendataanGlobalStatus(bulan: number, tahun: number, posyanduId?: string) {
   return useQuery({
     queryKey: ['pendataan', 'global', bulan, tahun, posyanduId],

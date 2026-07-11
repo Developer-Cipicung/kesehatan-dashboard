@@ -23,6 +23,7 @@ const UserManagementPage = Loadable(lazy(() => import('@/features/admin/pages/Us
 
 
 const AdminStatusPendataanPage = Loadable(lazy(() => import('@/features/admin/pages/AdminStatusPendataanPage').then(m => ({ default: m.AdminStatusPendataanPage }))))
+const VerifikasiPendataanPage = Loadable(lazy(() => import('@/features/pendataan/pages/VerifikasiPendataanPage').then(m => ({ default: m.VerifikasiPendataanPage }))))
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
           {
             path: 'laporan',
             element: <ReportPage />,
+          },
+          {
+            path: 'verifikasi-pendataan',
+            element: <VerifikasiPendataanPage />,
           },
           {
             path: 'status-pendataan',
