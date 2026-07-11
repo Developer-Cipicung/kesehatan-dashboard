@@ -886,17 +886,17 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
         </DialogContent>
       </Dialog>
       
-      {addRecordWargaId && (
-        <MonthlyRecordForm
-          open={!!addRecordWargaId}
-          onOpenChange={(open) => {
-            if (!open) setAddRecordWargaId(null)
-          }}
-          kategori={kategori}
-          wargaId={addRecordWargaId}
-          initialData={null}
-        />
-      )}
+      <MonthlyRecordForm
+        open={!!addRecordWargaId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTimeout(() => setAddRecordWargaId(null), 300)
+          }
+        }}
+        kategori={kategori}
+        wargaId={addRecordWargaId || ''}
+        initialData={null}
+      />
     </>
   )
 }

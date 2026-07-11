@@ -134,15 +134,18 @@ export function GlobalPatientSearch() {
         </div>
       </div>
 
-      {showForm && selectedWarga && (
-        <MonthlyRecordForm
-          open={showForm}
-          onOpenChange={setShowForm}
-          kategori={detectedCategory}
-          wargaId={selectedWarga.id}
-          initialData={null}
-        />
-      )}
+      <MonthlyRecordForm
+        open={showForm}
+        onOpenChange={(open) => {
+          setShowForm(open)
+          if (!open) {
+            setTimeout(() => setSelectedWarga(null), 300)
+          }
+        }}
+        kategori={detectedCategory}
+        wargaId={selectedWarga?.id || ''}
+        initialData={null}
+      />
     </div>
   )
 }

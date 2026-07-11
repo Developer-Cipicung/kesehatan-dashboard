@@ -38,12 +38,12 @@ export function SpeedDialNavigation() {
   }
 
   return (
-    <div ref={menuRef} className="fixed bottom-6 right-6 z-50 flex-col-reverse items-end gap-3 flex md:hidden">
+    <div ref={menuRef} className="fixed bottom-6 right-6 z-50 flex-col-reverse items-end gap-3 flex md:hidden pointer-events-none">
       {/* Main FAB */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center justify-center w-14 h-14 rounded-full bg-slate-900 text-white shadow-xl hover:bg-slate-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-slate-900/20",
+          "flex items-center justify-center w-14 h-14 rounded-full bg-slate-900 text-white shadow-xl hover:bg-slate-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-slate-900/20 pointer-events-auto",
           isOpen ? "rotate-90 scale-90 bg-slate-800" : ""
         )}
         aria-label="Speed Dial Navigation"
@@ -65,7 +65,7 @@ export function SpeedDialNavigation() {
               key={action.name}
               onClick={() => handleNavigate(action.path)}
               className={cn(
-                "group flex items-center gap-3 transition-all duration-300",
+                "group flex items-center gap-3 transition-all duration-300 pointer-events-auto",
                 isOpen ? "translate-x-0" : "translate-x-10"
               )}
               style={{ transitionDelay: `${(actions.length - index) * 30}ms` }}
