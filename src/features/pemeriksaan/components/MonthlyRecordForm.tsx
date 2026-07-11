@@ -374,7 +374,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   </div>
                 </Field>
                 <Field label="Riwayat Penyakit"><Input register={register} name="riwayat_penyakit" placeholder="Tidak ada" /></Field>
-                <Field label="Kadar HB">
+                <Field label="Kadar HB" required>
                   <Input register={register} name="kadar_hemoglobin" type="number" placeholder="12" max={30} min={0} />
                   {watch('kadar_hemoglobin') > 0 && watch('kadar_hemoglobin') < 11 && (
                     <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Risiko Anemia</p>
