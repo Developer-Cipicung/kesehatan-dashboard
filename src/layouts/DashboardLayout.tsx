@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
-import { cn } from '@/lib/utils'
 import { SpeedDialNavigation } from '@/components/navigation/SpeedDialNavigation'
 
 export default function DashboardLayout() {

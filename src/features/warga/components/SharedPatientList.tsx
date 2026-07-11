@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { useGetWargaList } from '../hooks/useWarga'
 import { PatientToolbar } from './PatientToolbar'
 import { PatientTable } from './PatientTable'
@@ -29,8 +28,6 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const { selectedPosyanduId, posyandu } = useAuthStore()
   const navigate = useNavigate()
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
 
   const isReadOnly = posyandu?.id !== selectedPosyanduId
 

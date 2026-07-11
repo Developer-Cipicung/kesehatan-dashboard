@@ -1,42 +1,67 @@
-# React + TypeScript + Vite
+# Posyandu Digital Dashboard (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Dashboard interaktif untuk Sistem Digitalisasi Posyandu. Proyek ini dibangun menggunakan **React**, **TypeScript**, dan **Vite**, serta dirancang dengan pendekatan **Mobile-First UX** untuk memudahkan kader di lapangan.
 
-Currently, two official plugins are available:
+## 🚀 Fitur Utama
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **One-Stop Action Center**: Kader dapat langsung mencari pasien secara global dari halaman beranda (Dashboard) dengan pendeteksian kategori otomatis (Balita, Lansia, Bumil, Pasca Salin) dan langsung membuka *form pop-up* pemeriksaan tanpa berpindah halaman.
+- **Buku Register Read-Only**: Halaman daftar pasien dikunci (*read-only*) untuk mencegah kesalahan input (*typo*) secara tidak sengaja saat melakukan *scrolling* di HP, dengan tombol khusus `[Tambah Catatan]` dan `[Profil Lengkap]` di setiap baris.
+- **Mobile-Responsive UI**: Form input dan tabel dioptimasi menggunakan `Tailwind CSS` dan `shadcn/ui` agar tampil sempurna di *smartphone*.
+- **State Management**: Menggunakan Zustand untuk pengaturan autentikasi.
+- **Data Fetching & Caching**: Menggunakan React Query (`@tanstack/react-query`) untuk manajemen *cache* yang cepat dan efisien.
 
-## React Compiler
+## 📋 Struktur Aplikasi
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `/src/features` — Modularisasi fitur per ranah (warga, pemeriksaan, pendataan, dashboard).
+- `/src/components` — Komponen UI re-usable (berbasis shadcn).
+- `/src/layouts` — Layout navigasi (Sidebar, Header, SpeedDial).
+- `/src/stores` — State management global (Zustand).
+- `/src/services` — Integrasi dengan API Axios.
 
-## Expanding the Oxlint configuration
+## 🛠 Teknologi
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM v6
+- **UI Components**: Radix UI + shadcn/ui
+- **Icons**: Lucide React
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## 📦 Instalasi
+
+1. Clone repositori ini.
+2. Pindah ke direktori frontend:
+   ```bash
+   cd kesehatan-dashboard
+   ```
+3. Install dependensi:
+   ```bash
+   npm install
+   ```
+4. Sesuaikan variabel di dalam `.env`:
+   ```env
+   VITE_API_URL=http://localhost:3000/api/v1
+   ```
+
+## 🚀 Menjalankan Server
+
+### Development
+```bash
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### Production Build
+```bash
+npm run build
+```
 
-## Deploy ke Vercel
+## 🌐 Deploy ke Vercel
 
-Dashboard ini sudah siap deploy ke Vercel sebagai single-page app.
+Dashboard ini sudah siap deploy ke Vercel sebagai *single-page application*.
 
-- Build command: `npm run build`
-- Output directory: `dist`
-- Environment variable wajib: `VITE_API_URL`
+- **Build command**: `npm run build`
+- **Output directory**: `dist`
+- **Environment variable wajib**: `VITE_API_URL` (arahkan ke URL backend production Anda)
 
-File `vercel.json` sudah menambahkan rewrite agar route React Router seperti `/login`, `/admin`, dan halaman detail tetap bisa dibuka saat refresh atau direct access.
+File `vercel.json` telah disertakan untuk menambahkan mekanisme *rewrite* agar route React Router (seperti `/login`, `/admin`, `/warga/123`) tetap dapat diakses secara langsung (*direct access*) saat halamannya di-*refresh*.

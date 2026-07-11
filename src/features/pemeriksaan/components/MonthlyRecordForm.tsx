@@ -27,13 +27,14 @@ function Field({ label, required, children }: { label: string; required?: boolea
   )
 }
 
-function Input({ register, name, type = 'text', placeholder, min, max }: { register: any; name: string; type?: string; placeholder?: string; min?: number; max?: number }) {
+function Input({ register, name, type = 'text', placeholder, min, max, step }: { register: any; name: string; type?: string; placeholder?: string; min?: number; max?: number; step?: string }) {
   return (
     <input
       {...register(name, { valueAsNumber: type === 'number' ? true : false })}
       type={type}
       min={min}
       max={max}
+      step={step}
       placeholder={placeholder}
       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
     />
@@ -156,11 +157,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
       const diffTime = tglDate.getTime() - hphtDate.getTime()
       if (diffTime >= 0) {
         const weeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7))
-        if (weeks <= 45 && !initialData?.usia_kehamilan_minggu) {
+        if (weeks <= 45 && !(initialData as any)?.usia_kehamilan_minggu) {
           setValue('usia_kehamilan_minggu', weeks)
         }
       }
-      if (!initialData?.htp) {
+      if (!(initialData as any)?.htp) {
         const hplDate = new Date(hphtWatch)
         hplDate.setDate(hplDate.getDate() + 280)
         setValue('htp', hplDate.toISOString().split('T')[0])
@@ -280,11 +281,23 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Balita / Baduta */}
             {isBalita && (
               <div className="grid grid-cols-2 gap-3">
+                <Field label="Nama Ibu"><Input register={register} name="nama_ibu" placeholder="Nama Ibu" /></Field>
+                <Field label="Penggunaan Kontrasepsi">
+                  <select {...register('penggunaan_kontrasepsi')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    <option value="">Pilih KB...</option>
+                    <option value="Pil">Pil</option>
+                    <option value="Suntik">Suntik</option>
+                    <option value="IUD">IUD</option>
+                    <option value="Implan">Implan</option>
+                    <option value="Kondom">Kondom</option>
+                    <option value="MOW">MOW</option>
+                    <option value="MOP">MOP</option>
+                    <option value="Tidak Pakai">Tidak Pakai</option>
+                  </select>
+                </Field>
                 <Field label="Berat Badan Anak (kg)" required><Input register={register} name="bb" type="number" placeholder="8.5" /></Field>
                 <Field label="Tinggi/Panjang Badan Anak (cm)" required><Input register={register} name="tb" type="number" placeholder="72" /></Field>
-                <Field label="Lingkar Kepala (cm)" required><Input register={register} name="lingkar_kepala" type="number" placeholder="44" /></Field>
-                <Field label="Lingkar Lengan Atas (cm)" required><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="13.5" /></Field>
-                <Field label="Kondisi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
+                <Field label="Kondisi Bayi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
                 <div className="flex items-center gap-2 mt-6">
                   <input type="checkbox" id="asi_eksklusif" {...register('asi_eksklusif')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <label htmlFor="asi_eksklusif" className="text-sm font-medium text-slate-700">ASI Eksklusif</label>
@@ -404,6 +417,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   <TdInput setValue={setValue} watch={watch} name="td" />
                 </Field>
                 <Field label="Gula Darah Sewaktu (mg/dL)" required><Input register={register} name="gula_darah_sewaktu" type="number" placeholder="120" /></Field>
+                <Field label="Kolesterol (mg/dL)"><Input register={register} name="kolesterol" type="number" placeholder="150" /></Field>
+                <Field label="Asam Urat (mg/dL)"><Input register={register} name="asam_urat" type="number" placeholder="5.5" step="0.1" /></Field>
               </div>
             )}
 
@@ -411,14 +426,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {isPasca && (
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Tanggal Persalinan" required><Input register={register} name="tanggal_persalinan" type="date" /></Field>
+                <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
                 <Field label="Berat Badan Ibu (kg)" required><Input register={register} name="bb" type="number" placeholder="62" /></Field>
-                <Field label="Suhu Tubuh (°C)" required><Input register={register} name="suhu_tubuh" type="number" placeholder="36.5" /></Field>
                 <div className="col-span-2">
-                  <Field label="Tekanan Darah (mmHg)" required>
-                    <TdInput setValue={setValue} watch={watch} name="td" />
-                  </Field>
+                  <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 </div>
-                <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 <Field label="Tinggi Bayi (cm)"><Input register={register} name="tinggi_badan_bayi" type="number" placeholder="50" /></Field>
                 <Field label="Berat Bayi (kg)"><Input register={register} name="berat_badan_bayi" type="number" placeholder="3.2" /></Field>
                 

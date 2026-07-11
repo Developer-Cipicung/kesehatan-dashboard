@@ -15,6 +15,7 @@ import {
 } from 'recharts'
 import { Link } from 'react-router-dom'
 import { Baby, HeartPulse, PersonStanding, Users, Activity, FileBarChart, ClipboardList } from 'lucide-react'
+import { GlobalPatientSearch } from '../components/GlobalPatientSearch'
 
 
 
@@ -95,6 +96,8 @@ export function DashboardPage() {
           </Link>
         )}
       </div>
+
+      <GlobalPatientSearch />
 
       <h2 className="text-xl font-bold text-slate-800 mb-4">Navigasi Utama</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">

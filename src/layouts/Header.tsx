@@ -1,4 +1,4 @@
-import { Menu, LogOut, User, MapPin } from 'lucide-react'
+import { LogOut, User, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 

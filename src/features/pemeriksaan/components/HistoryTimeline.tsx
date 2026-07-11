@@ -39,15 +39,15 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
             {/* Dynamic Headers */}
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Usia Kandungan</th>}
             
-            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">BB{(!isPasca) && ' / TB'}</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">BB / TB</th>
             
             {(isBalita || isBumil) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Lingkar</th>}
             
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">HPHT / HTP</th>}
             
-            {(isLansia || isPasca) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tensi</th>}
-            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">GDS</th>}
-            {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Suhu & Kondisi</th>}
+            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tensi</th>}
+            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Cek Darah</th>}
+            {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Kondisi Ibu</th>}
 
             {isBalita && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Lainnya</th>}
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Kehamilan</th>}
@@ -99,7 +99,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                 
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                   {bb !== undefined && bb !== null ? `${bb} kg` : '-'}
-                  {(!isPasca && tb !== undefined && tb !== null) ? ` / ${tb} cm` : ''}
+                  {(tb !== undefined && tb !== null) ? ` / ${tb} cm` : ''}
                 </td>
                 
                 {(isBalita || isBumil) && (
@@ -117,7 +117,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                   </td>
                 )}
 
-                {(isLansia || isPasca) && (
+                {isLansia && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                     {td}
                   </td>
@@ -125,21 +125,24 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
 
                 {isLansia && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                    {record.gula_darah_sewaktu !== undefined && record.gula_darah_sewaktu !== null ? `${record.gula_darah_sewaktu} mg/dL` : '-'}
+                    {record.gula_darah_sewaktu !== undefined && record.gula_darah_sewaktu !== null && <div className="text-xs"><span className="text-muted-foreground">GDS:</span> {record.gula_darah_sewaktu}</div>}
+                    {record.kolesterol !== undefined && record.kolesterol !== null && <div className="text-xs"><span className="text-muted-foreground">Kolesterol:</span> {record.kolesterol}</div>}
+                    {record.asam_urat !== undefined && record.asam_urat !== null && <div className="text-xs"><span className="text-muted-foreground">Asam Urat:</span> {record.asam_urat}</div>}
+                    {(record.gula_darah_sewaktu === undefined && record.kolesterol === undefined && record.asam_urat === undefined) && '-'}
                   </td>
                 )}
 
                 {isPasca && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                    {record.suhu_tubuh !== undefined && record.suhu_tubuh !== null && <div className="text-xs"><span className="text-muted-foreground">Suhu:</span> {record.suhu_tubuh}°C</div>}
-                    {record.kondisi_ibu && <div className="text-xs mt-0.5"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi_ibu}</div>}
-                    {(record.suhu_tubuh === undefined && !record.kondisi_ibu) && '-'}
+                    {record.kondisi_ibu ? <div className="text-xs mt-0.5"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi_ibu}</div> : '-'}
                   </td>
                 )}
 
                 {isBalita && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                    {record.kondisi && <div className="text-xs"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi}</div>}
+                    {record.nama_ibu && <div className="text-xs"><span className="text-muted-foreground">Ibu:</span> {record.nama_ibu}</div>}
+                    {record.penggunaan_kontrasepsi && <div className="text-xs"><span className="text-muted-foreground">KB:</span> {record.penggunaan_kontrasepsi}</div>}
+                    {record.kondisi && <div className="text-xs mt-0.5"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi}</div>}
                     <div className="text-xs"><span className="text-muted-foreground">ASI Eksklusif:</span> {record.asi_eksklusif ? 'Ya' : 'Tidak'}</div>
                     <div className="text-xs"><span className="text-muted-foreground">Bansos:</span> {record.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak'}</div>
                   </td>

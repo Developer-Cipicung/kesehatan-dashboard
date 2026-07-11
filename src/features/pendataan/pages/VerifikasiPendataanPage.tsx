@@ -15,10 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ArrowLeft, CheckCircle2, Lock } from 'lucide-react'
+import { CheckCircle2, Lock } from 'lucide-react'
 
 export function VerifikasiPendataanPage() {
-  const navigate = useNavigate()
   const { selectedPosyanduId } = useAuthStore()
   
   const currentMonth = new Date().getMonth() + 1

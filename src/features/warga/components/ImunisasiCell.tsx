@@ -2,6 +2,17 @@ import { useState } from 'react'
 import { X, Plus, Loader2 } from 'lucide-react'
 import { useGetImunisasiByWarga, useCreateImunisasi, useDeleteImunisasi } from '../hooks/useImunisasi'
 
+const VAKSIN_OPTIONS = [
+  'HB0', 'BCG',
+  'POLIO1', 'POLIO2', 'POLIO3', 'POLIO4',
+  'ROTAVIRUS 1', 'ROTAVIRUS 2', 'ROTAVIRUS 3',
+  'DPT 1', 'DPT 2', 'DPT 3',
+  'PCV 1', 'PCV 2', 'PCV 3',
+  'IPV 1', 'IPV 2',
+  'MR(CAMPAK)',
+  'BOSTER DPT', 'BOSTER MR(CAMPAK)'
+]
+
 interface ImunisasiCellProps {
   wargaId: string
   disabled?: boolean
@@ -56,17 +67,19 @@ export function ImunisasiCell({ wargaId, disabled }: ImunisasiCellProps) {
 
       {!disabled && (
         <div className="flex items-center gap-1">
-          <input
-            type="text"
+          <select
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
-            placeholder="Nama vaksin..."
-            className="w-full px-2 py-1 border border-slate-200 rounded-md bg-white text-[11px] text-slate-700 focus:outline-none focus:border-primary placeholder:text-slate-300"
-          />
+            className="w-full px-2 py-1 border border-slate-200 rounded-md bg-white text-[11px] text-slate-700 focus:outline-none focus:border-primary"
+          >
+            <option value="" disabled>Pilih vaksin...</option>
+            {VAKSIN_OPTIONS.map(v => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
           <button
             onClick={handleAdd}
-            disabled={!input.trim() || isCreating}
+            disabled={!input || isCreating}
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-40 transition-colors"
           >
             {isCreating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
