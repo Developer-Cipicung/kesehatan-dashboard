@@ -34,7 +34,7 @@ function Input({ register, name, type = 'text', placeholder, min, max, step }: {
       type={type}
       min={min}
       max={max}
-      step={step}
+      step={step || (type === 'number' ? 'any' : undefined)}
       placeholder={placeholder}
       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
     />
@@ -318,7 +318,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                     <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Lewat Waktu (Normal 37-42 mgg)</p>
                   )}
                 </Field>
-                <Field label="Jumlah Anak"><Input register={register} name="jumlah_anak" type="number" placeholder="1" max={20} min={0} /></Field>
+                <Field label="Anak Ke"><Input register={register} name="jumlah_anak" type="number" placeholder="1" max={20} min={0} /></Field>
                 <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="60.5" max={200} min={0} /></Field>
                 <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="155" max={250} min={0} /></Field>
                 <Field label="IMT">
