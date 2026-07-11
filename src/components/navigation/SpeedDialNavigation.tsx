@@ -24,7 +24,8 @@ export function SpeedDialNavigation() {
 
   const actions = [
     { name: 'Kembali ke Beranda', icon: Home, path: '/', color: 'text-slate-600' },
-    { name: 'Balita & Baduta', icon: Baby, path: '/balita', color: 'text-blue-600' },
+    { name: 'Balita', icon: Baby, path: '/balita', color: 'text-blue-600' },
+    { name: 'Baduta', icon: Baby, path: '/baduta', color: 'text-sky-600' },
     { name: 'Ibu Hamil', icon: HeartPulse, path: '/bumil', color: 'text-pink-600' },
     { name: 'Pasca Salin', icon: Activity, path: '/pasca-persalinan', color: 'text-rose-600' },
     { name: 'Lansia', icon: PersonStanding, path: '/lansia', color: 'text-amber-600' },

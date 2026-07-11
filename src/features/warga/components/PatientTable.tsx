@@ -371,7 +371,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
           <tr className="border-b border-slate-200">
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[160px]">NIK</th>
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[190px]">Nama</th>
-            <th colSpan={isBalita ? 11 : isBumil ? 22 : isPasca ? 14 : 9} className="px-4 py-3 border-l border-slate-100">
+            <th colSpan={isBalita ? 11 : isBumil ? 22 : isPasca ? 15 : 9} className="px-4 py-3 border-l border-slate-100">
               <div className="flex items-center text-primary font-bold text-xs uppercase tracking-wider">
                 <ActivitySquare className="w-4 h-4 mr-2" />
                 Record Pemeriksaan Terakhir
@@ -447,6 +447,7 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi Badan Ibu (cm) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Berat Badan Ibu (kg) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">IMT</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Tekanan Darah (mmHg) <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi Ibu <span className="text-red-500">*</span></th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi<br/>Bayi (cm)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Berat<br/>Bayi (kg)</th>
@@ -734,6 +735,13 @@ export function PatientTable({ data, kategori, onView, isReadOnly }: PatientTabl
                         ) : (
                           <div className="text-xs text-slate-400 text-center">-</div>
                         )
+                      })()}
+                    </td>
+                    <td className="px-3 py-3">
+                      <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={isReadOnly} />
+                      {(() => {
+                        const status = calculateTDStatus(row.td);
+                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
                       })()}
                     </td>
                     <td className="px-3 py-3">

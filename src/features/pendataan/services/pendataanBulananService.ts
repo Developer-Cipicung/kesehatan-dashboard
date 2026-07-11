@@ -23,7 +23,7 @@ export interface PendataanGlobalStatusResponse {
 export interface PendataanSummaryResponse {
   success: boolean
   data: {
-    balita: { id: string; nama: string; tanggal: string; bb: number; tb: number }[]
+    balita: { id: string; nama: string; tanggal: string; bb: number; tb: number; tanggal_lahir: string }[]
     bumil: { id: string; nama: string; tanggal: string; bb: number; usia_kehamilan_minggu: number; lingkar_lengan_atas: number }[]
     pasca_persalinan: { id: string; nama: string; tanggal: string; td_sistolik: number; td_diastolik: number }[]
     lansia: { id: string; nama: string; tanggal: string; bb: number; td_sistolik: number; td_diastolik: number; gula_darah_sewaktu: number }[]

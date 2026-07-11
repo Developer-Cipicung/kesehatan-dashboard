@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider, useFormContext } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Pemeriksaan } from '../services/pemeriksaanService'
@@ -28,41 +29,51 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 function Input({ register, name, type = 'text', placeholder, min, max, step }: { register: any; name: string; type?: string; placeholder?: string; min?: number; max?: number; step?: string }) {
+  const { formState: { errors } } = useFormContext()
+  const error = errors[name]?.message as string
   return (
-    <input
-      {...register(name, { valueAsNumber: type === 'number' ? true : false })}
-      type={type}
-      min={min}
-      max={max}
-      step={step || (type === 'number' ? 'any' : undefined)}
-      placeholder={placeholder}
-      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
-    />
+    <div>
+      <input
+        {...register(name, { valueAsNumber: type === 'number' ? true : false })}
+        type={type}
+        min={min}
+        max={max}
+        step={step || (type === 'number' ? 'any' : undefined)}
+        placeholder={placeholder}
+        className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground ${error ? 'border-red-500' : 'border-input'}`}
+      />
+      {error && <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">{error}</p>}
+    </div>
   )
 }
 
 function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: string }) {
+  const { formState: { errors } } = useFormContext()
+  const error = (errors[name]?.message || errors['tekanan_darah_sistolik']?.message || errors['tekanan_darah_diastolik']?.message) as string
   const val = watch(name) || ''
   const parts = val.split('/')
   const s = parts[0] || ''
   const d = parts[1] || ''
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        value={s}
-        onChange={e => setValue(name, `${e.target.value}${d ? '/' + d : ''}`)}
-        placeholder="120"
-        className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
-      <span className="text-slate-400 font-bold">/</span>
-      <input
-        type="number"
-        value={d}
-        onChange={e => setValue(name, `${s || '0'}/${e.target.value}`)}
-        placeholder="80"
-        className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
+    <div>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={s}
+          onChange={e => setValue(name, `${e.target.value}${d ? '/' + d : ''}`)}
+          placeholder="120"
+          className={`flex-1 h-10 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+        />
+        <span className="text-slate-400 font-bold">/</span>
+        <input
+          type="number"
+          value={d}
+          onChange={e => setValue(name, `${s ? s + '/' : ''}${e.target.value}`)}
+          placeholder="80"
+          className={`flex-1 h-10 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+        />
+      </div>
+      {error && <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">{error}</p>}
     </div>
   )
 }
@@ -84,6 +95,12 @@ const calculateHplRange = (hphtStr?: string): string => {
   
   const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
   return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
+}
+
+const parseNum = (val: any, isInt = false) => {
+  if (val === '' || val === null || val === undefined) return undefined;
+  const num = isInt ? parseInt(val, 10) : parseFloat(val);
+  return isNaN(num) ? undefined : num;
 }
 
 export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData, previousRecord, defaultTanggalPersalinan }: MonthlyRecordFormProps) {
@@ -189,10 +206,10 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
       if (isBalita) {
         payload = {
           ...payload,
-          bb: parseFloat(values.bb) || undefined,
-          tb: parseFloat(values.tb) || undefined,
-          lingkar_kepala: parseFloat(values.lingkar_kepala) || undefined,
-          lingkar_lengan_atas: parseFloat(values.lingkar_lengan_atas) || undefined,
+          bb: parseNum(values.bb),
+          tb: parseNum(values.tb),
+          lingkar_kepala: parseNum(values.lingkar_kepala),
+          lingkar_lengan_atas: parseNum(values.lingkar_lengan_atas),
           kondisi: values.kondisi || undefined,
           asi_eksklusif: values.asi_eksklusif ?? undefined,
           fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
@@ -200,22 +217,22 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
       } else if (isBumil) {
         payload = {
           ...payload,
-          bb: parseFloat(values.bb) || undefined,
-          tb: parseFloat(values.tb) || undefined,
-          lingkar_perut: parseFloat(values.lingkar_perut) || undefined,
-          lingkar_lengan_atas: parseFloat(values.lingkar_lengan_atas) || undefined,
-          tinggi_fundus: parseFloat(values.tinggi_fundus) || undefined,
-          usia_kehamilan_minggu: parseInt(values.usia_kehamilan_minggu) || undefined,
+          bb: parseNum(values.bb),
+          tb: parseNum(values.tb),
+          lingkar_perut: parseNum(values.lingkar_perut),
+          lingkar_lengan_atas: parseNum(values.lingkar_lengan_atas),
+          tinggi_fundus: parseNum(values.tinggi_fundus),
+          usia_kehamilan_minggu: parseNum(values.usia_kehamilan_minggu, true),
           hpht: values.hpht || undefined,
           htp: values.htp || undefined,
-          jumlah_anak: parseInt(values.jumlah_anak) || undefined,
+          jumlah_anak: parseNum(values.jumlah_anak, true),
           riwayat_penyakit: values.riwayat_penyakit || undefined,
-          kadar_hemoglobin: parseFloat(values.kadar_hemoglobin) || undefined,
-          berat_janin: parseFloat(values.berat_janin) || undefined,
+          kadar_hemoglobin: parseNum(values.kadar_hemoglobin),
+          berat_janin: parseNum(values.berat_janin),
           terpapar_rokok: values.terpapar_rokok ?? undefined,
           kie: values.kie ?? undefined,
-          suplemen_tambah_darah: parseInt(values.suplemen_tambah_darah) || undefined,
-          mms: parseInt(values.mms) || undefined,
+          suplemen_tambah_darah: parseNum(values.suplemen_tambah_darah, true),
+          mms: parseNum(values.mms, true),
           fasilitasi_rujukan: values.fasilitasi_rujukan ?? undefined,
           fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
         }
@@ -223,24 +240,24 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         const td = parseTd(values.td)
         payload = {
           ...payload,
-          bb: parseFloat(values.bb) || undefined,
-          tb: parseFloat(values.tb) || undefined,
+          bb: parseNum(values.bb),
+          tb: parseNum(values.tb),
           tekanan_darah_sistolik: td?.s,
           tekanan_darah_diastolik: td?.d,
-          gula_darah_sewaktu: parseFloat(values.gula_darah_sewaktu) || undefined,
+          gula_darah_sewaktu: parseNum(values.gula_darah_sewaktu),
         }
       } else if (isPasca) {
         const td = parseTd(values.td)
         payload = {
           ...payload,
           tanggal_persalinan: values.tanggal_persalinan || undefined,
-          bb: parseFloat(values.bb) || undefined,
+          bb: parseNum(values.bb),
           tekanan_darah_sistolik: td?.s,
           tekanan_darah_diastolik: td?.d,
-          suhu_tubuh: parseFloat(values.suhu_tubuh) || undefined,
+          suhu_tubuh: parseNum(values.suhu_tubuh),
           kondisi_ibu: values.kondisi_ibu || undefined,
-          tinggi_badan_bayi: parseFloat(values.tinggi_badan_bayi) || undefined,
-          berat_badan_bayi: parseFloat(values.berat_badan_bayi) || undefined,
+          tinggi_badan_bayi: parseNum(values.tinggi_badan_bayi),
+          berat_badan_bayi: parseNum(values.berat_badan_bayi),
           kie: values.kie ?? undefined,
           fasilitasi_rujukan: values.fasilitasi_rujukan ?? undefined,
           fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
@@ -255,8 +272,25 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
 
       reset()
       onOpenChange(false)
-    } catch (err) {
+      toast.success('Data berhasil disimpan')
+    } catch (err: any) {
       console.error(err)
+      if (err.response?.data?.errors?.length > 0) {
+        err.response.data.errors.forEach((error: any) => {
+          if (error.path && error.path.length > 0) {
+            let fieldName = error.path[0] as string;
+            if (fieldName === 'tekanan_darah_sistolik' || fieldName === 'tekanan_darah_diastolik') {
+              fieldName = 'td';
+            }
+            methods.setError(fieldName as any, { type: 'server', message: error.message });
+          }
+        });
+        toast.error('Gagal menyimpan: periksa kembali isian formulir')
+      } else if (err.response?.data?.message) {
+        toast.error(err.response.data.message)
+      } else {
+        toast.error('Terjadi kesalahan saat menyimpan data')
+      }
     }
   }
 
@@ -264,7 +298,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
     <Dialog open={open} onOpenChange={(nextOpen) => {
       if (!isPending) onOpenChange(nextOpen)
     }}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
           <DialogDescription>
@@ -312,15 +346,15 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Ibu Hamil */}
             {isBumil && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Usia Kandungan (Minggu)">
+                <Field label="Usia Kandungan (Minggu)" required>
                   <Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="28" max={45} min={0} />
                   {watch('usia_kehamilan_minggu') > 42 && (
                     <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Lewat Waktu (Normal 37-42 mgg)</p>
                   )}
                 </Field>
                 <Field label="Anak Ke"><Input register={register} name="jumlah_anak" type="number" placeholder="1" max={20} min={0} /></Field>
-                <Field label="Berat Badan (kg)"><Input register={register} name="bb" type="number" placeholder="60.5" max={200} min={0} /></Field>
-                <Field label="Tinggi Badan (cm)"><Input register={register} name="tb" type="number" placeholder="155" max={250} min={0} /></Field>
+                <Field label="Berat Badan (kg)" required><Input register={register} name="bb" type="number" placeholder="60.5" max={200} min={0} /></Field>
+                <Field label="Tinggi Badan (cm)" required><Input register={register} name="tb" type="number" placeholder="155" max={250} min={0} /></Field>
                 <Field label="IMT">
                   {(() => {
                     const bb = watch('bb')
@@ -359,15 +393,15 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                     )
                   })()}
                 </Field>
-                <Field label="Lingkar Perut (cm)"><Input register={register} name="lingkar_perut" type="number" placeholder="85" max={200} min={0} /></Field>
+                <Field label="Lingkar Perut (cm)" required><Input register={register} name="lingkar_perut" type="number" placeholder="85" max={200} min={0} /></Field>
                 <Field label="Tinggi Fundus (cm)"><Input register={register} name="tinggi_fundus" type="number" placeholder="20" max={100} min={0} /></Field>
-                <Field label="LILA (cm)">
+                <Field label="LILA (cm)" required>
                   <Input register={register} name="lingkar_lengan_atas" type="number" placeholder="24" max={60} min={0} />
                   {watch('lingkar_lengan_atas') > 0 && watch('lingkar_lengan_atas') < 23.5 && (
                     <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Risiko KEK</p>
                   )}
                 </Field>
-                <Field label="HPHT"><Input register={register} name="hpht" type="date" /></Field>
+                <Field label="HPHT" required><Input register={register} name="hpht" type="date" /></Field>
                 <Field label="Rentang HPL">
                   <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
                     {calculateHplRange(hphtWatch)}
@@ -428,6 +462,9 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="Tanggal Persalinan" required><Input register={register} name="tanggal_persalinan" type="date" /></Field>
                 <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
                 <Field label="Berat Badan Ibu (kg)" required><Input register={register} name="bb" type="number" placeholder="62" /></Field>
+                <Field label="Tekanan Darah (mmHg)" required>
+                  <TdInput setValue={setValue} watch={watch} name="td" />
+                </Field>
                 <div className="col-span-2">
                   <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 </div>
