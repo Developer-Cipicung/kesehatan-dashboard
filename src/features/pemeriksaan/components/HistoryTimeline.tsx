@@ -20,6 +20,11 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
   }
 
   const isBumil = kategori === 'bumil'
+  
+  if (isBumil) {
+    return <BumilTimelineTable history={history} isLocked={isLocked} onEdit={onEdit} onDelete={onDelete} />
+  }
+
   const isLansia = kategori === 'lansia'
   const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
   const isBalita = kategori === 'balita' || kategori === 'baduta'
@@ -144,7 +149,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                     {record.jumlah_anak !== undefined && record.jumlah_anak !== null && <div className="text-xs"><span className="text-muted-foreground">Anak Ke-:</span> {record.jumlah_anak}</div>}
                     {record.kadar_hemoglobin !== undefined && record.kadar_hemoglobin !== null && <div className="text-xs"><span className="text-muted-foreground">Hb:</span> {record.kadar_hemoglobin}</div>}
-                    {record.berat_janin !== undefined && record.berat_janin !== null && <div className="text-xs"><span className="text-muted-foreground">Berat Janin:</span> {record.berat_janin} g</div>}
+                    {record.berat_janin !== undefined && record.berat_janin !== null && <div className="text-xs"><span className="text-muted-foreground">Berat Janin:</span> {record.berat_janin} kg</div>}
                     <div className="text-xs"><span className="text-muted-foreground">Rokok:</span> {record.terpapar_rokok ? 'Ya' : 'Tidak'}</div>
                     <div className="text-xs"><span className="text-muted-foreground">KIE:</span> {record.kie ? 'Ya' : 'Tidak'}</div>
                     <div className="text-xs"><span className="text-muted-foreground">TTD:</span> {record.suplemen_tambah_darah ? 'Ya' : 'Tidak'}</div>
@@ -181,6 +186,156 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                         onClick={() => onDelete(record.id)}
                       >
                         <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function BumilTimelineTable({ history, isLocked, onEdit, onDelete }: Omit<HistoryTimelineProps, 'kategori'>) {
+  const getBadgeColor = (status: string) => {
+    if (status?.includes('KEK & Anemia')) return 'bg-red-100 text-red-800 border-red-200'
+    if (status?.includes('KEK') || status?.includes('Anemia')) return 'bg-amber-100 text-amber-800 border-amber-200'
+    return 'bg-emerald-100 text-emerald-800 border-emerald-200'
+  }
+
+  const getHplRange = (hphtStr?: string) => {
+    if (!hphtStr) return '-'
+    const hpht = new Date(hphtStr)
+    const start = new Date(hpht)
+    start.setDate(start.getDate() + 259)
+    const end = new Date(hpht)
+    end.setDate(end.getDate() + 294)
+    const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+    return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
+  }
+
+  const calculateBMI = (bbStr?: string, tbStr?: string) => {
+    if (!bbStr || !tbStr) return null;
+    const bb = parseFloat(bbStr);
+    const tb = parseFloat(tbStr);
+    if (bb > 0 && tb > 0) {
+      const tbMeters = tb / 100;
+      const bmi = bb / (tbMeters * tbMeters);
+      let status = '';
+      let color = '';
+      if (bmi < 18.5) {
+        status = 'Kurus';
+        color = 'text-amber-600 bg-amber-50 border-amber-200';
+      } else if (bmi < 25.0) {
+        status = 'Normal';
+        color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
+      } else if (bmi <= 27.0) {
+        status = 'Gemuk';
+        color = 'text-amber-600 bg-amber-50 border-amber-200';
+      } else {
+        status = 'Obesitas';
+        color = 'text-red-600 bg-red-50 border-red-200';
+      }
+      return { value: bmi.toFixed(1), status, color };
+    }
+    return null;
+  }
+
+  return (
+    <div className="w-full overflow-x-auto bg-white rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100">
+      <table className="w-full text-sm text-left">
+        <thead>
+          <tr className="border-b border-slate-200 bg-slate-50/50">
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Tgl Kunj.</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">HPHT / HPL</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Jml Anak</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Usia Hamil</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">TB (cm)</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">BB (kg)</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap text-center">IMT</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">L. Perut</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">T. Fundus</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Riw. Penyakit</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Hb</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">LiLA</th>
+            <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Janin (kg)</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Rokok / KIE / TTD / MMS</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Rujukan & Bansos</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Status Medis</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Tgl Berikut</th>
+            <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] whitespace-nowrap">Catatan</th>
+            {!isLocked && <th className="px-3 py-4 font-bold text-slate-500 uppercase tracking-wider text-[10px] text-right">Aksi</th>}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {history.map((record: any) => {
+            const parseDate = (d: string) => d ? new Date(d).toLocaleDateString('id-ID') : '-'
+            
+            return (
+              <tr key={record.id} className="hover:bg-primary/5 transition-colors">
+                <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap text-xs">{parseDate(record.tanggal_kunjungan || record.created_at)}</td>
+                <td className="px-4 py-3 text-slate-600 text-[11px] whitespace-nowrap">
+                  <div><span className="text-muted-foreground">HPHT:</span> {parseDate(record.hpht)}</div>
+                  <div className="mt-0.5"><span className="text-muted-foreground">HPL:</span> {getHplRange(record.hpht)}</div>
+                </td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.jumlah_anak ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.usia_kehamilan_minggu ?? '-'} Mg</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.tb ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.bb ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">
+                  {(() => {
+                    const bmiData = calculateBMI(record.bb, record.tb);
+                    return bmiData ? (
+                      <div className={`text-[10px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${bmiData.color}`} title="Indeks Massa Tubuh">
+                        {bmiData.value}<br/>
+                        <span className="font-medium text-[8px] uppercase tracking-wider">{bmiData.status}</span>
+                      </div>
+                    ) : '-'
+                  })()}
+                </td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.lingkar_perut ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.tinggi_fundus ?? '-'}</td>
+                <td className="px-4 py-3 text-slate-600 text-xs max-w-[120px] truncate" title={record.riwayat_penyakit}>{record.riwayat_penyakit || '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.kadar_hemoglobin ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.lingkar_lengan_atas ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.berat_janin ?? '-'}</td>
+                
+                <td className="px-4 py-3 text-slate-600 text-[11px] whitespace-nowrap">
+                  <div>Rokok: {record.terpapar_rokok ? 'Ya' : 'Tidak'}</div>
+                  <div>KIE: {record.kie ? 'Ya' : 'Tidak'}</div>
+                  <div>TTD: {record.suplemen_tambah_darah ?? '-'}</div>
+                  <div>MMS: {record.mms ?? '-'}</div>
+                </td>
+                <td className="px-4 py-3 text-slate-600 text-[11px] whitespace-nowrap">
+                  <div>Rujukan: {record.fasilitasi_rujukan ? 'Ya' : 'Tidak'}</div>
+                  <div>Bansos: {record.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak'}</div>
+                </td>
+                
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold border ${getBadgeColor(record.status_medis)}`}>
+                    {record.status_medis || 'Normal'}
+                  </span>
+                </td>
+                
+                <td className="px-4 py-3 text-slate-600 text-xs whitespace-nowrap">
+                  {parseDate(record.tanggal_kunjungan_berikut)}
+                </td>
+
+                <td className="px-4 py-3 text-slate-600 max-w-[150px]">
+                  {record.catatan ? <span className="text-xs truncate block" title={record.catatan}>{record.catatan}</span> : <span className="text-slate-300">-</span>}
+                </td>
+                
+                {!isLocked && (
+                  <td className="px-3 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => onEdit(record)}>
+                        <Edit className="h-3 w-3 text-slate-500" />
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 border-destructive/20" onClick={() => onDelete(record.id)}>
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </td>

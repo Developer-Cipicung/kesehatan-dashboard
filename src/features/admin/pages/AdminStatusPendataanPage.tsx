@@ -1,12 +1,22 @@
 import { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useGetAdminStatusPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
+import { useGetAdminStatusPendataan, useGetPendataanStatus, useSubmitPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { CheckCircle2, CircleDashed, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAuthStore } from '@/stores/authStore'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 
 const MONTHS = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -15,13 +25,19 @@ const MONTHS = [
 
 export function AdminStatusPendataanPage() {
   const currentDate = new Date()
+  const currentMonth = currentDate.getMonth() + 1
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
   const userPosyanduId = useAuthStore(state => state.posyandu?.id)
 
-  const { data, isLoading, isError, refetch } = useGetAdminStatusPendataan(selectedYear)
+  const [isSubmitOpen, setIsSubmitOpen] = useState(false)
+  const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState(currentDate.toISOString().split('T')[0])
 
+  const { data, isLoading, isError, refetch } = useGetAdminStatusPendataan(selectedYear)
+  const { data: pendataanStatus, refetch: refetchStatus } = useGetPendataanStatus(currentMonth, currentDate.getFullYear(), userPosyanduId || undefined)
+  const { mutate: submitPendataan, isPending: isSubmitting } = useSubmitPendataan()
+  const isLocked = pendataanStatus?.status === 'selesai'
   const filteredData = data?.filter(posyandu => 
     posyandu.nama.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
     posyandu.kode.toLowerCase().includes(debouncedSearch.toLowerCase())
@@ -60,6 +76,26 @@ export function AdminStatusPendataanPage() {
           </div>
           
           <div className="flex items-center gap-3">
+            {userPosyanduId && (
+              isLocked ? (
+                <Button 
+                  variant="outline"
+                  className="bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed shadow-sm"
+                  disabled
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" />
+                  Bulan Ini Sudah Dikunci
+                </Button>
+              ) : (
+                <Button 
+                  variant="default"
+                  className="bg-slate-900 hover:bg-slate-800 shadow-sm"
+                  onClick={() => setIsSubmitOpen(true)}
+                >
+                  Tutup Pendataan Bulan Ini
+                </Button>
+              )
+            )}
             <Select value={selectedYear.toString()} onValueChange={(v) => { if(v) setSelectedYear(parseInt(v)) }}>
               <SelectTrigger className="w-[100px] h-10 border-slate-200 font-medium">
                 <SelectValue placeholder="Tahun" />
@@ -135,6 +171,49 @@ export function AdminStatusPendataanPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={isSubmitOpen} onOpenChange={setIsSubmitOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Kunci Pendataan Bulan Ini</DialogTitle>
+            <DialogDescription>
+              Tentukan tanggal pelaksanaan Posyandu. Semua data pemeriksaan yang baru diinput akan disimpan dengan tanggal ini. Data yang sudah dikunci tidak dapat diubah lagi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="tanggal_pelaksanaan">Tanggal Pelaksanaan Posyandu</Label>
+              <Input
+                id="tanggal_pelaksanaan"
+                type="date"
+                value={tanggalPelaksanaan}
+                onChange={(e) => setTanggalPelaksanaan(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSubmitOpen(false)}>
+              Batal
+            </Button>
+            <Button 
+              onClick={() => {
+                if (!tanggalPelaksanaan || !pendataanStatus?.id) return
+                submitPendataan(
+                  { id: pendataanStatus.id, tanggal_pelaksanaan: new Date(tanggalPelaksanaan).toISOString() },
+                  { onSuccess: () => {
+                    setIsSubmitOpen(false)
+                    refetch() // Refresh table
+                    refetchStatus() // Refresh status
+                  }},
+                )
+              }}
+              disabled={isSubmitting || !tanggalPelaksanaan || !pendataanStatus?.id}
+            >
+              Ya, Kunci Pendataan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

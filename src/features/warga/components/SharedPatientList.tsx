@@ -8,16 +8,6 @@ import { AddPatientDialog } from './AddPatientDialog'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { useNavigate } from 'react-router-dom'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 import {
   Pagination,
@@ -37,11 +27,8 @@ interface SharedPatientListProps {
 export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [isSubmitOpen, setIsSubmitOpen] = useState(false)
-  const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState(new Date().toISOString().split('T')[0])
-  const navigate = useNavigate()
   const { selectedPosyanduId, posyandu } = useAuthStore()
-  
+  const navigate = useNavigate()
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
 

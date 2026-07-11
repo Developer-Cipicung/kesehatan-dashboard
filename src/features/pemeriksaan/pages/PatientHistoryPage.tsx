@@ -139,6 +139,7 @@ export function PatientHistoryPage() {
         kategori={kategori!}
         wargaId={id!}
         initialData={editingRecord}
+        previousRecord={history?.[0]}
         defaultTanggalPersalinan={warga.pemeriksaan_pasca_persalinan?.[0]?.tanggal_persalinan}
       />
 
