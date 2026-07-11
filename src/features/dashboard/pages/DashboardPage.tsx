@@ -14,7 +14,7 @@ import {
   Legend,
 } from 'recharts'
 import { Link } from 'react-router-dom'
-import { Baby, HeartPulse, PersonStanding, Users, Activity, FileBarChart, ClipboardList } from 'lucide-react'
+import { Baby, HeartPulse, PersonStanding, Activity, FileBarChart, ClipboardList } from 'lucide-react'
 import { GlobalPatientSearch } from '../components/GlobalPatientSearch'
 
 
@@ -53,15 +53,12 @@ export function DashboardPage() {
   }
 
   const {
-    total_warga,
-    total_lansia,
     kategori_breakdown,
     kunjungan_6_bulan,
-    pendataan_status
+    pendataan
   } = data
 
-  const totalIbu = kategori_breakdown.ibu_hamil + kategori_breakdown.pasca_persalinan
-  const totalAnak = kategori_breakdown.baduta + kategori_breakdown.balita
+  const isPendataanSelesai = pendataan && Object.values(pendataan).every(status => status === 'selesai')
 
   return (
     <div className="flex flex-col max-w-full">
@@ -74,7 +71,7 @@ export function DashboardPage() {
             {currentDate} · {posyandu ? `Posyandu ${posyandu.nama}` : 'Pusat Pendataan Kesehatan Cipicung'}
           </p>
         </div>
-        {pendataan_status === 'draft' ? (
+        {!isPendataanSelesai ? (
           <Link to="/verifikasi-pendataan" className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-200">
             <div className="bg-white/20 p-2 rounded-lg">
               <ClipboardList className="w-6 h-6 text-white" />

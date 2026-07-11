@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Plus, User, Baby, HeartPulse, PersonStanding, Activity, Loader2 } from 'lucide-react'
 import { wargaService, Warga } from '@/features/warga/services/wargaService'
-import { isBalitaByBirthDate, isBadutaByBirthDate, calculateAgeInMonths } from '@/utils/age'
+import { calculateAgeInMonths } from '@/utils/age'
 import { useNavigate } from 'react-router-dom'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 
