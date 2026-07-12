@@ -313,7 +313,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
     <Dialog open={open} onOpenChange={(nextOpen) => {
       if (!isPending) onOpenChange(nextOpen)
     }}>
-      <DialogContent className="max-w-[420px] sm:max-w-xl md:max-w-2xl">
+      <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[420px] overflow-x-hidden overflow-y-auto sm:max-w-xl md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
           <DialogDescription>
@@ -538,9 +538,9 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
               />
             </Field>
 
-            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
-              <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)} className="w-full sm:w-auto">Batal</Button>
-              <Button type="submit" disabled={isPending} className="w-full sm:w-auto">{isPending ? 'Menyimpan...' : 'Simpan'}</Button>
+            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
+              <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)} className="h-8 w-full text-xs sm:h-9 sm:w-auto sm:text-sm">Batal</Button>
+              <Button type="submit" disabled={isPending} className="h-8 w-full text-xs sm:h-9 sm:w-auto sm:text-sm">{isPending ? 'Menyimpan...' : 'Simpan'}</Button>
             </div>
           </form>
         </FormProvider>

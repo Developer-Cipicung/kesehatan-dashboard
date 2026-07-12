@@ -17,7 +17,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500 border rounded-md bg-slate-50">
+      <div className="flex flex-col items-center justify-center rounded-md border bg-slate-50 p-6 text-center text-sm text-slate-500 sm:p-8">
         <p>Belum ada data pemeriksaan untuk kategori ini pada bulan ini.</p>
       </div>
     )
@@ -31,7 +31,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
       red: 'bg-rose-50 text-rose-700 border-rose-200',
       blue: 'bg-blue-50 text-blue-700 border-blue-200'
     };
-    return <span className={`inline-block whitespace-nowrap px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border ${colors[color]}`}>{text}</span>;
+    return <span className={`inline-block whitespace-nowrap rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase sm:px-2 ${colors[color]}`}>{text}</span>;
   }
 
   const renderHeaders = () => {
@@ -360,8 +360,8 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="max-w-full overflow-hidden rounded-md border">
+      <Table className="min-w-max text-xs sm:text-sm">
         <TableHeader>
           <TableRow>
             <TableHead className="w-12">No</TableHead>

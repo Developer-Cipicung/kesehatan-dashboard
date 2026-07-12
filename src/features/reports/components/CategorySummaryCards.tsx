@@ -20,14 +20,14 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
     const percentage = total > 0 ? ((value / total) * 100).toFixed(1).replace('.', ',') + '%' : '0%';
 
     return (
-      <Card className="shadow-sm border border-slate-200">
-        <CardContent className="p-4 sm:p-5">
-          <p className="text-sm font-medium text-slate-600 mb-2">{title}</p>
+      <Card className="border border-slate-200 shadow-sm">
+        <CardContent className="p-3 sm:p-4">
+          <p className="mb-1.5 text-xs font-medium leading-tight text-slate-600 sm:text-sm">{title}</p>
           <div className="flex flex-col">
-            <span className="text-3xl font-bold text-slate-800">
-              {value} {suffix && <span className="text-sm font-normal text-slate-500">{suffix}</span>}
+            <span className="text-xl font-bold leading-tight text-slate-800 sm:text-2xl">
+              {value} {suffix && <span className="text-xs font-normal text-slate-500 sm:text-sm">{suffix}</span>}
             </span>
-            {!suffix && <span className={`text-sm font-medium mt-1 ${pctColor}`}>({percentage})</span>}
+            {!suffix && <span className={`mt-0.5 text-xs font-medium sm:text-sm ${pctColor}`}>({percentage})</span>}
           </div>
         </CardContent>
       </Card>
@@ -35,19 +35,19 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
   };
 
   const renderGroupedCard = (title: string, items: { label: string; value: number; color: string }[]) => (
-    <Card className="col-span-2 md:col-span-2 border-l-4 border-l-primary bg-white shadow-sm">
-      <CardContent className="p-4 sm:p-5">
-        <h3 className="text-sm font-bold text-slate-700 mb-3 border-b pb-2">{title}</h3>
-        <div className="flex flex-row gap-2">
+    <Card className="col-span-2 border-l-4 border-l-primary bg-white shadow-sm md:col-span-2">
+      <CardContent className="p-3 sm:p-4">
+        <h3 className="mb-2 border-b pb-2 text-xs font-bold leading-tight text-slate-700 sm:text-sm">{title}</h3>
+        <div className="grid grid-cols-2 gap-2 min-[390px]:grid-cols-3">
           {items.map((d, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <span className={`text-xl font-bold mb-1 ${
+            <div key={i} className="flex min-h-[68px] flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-2">
+              <span className={`mb-1 text-lg font-bold leading-none sm:text-xl ${
                 d.color === 'green' ? 'text-emerald-600' :
                 d.color === 'red' ? 'text-rose-600' :
                 d.color === 'orange' ? 'text-amber-600' :
                 'text-blue-600'
               }`}>{d.value}</span>
-              <span className="text-[10px] text-slate-500 font-medium text-center leading-tight uppercase tracking-wide">{d.label}</span>
+              <span className="text-center text-[10px] font-medium uppercase leading-tight text-slate-500">{d.label}</span>
             </div>
           ))}
         </div>
@@ -74,9 +74,9 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
     });
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="col-span-2 md:col-span-4 flex">
-          <div className="w-1/2 md:w-1/4 pr-2">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4">
+          <div className="w-full md:w-1/4">
             {renderCard('Total Data Pemeriksaan', total, 'kunjungan')}
           </div>
         </div>
@@ -115,9 +115,9 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
     });
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="col-span-2 md:col-span-4 flex">
-          <div className="w-1/2 md:w-1/4 pr-2">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4">
+          <div className="w-full md:w-1/4">
             {renderCard('Total Data Pemeriksaan', total, 'kunjungan')}
           </div>
         </div>
@@ -160,9 +160,9 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
     });
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="col-span-2 md:col-span-4 flex">
-          <div className="w-1/2 md:w-1/4 pr-2">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4">
+          <div className="w-full md:w-1/4">
             {renderCard('Total Data Pemeriksaan', total, 'kunjungan')}
           </div>
         </div>
@@ -217,9 +217,9 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
     });
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="col-span-2 md:col-span-4 flex">
-          <div className="w-1/2 md:w-1/4 pr-2">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4">
+          <div className="w-full md:w-1/4">
             {renderCard('Total Data Pemeriksaan', total, 'kunjungan')}
           </div>
         </div>

@@ -92,9 +92,9 @@ export function PatientHistoryPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="pl-0">
+    <div className="max-w-full space-y-4 overflow-x-hidden sm:space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="h-8 pl-0 text-xs sm:h-9 sm:text-sm">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali
         </Button>
@@ -121,11 +121,11 @@ export function PatientHistoryPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-8 mb-4">
-        <h3 className="text-xl font-bold">Riwayat Pemeriksaan</h3>
+      <div className="mt-6 mb-3 flex items-center justify-between gap-3 sm:mt-8 sm:mb-4">
+        <h3 className="text-lg font-bold sm:text-xl">Riwayat Pemeriksaan</h3>
         {!isLocked && !isReadOnly && (
-          <Button onClick={handleAdd}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={handleAdd} className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm">
+            <Plus className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
             Tambah Riwayat
           </Button>
         )}

@@ -78,13 +78,13 @@ export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bula
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3">
+    <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-3">
 
       <Button 
         variant="default"
         onClick={handleExportExcel}
         disabled={isLoading || isExporting}
-        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+        className="w-full bg-green-600 text-xs text-white hover:bg-green-700 sm:w-auto sm:text-sm"
       >
         {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}
         {isExporting ? 'Memproses...' : 'Download Excel'}

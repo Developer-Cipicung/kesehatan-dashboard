@@ -1,17 +1,27 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats'
 import { useNavigate } from 'react-router-dom'
-import { useGetPendataanGlobalStatus, useGetAdminStatusPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
-
+import {
+  useGetPendataanGlobalStatus,
+  useGetAdminStatusPendataan,
+} from '@/features/pendataan/hooks/usePendataanBulanan'
 
 // Lazy load ExportActions to prevent loading heavy jsPDF & exceljs on page load
-const ExportActions = lazy(() => import('../components/ExportActions').then(m => ({ default: m.ExportActions })))
+const ExportActions = lazy(() =>
+  import('../components/ExportActions').then((m) => ({
+    default: m.ExportActions,
+  }))
+)
 import { MonthlyReportTable } from '../components/MonthlyReportTable'
 import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
-import { calculateIMT, classifyIMT, classifyTekananDarah } from '@/utils/kesehatan'
+import {
+  calculateIMT,
+  classifyIMT,
+  classifyTekananDarah,
+} from '@/utils/kesehatan'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Filter, RotateCcw, Search } from 'lucide-react'
@@ -23,22 +33,34 @@ export function ReportPage() {
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
 
-  const [posyanduFilter, setPosyanduFilter] = useState<'my' | 'all'>(() => (localStorage.getItem('rekapitulasi_posyandu') as 'my' | 'all') || 'my')
-  const [kategoriFilter, setKategoriFilter] = useState<string>(() => localStorage.getItem('rekapitulasi_kategori') || 'bumil')
+  const [posyanduFilter, setPosyanduFilter] = useState<'my' | 'all'>(
+    () =>
+      (localStorage.getItem('rekapitulasi_posyandu') as 'my' | 'all') || 'my'
+  )
+  const [kategoriFilter, setKategoriFilter] = useState<string>(
+    () => localStorage.getItem('rekapitulasi_kategori') || 'bumil'
+  )
   const [subFilters, setSubFilters] = useState<Record<string, string>>(() => {
     try {
-      const saved = localStorage.getItem(`rekapitulasi_filters_${localStorage.getItem('rekapitulasi_kategori') || 'bumil'}`)
+      const saved = localStorage.getItem(
+        `rekapitulasi_filters_${localStorage.getItem('rekapitulasi_kategori') || 'bumil'}`
+      )
       return saved ? JSON.parse(saved) : {}
     } catch {
       return {}
     }
   })
-  const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('rekapitulasi_search') || '')
+  const [searchQuery, setSearchQuery] = useState(
+    () => localStorage.getItem('rekapitulasi_search') || ''
+  )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const posyanduIdParam = posyanduFilter === 'all' ? 'all' : undefined
 
   useEffect(() => {
-    localStorage.setItem(`rekapitulasi_filters_${kategoriFilter}`, JSON.stringify(subFilters))
+    localStorage.setItem(
+      `rekapitulasi_filters_${kategoriFilter}`,
+      JSON.stringify(subFilters)
+    )
   }, [subFilters, kategoriFilter])
 
   useEffect(() => {
@@ -52,7 +74,9 @@ export function ReportPage() {
   // Reload subFilters when kategoriFilter changes
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`rekapitulasi_filters_${kategoriFilter}`)
+      const saved = localStorage.getItem(
+        `rekapitulasi_filters_${kategoriFilter}`
+      )
       setSubFilters(saved ? JSON.parse(saved) : {})
     } catch {
       setSubFilters({})
@@ -60,21 +84,32 @@ export function ReportPage() {
   }, [kategoriFilter])
 
   // Fetch Dashboard Stats for numbers
-  const { data: dashboard, isLoading: isDashboardLoading, error: dashboardError } = useDashboardStats(posyanduIdParam)
-  
+  const {
+    data: dashboard,
+    isLoading: isDashboardLoading,
+    error: dashboardError,
+  } = useDashboardStats(posyanduIdParam)
+
   // Fetch Pendataan Status for completion state
-  const { isLoading: isStatusLoading } = useGetPendataanGlobalStatus(currentMonth, currentYear)
+  const { isLoading: isStatusLoading } = useGetPendataanGlobalStatus(
+    currentMonth,
+    currentYear
+  )
 
   // Fetch all posyandus status if filter is 'all'
-  const { data: allPosyanduData } = useGetAdminStatusPendataan(currentYear, posyanduFilter === 'all')
+  const { data: allPosyanduData } = useGetAdminStatusPendataan(
+    currentYear,
+    posyanduFilter === 'all'
+  )
 
   // Fetch Pemeriksaan List for the selected category, month, and year (limit 1000 for full month stats)
-  const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(kategoriFilter, {
-    bulan: currentMonth,
-    tahun: currentYear,
-    limit: 1000,
-    posyanduId: posyanduIdParam,
-  })
+  const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } =
+    useGetPemeriksaanList(kategoriFilter, {
+      bulan: currentMonth,
+      tahun: currentYear,
+      limit: 1000,
+      posyanduId: posyanduIdParam,
+    })
 
   // Compute baduta vs balita filter dynamically
   let filteredPemeriksaanList = (() => {
@@ -82,13 +117,15 @@ export function ReportPage() {
     if (kategoriFilter === 'baduta') {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
-        const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
+        const tglKunjungan =
+          item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
         return isBadutaByBirthDate(item.warga.tanggal_lahir, tglKunjungan)
       })
     } else if (kategoriFilter === 'balita') {
       return list.filter((item: any) => {
         if (!item.warga?.tanggal_lahir) return false
-        const tglKunjungan = item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
+        const tglKunjungan =
+          item.tanggal_kunjungan || item.tanggal_pemeriksaan || new Date()
         return isBalitaByBirthDate(item.warga.tanggal_lahir, tglKunjungan)
       })
     }
@@ -98,88 +135,99 @@ export function ReportPage() {
   // Apply Sub Filters
   if (Object.keys(subFilters).length > 0) {
     filteredPemeriksaanList = filteredPemeriksaanList.filter((item: any) => {
-      let passed = true;
-      
+      let passed = true
+
       // Bumil
       if (kategoriFilter === 'bumil') {
         if (subFilters.trimester) {
-          const mgg = item.usia_kehamilan_minggu || 0;
-          if (subFilters.trimester === '1' && mgg > 13) passed = false;
-          if (subFilters.trimester === '2' && (mgg <= 13 || mgg > 27)) passed = false;
-          if (subFilters.trimester === '3' && mgg <= 27) passed = false;
+          const mgg = item.usia_kehamilan_minggu || 0
+          if (subFilters.trimester === '1' && mgg > 13) passed = false
+          if (subFilters.trimester === '2' && (mgg <= 13 || mgg > 27))
+            passed = false
+          if (subFilters.trimester === '3' && mgg <= 27) passed = false
         }
         if (subFilters.anemia) {
-          const hb = item.kadar_hemoglobin ? Number(item.kadar_hemoglobin) : 999;
-          if (subFilters.anemia === 'normal' && hb < 11) passed = false;
-          if (subFilters.anemia === 'ringan' && (hb >= 11 || hb < 8)) passed = false;
-          if (subFilters.anemia === 'berat' && hb >= 8) passed = false;
+          const hb = item.kadar_hemoglobin ? Number(item.kadar_hemoglobin) : 999
+          if (subFilters.anemia === 'normal' && hb < 11) passed = false
+          if (subFilters.anemia === 'ringan' && (hb >= 11 || hb < 8))
+            passed = false
+          if (subFilters.anemia === 'berat' && hb >= 8) passed = false
         }
         if (subFilters.kek) {
-          const lila = item.lingkar_lengan_atas ? Number(item.lingkar_lengan_atas) : 999;
-          if (subFilters.kek === 'kek' && lila >= 23.5) passed = false;
-          if (subFilters.kek === 'normal' && lila < 23.5) passed = false;
+          const lila = item.lingkar_lengan_atas
+            ? Number(item.lingkar_lengan_atas)
+            : 999
+          if (subFilters.kek === 'kek' && lila >= 23.5) passed = false
+          if (subFilters.kek === 'normal' && lila < 23.5) passed = false
         }
         if (subFilters.kie) {
-          if (subFilters.kie === 'ya' && !item.kie) passed = false;
-          if (subFilters.kie === 'tidak' && item.kie) passed = false;
+          if (subFilters.kie === 'ya' && !item.kie) passed = false
+          if (subFilters.kie === 'tidak' && item.kie) passed = false
         }
         if (subFilters.imt) {
-          const bb = item.bb ? Number(item.bb) : null;
-          const tb = item.tb ? Number(item.tb) : null;
-          const imt = calculateIMT(bb, tb);
-          const klass = classifyIMT(imt).toLowerCase();
-          if (klass !== subFilters.imt) passed = false;
+          const bb = item.bb ? Number(item.bb) : null
+          const tb = item.tb ? Number(item.tb) : null
+          const imt = calculateIMT(bb, tb)
+          const klass = classifyIMT(imt).toLowerCase()
+          if (klass !== subFilters.imt) passed = false
         }
       }
-      
+
       // Pasca / Lansia
       if (kategoriFilter.startsWith('pasca') || kategoriFilter === 'lansia') {
         if (subFilters.imt) {
-          const bb = item.bb ? Number(item.bb) : null;
-          const tb = item.tb ? Number(item.tb) : null;
-          const imt = calculateIMT(bb, tb);
-          const klass = classifyIMT(imt).toLowerCase();
-          if (klass !== subFilters.imt) passed = false;
+          const bb = item.bb ? Number(item.bb) : null
+          const tb = item.tb ? Number(item.tb) : null
+          const imt = calculateIMT(bb, tb)
+          const klass = classifyIMT(imt).toLowerCase()
+          if (klass !== subFilters.imt) passed = false
         }
         if (subFilters.tensi) {
-          const tensi = classifyTekananDarah(item.tekanan_darah_sistolik, item.tekanan_darah_diastolik).toLowerCase();
-          if (tensi !== subFilters.tensi) passed = false;
+          const tensi = classifyTekananDarah(
+            item.tekanan_darah_sistolik,
+            item.tekanan_darah_diastolik
+          ).toLowerCase()
+          if (tensi !== subFilters.tensi) passed = false
         }
         if (subFilters.kie && kategoriFilter.startsWith('pasca')) {
-          if (subFilters.kie === 'ya' && !item.kie) passed = false;
-          if (subFilters.kie === 'tidak' && item.kie) passed = false;
+          if (subFilters.kie === 'ya' && !item.kie) passed = false
+          if (subFilters.kie === 'tidak' && item.kie) passed = false
         }
         if (kategoriFilter === 'lansia') {
           if (subFilters.gula_darah) {
-            const val = item.gula_darah_sewaktu ? parseFloat(item.gula_darah_sewaktu) : null;
+            const val = item.gula_darah_sewaktu
+              ? parseFloat(item.gula_darah_sewaktu)
+              : null
             if (val !== null && !isNaN(val)) {
-              const isTinggi = val >= 200;
-              if (subFilters.gula_darah === 'tinggi' && !isTinggi) passed = false;
-              if (subFilters.gula_darah === 'normal' && isTinggi) passed = false;
+              const isTinggi = val >= 200
+              if (subFilters.gula_darah === 'tinggi' && !isTinggi)
+                passed = false
+              if (subFilters.gula_darah === 'normal' && isTinggi) passed = false
             } else {
-              passed = false;
+              passed = false
             }
           }
           if (subFilters.kolesterol) {
-            const val = item.kolesterol ? parseFloat(item.kolesterol) : null;
+            const val = item.kolesterol ? parseFloat(item.kolesterol) : null
             if (val !== null && !isNaN(val)) {
-              const isTinggi = val >= 200; // >= 200 means Batas Tinggi or Tinggi
-              if (subFilters.kolesterol === 'tinggi' && !isTinggi) passed = false;
-              if (subFilters.kolesterol === 'normal' && isTinggi) passed = false;
+              const isTinggi = val >= 200 // >= 200 means Batas Tinggi or Tinggi
+              if (subFilters.kolesterol === 'tinggi' && !isTinggi)
+                passed = false
+              if (subFilters.kolesterol === 'normal' && isTinggi) passed = false
             } else {
-              passed = false;
+              passed = false
             }
           }
           if (subFilters.asam_urat) {
-            const val = item.asam_urat ? parseFloat(item.asam_urat) : null;
+            const val = item.asam_urat ? parseFloat(item.asam_urat) : null
             if (val !== null && !isNaN(val)) {
-              const jk = item.warga?.jenis_kelamin || 'P';
-              const maxNormal = jk === 'L' ? 7.0 : 6.0;
-              const isTinggi = val > maxNormal;
-              if (subFilters.asam_urat === 'tinggi' && !isTinggi) passed = false;
-              if (subFilters.asam_urat === 'normal' && isTinggi) passed = false;
+              const jk = item.warga?.jenis_kelamin || 'P'
+              const maxNormal = jk === 'L' ? 7.0 : 6.0
+              const isTinggi = val > maxNormal
+              if (subFilters.asam_urat === 'tinggi' && !isTinggi) passed = false
+              if (subFilters.asam_urat === 'normal' && isTinggi) passed = false
             } else {
-              passed = false;
+              passed = false
             }
           }
         }
@@ -188,43 +236,72 @@ export function ReportPage() {
       // Balita / Baduta
       if (kategoriFilter === 'balita' || kategoriFilter === 'baduta') {
         if (subFilters.gizi) {
-          const g = item.status_gizi?.kategori_bb_tb?.toLowerCase() || '';
-          if (subFilters.gizi === 'baik' && !g.includes('baik')) passed = false;
-          if (subFilters.gizi === 'kurang' && !g.includes('kurang') && !g.includes('buruk')) passed = false;
-          if (subFilters.gizi === 'lebih' && !g.includes('lebih') && !g.includes('overweight') && !g.includes('obesitas')) passed = false;
+          const g = item.status_gizi?.kategori_bb_tb?.toLowerCase() || ''
+          if (subFilters.gizi === 'baik' && !g.includes('baik')) passed = false
+          if (
+            subFilters.gizi === 'kurang' &&
+            !g.includes('kurang') &&
+            !g.includes('buruk')
+          )
+            passed = false
+          if (
+            subFilters.gizi === 'lebih' &&
+            !g.includes('lebih') &&
+            !g.includes('overweight') &&
+            !g.includes('obesitas')
+          )
+            passed = false
         }
         if (subFilters.tinggi) {
-          const t = item.status_gizi?.kategori_tb_u?.toLowerCase() || '';
-          if (subFilters.tinggi === 'normal' && !t.includes('normal')) passed = false;
-          if (subFilters.tinggi === 'pendek' && !t.includes('pendek')) passed = false;
-          if (subFilters.tinggi === 'tinggi' && !t.includes('tinggi')) passed = false;
+          const t = item.status_gizi?.kategori_tb_u?.toLowerCase() || ''
+          if (subFilters.tinggi === 'normal' && !t.includes('normal'))
+            passed = false
+          if (subFilters.tinggi === 'pendek' && !t.includes('pendek'))
+            passed = false
+          if (subFilters.tinggi === 'tinggi' && !t.includes('tinggi'))
+            passed = false
         }
         if (subFilters.berat) {
-          const b = item.status_gizi?.kategori_bb_u?.toLowerCase() || '';
-          if (subFilters.berat === 'normal' && !b.includes('normal')) passed = false;
-          if (subFilters.berat === 'kurang' && !b.includes('kurang')) passed = false;
-          if (subFilters.berat === 'lebih' && !b.includes('lebih') && !b.includes('risiko')) passed = false;
+          const b = item.status_gizi?.kategori_bb_u?.toLowerCase() || ''
+          if (subFilters.berat === 'normal' && !b.includes('normal'))
+            passed = false
+          if (subFilters.berat === 'kurang' && !b.includes('kurang'))
+            passed = false
+          if (
+            subFilters.berat === 'lebih' &&
+            !b.includes('lebih') &&
+            !b.includes('risiko')
+          )
+            passed = false
         }
         if (subFilters.imunisasi) {
-          const imunisasiList = item.warga?.riwayat_imunisasi || [];
-          const hasVaksin = imunisasiList.some((i: any) => i.jenis_vaksin?.toUpperCase() === subFilters.imunisasi?.toUpperCase());
-          if (!hasVaksin) passed = false;
+          const imunisasiList = item.warga?.riwayat_imunisasi || []
+          const hasVaksin = imunisasiList.some(
+            (i: any) =>
+              i.jenis_vaksin?.toUpperCase() ===
+              subFilters.imunisasi?.toUpperCase()
+          )
+          if (!hasVaksin) passed = false
         }
       }
 
       // Search Query
       if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
-        const nama = (item.warga?.nama || '').toLowerCase();
-        const nik = (item.warga?.nik || '').toLowerCase();
-        const hp = (item.warga?.no_hp || '').toLowerCase();
-        if (!nama.includes(query) && !nik.includes(query) && !hp.includes(query)) {
-          passed = false;
+        const query = searchQuery.toLowerCase()
+        const nama = (item.warga?.nama || '').toLowerCase()
+        const nik = (item.warga?.nik || '').toLowerCase()
+        const hp = (item.warga?.no_hp || '').toLowerCase()
+        if (
+          !nama.includes(query) &&
+          !nik.includes(query) &&
+          !hp.includes(query)
+        ) {
+          passed = false
         }
       }
 
-      return passed;
-    });
+      return passed
+    })
   }
 
   if (isDashboardLoading || isStatusLoading) {
@@ -255,25 +332,31 @@ export function ReportPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+    <div className="max-w-full space-y-4 overflow-x-hidden sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Laporan & Rekapitulasi</h2>
-          <p className="text-muted-foreground">Menampilkan data pemeriksaan terbaru dan ekspor laporan berdasarkan filter aktif.</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Laporan & Rekapitulasi
+          </h2>
+          {/* <p className="mt-1 text-sm leading-snug text-muted-foreground">Menampilkan data pemeriksaan terbaru dan ekspor laporan berdasarkan filter aktif.</p> */}
         </div>
-        <div className="flex items-center space-x-2 bg-slate-100 border p-1 rounded-md shrink-0">
+        <div className="grid grid-cols-2 gap-1 rounded-md border bg-slate-100 p-1 sm:flex sm:items-center sm:space-x-2 sm:gap-0 sm:shrink-0">
           <button
             onClick={() => setPosyanduFilter('my')}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-sm transition-colors ${
-              posyanduFilter === 'my' ? 'bg-green-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
+            className={`rounded-sm px-2 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
+              posyanduFilter === 'my'
+                ? 'bg-green-600 text-white shadow'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Posyandu Saya
           </button>
           <button
             onClick={() => setPosyanduFilter('all')}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-sm transition-colors ${
-              posyanduFilter === 'all' ? 'bg-green-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
+            className={`rounded-sm px-2 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
+              posyanduFilter === 'all'
+                ? 'bg-green-600 text-white shadow'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Semua Posyandu
@@ -281,23 +364,25 @@ export function ReportPage() {
         </div>
       </div>
 
-      <div className="bg-card p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-card p-3 shadow-sm sm:p-5 lg:p-6">
         {/* Top Controls Row */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-          <select 
+        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(170px,0.7fr)_minmax(0,1.3fr)] lg:grid-cols-[12rem_minmax(0,1fr)_auto] lg:gap-3">
+          <select
             value={kategoriFilter}
             onChange={(e) => {
-              const val = e.target.value;
-              setKategoriFilter(val);
-              localStorage.setItem('rekapitulasi_kategori', val);
+              const val = e.target.value
+              setKategoriFilter(val)
+              localStorage.setItem('rekapitulasi_kategori', val)
               try {
-                const savedFilters = localStorage.getItem(`rekapitulasi_filters_${val}`);
-                setSubFilters(savedFilters ? JSON.parse(savedFilters) : {});
+                const savedFilters = localStorage.getItem(
+                  `rekapitulasi_filters_${val}`
+                )
+                setSubFilters(savedFilters ? JSON.parse(savedFilters) : {})
               } catch {
-                setSubFilters({});
+                setSubFilters({})
               }
             }}
-            className="h-10 px-3 rounded-md border border-slate-300 bg-white w-full lg:w-48 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium"
+            className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 sm:h-10"
           >
             <option value="bumil">Ibu Hamil</option>
             <option value="pasca_persalinan">Ibu Pasca Persalinan</option>
@@ -308,59 +393,116 @@ export function ReportPage() {
 
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input 
-              placeholder="Cari nama / NIK / No. HP" 
+            <Input
+              placeholder="Cari nama / NIK / No. HP"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 w-full"
+              className="h-9 w-full pl-9 text-sm sm:h-10"
             />
           </div>
 
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className="h-10 px-4 text-green-700 border-green-200 hover:bg-green-50"
+          <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-1 lg:flex">
+            <Button
+              variant="outline"
+              className="h-9 px-2 text-xs text-green-700 border-green-200 hover:bg-green-50 sm:h-10 sm:px-4 sm:text-sm"
               onClick={() => setIsSidebarOpen(true)}
             >
-              <Filter className="mr-2 h-4 w-4" />
+              <Filter className="mr-1.5 h-4 w-4 sm:mr-2" />
               Filter Data
             </Button>
-            <Button 
-              variant="ghost" 
-              className="h-10 px-4 text-slate-600 hover:bg-slate-100"
-              onClick={() => { setSubFilters({}); setSearchQuery(''); }}
+            <Button
+              variant="ghost"
+              className="h-9 px-2 text-xs text-slate-600 hover:bg-slate-100 sm:h-10 sm:px-4 sm:text-sm"
+              onClick={() => {
+                setSubFilters({})
+                setSearchQuery('')
+              }}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <RotateCcw className="mr-1.5 h-4 w-4 sm:mr-2" />
               Reset Filter
             </Button>
           </div>
         </div>
 
-        <CategorySummaryCards 
-          kategori={kategoriFilter} 
-          data={filteredPemeriksaanList} 
+        {/* <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 invisible">
+          {activeFilterBadges.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-emerald-900">
+                Filter aktif
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {activeFilterBadges.map((filter) => (
+                  <Badge
+                    key={`${filter.label}-${filter.value}`}
+                    variant="outline"
+                    className="border-emerald-200 bg-white px-2 py-0.5 text-[11px] text-emerald-800"
+                  >
+                    {filter.label}: {filter.value}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="invisible">Menampilkan data pemeriksaan terbaru</p>
+          )}
+          <p className="mt-1 text-[11px] leading-snug text-emerald-700 sm:text-xs invisible">
+            Tabel, Cetak Visum, dan Download Excel mengikuti filter aktif.
+          </p>
+        </div> */}
+
+        <CategorySummaryCards
+          kategori={kategoriFilter}
+          data={filteredPemeriksaanList}
         />
 
         {/* Export Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-t border-b mb-6">
+        <div className="mb-5 flex flex-col gap-3 border-y py-3 sm:py-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 className="text-base font-bold text-slate-800">Export & Cetak Laporan</h3>
-            <p className="text-sm text-slate-500">Unduh atau cetak hasil sesuai filter aktif.</p>
+            <h3 className="text-sm font-bold text-slate-800 sm:text-base">
+              Export & Cetak Laporan
+            </h3>
+            <p className="text-xs text-slate-500 sm:text-sm">
+              Unduh atau cetak hasil sesuai filter aktif.
+            </p>
           </div>
-          
-          <div className="flex gap-2 items-center flex-wrap">
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={() => navigate(`/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`)}
+
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+            <Button
+              variant="outline"
+              className="w-full gap-1.5 text-xs sm:w-auto sm:gap-2 sm:text-sm"
+              onClick={() =>
+                navigate(
+                  `/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`
+                )
+              }
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-printer"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-printer"
+              >
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
+                <rect x="6" y="14" width="12" height="8" rx="1" />
+              </svg>
               <span className="hidden sm:inline">Cetak Visum</span>
+              <span className="sm:hidden">Visum</span>
             </Button>
 
-            <Suspense fallback={<div className="h-10 w-32 bg-slate-100 animate-pulse rounded-md"></div>}>
-              <ExportActions 
-                isLoading={isPemeriksaanLoading} 
+            <Suspense
+              fallback={
+                <div className="h-8 w-full animate-pulse rounded-md bg-slate-100 sm:h-10 sm:w-32"></div>
+              }
+            >
+              <ExportActions
+                isLoading={isPemeriksaanLoading}
                 kategoriFilter={kategoriFilter}
                 posyanduIdParam={posyanduIdParam}
                 bulan={currentMonth}
@@ -371,36 +513,54 @@ export function ReportPage() {
         </div>
 
         <div>
-          <h3 className="text-lg font-bold mb-4">Hasil Data {kategoriFilter.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
-          
-          <MonthlyReportTable 
-            kategori={kategoriFilter} 
-            data={filteredPemeriksaanList} 
-            isLoading={isPemeriksaanLoading} 
+          <h3 className="mb-3 text-base font-bold sm:mb-4 sm:text-lg">
+            Hasil Data{' '}
+            {kategoriFilter
+              .replace('_', ' ')
+              .replace(/\b\w/g, (l) => l.toUpperCase())}
+          </h3>
+
+          <MonthlyReportTable
+            kategori={kategoriFilter}
+            data={filteredPemeriksaanList}
+            isLoading={isPemeriksaanLoading}
           />
         </div>
       </div>
 
-      <ReportFilterSidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
-        kategori={kategoriFilter} 
-        subFilters={subFilters} 
-        setSubFilters={setSubFilters} 
+      <ReportFilterSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        kategori={kategoriFilter}
+        subFilters={subFilters}
+        setSubFilters={setSubFilters}
       />
 
       {posyanduFilter === 'all' && allPosyanduData && (
-        <div className="bg-card p-6 rounded-lg border mt-6">
-          <h3 className="text-lg font-bold mb-4">Status Pendataan Posyandu (Bulan Ini)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-4 rounded-lg border bg-card p-3 sm:mt-6 sm:p-5 lg:p-6">
+          <h3 className="mb-3 text-base font-bold sm:mb-4 sm:text-lg">
+            Status Pendataan Posyandu (Bulan Ini)
+          </h3>
+          <div className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 lg:grid-cols-3">
             {allPosyanduData.map((posyandu) => {
-              const currentMonthStatus = posyandu.status.find(s => s.bulan === currentMonth)?.status || 'draft'
+              const currentMonthStatus =
+                posyandu.status.find((s) => s.bulan === currentMonth)?.status ||
+                'draft'
               return (
-                <div key={posyandu.id} className="p-4 border rounded-md flex justify-between items-center bg-slate-50/50">
-                  <div className="font-medium">{posyandu.nama}</div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    currentMonthStatus === 'selesai' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                  }`}>
+                <div
+                  key={posyandu.id}
+                  className="flex items-center justify-between gap-2 rounded-md border bg-slate-50/50 p-3"
+                >
+                  <div className="min-w-0 truncate text-sm font-medium">
+                    {posyandu.nama}
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      currentMonthStatus === 'selesai'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-amber-100 text-amber-700'
+                    }`}
+                  >
                     {currentMonthStatus === 'selesai' ? 'Selesai' : 'Draft'}
                   </span>
                 </div>
