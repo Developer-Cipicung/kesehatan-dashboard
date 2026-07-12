@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGetWargaList } from '../hooks/useWarga'
 import { PatientToolbar } from './PatientToolbar'
 import { PatientTable } from './PatientTable'
@@ -28,6 +28,10 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const { selectedPosyanduId, posyandu } = useAuthStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.setItem('rekapitulasi_kategori', kategori)
+  }, [kategori])
 
   const isReadOnly = posyandu?.id !== selectedPosyanduId
 

@@ -19,6 +19,7 @@ export interface ConfirmDialogProps {
   cancelText?: string
   onConfirm: () => void
   variant?: 'default' | 'destructive'
+  isLoading?: boolean
 }
 
 export function ConfirmDialog({
@@ -30,6 +31,7 @@ export function ConfirmDialog({
   cancelText = 'Batal',
   onConfirm,
   variant = 'default',
+  isLoading = false,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -41,15 +43,25 @@ export function ConfirmDialog({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
-              onConfirm()
+              if (!isLoading) {
+                onConfirm()
+              }
             }}
             className={buttonVariants({ variant })}
+            disabled={isLoading}
           >
-            {confirmText}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                Memproses...
+              </span>
+            ) : (
+              confirmText
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

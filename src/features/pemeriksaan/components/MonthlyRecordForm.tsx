@@ -126,6 +126,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
         td: (rec.tekanan_darah_sistolik && rec.tekanan_darah_diastolik) ? `${rec.tekanan_darah_sistolik}/${rec.tekanan_darah_diastolik}` : '',
         gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
+        kolesterol: rec.kolesterol ?? '',
+        asam_urat: rec.asam_urat ?? '',
         suhu_tubuh: rec.suhu_tubuh ?? '',
         kondisi_ibu: rec.kondisi_ibu ?? '',
         catatan: rec.catatan ?? '',
@@ -256,6 +258,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           tekanan_darah_sistolik: td?.s,
           tekanan_darah_diastolik: td?.d,
           gula_darah_sewaktu: parseNum(values.gula_darah_sewaktu),
+          kolesterol: parseNum(values.kolesterol),
+          asam_urat: parseNum(values.asam_urat),
         }
       } else if (isPasca) {
         const td = parseTd(values.td)

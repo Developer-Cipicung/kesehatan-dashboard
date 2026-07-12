@@ -33,7 +33,7 @@ export function PatientHistoryPage() {
   const { data: history, isLoading: isHistoryLoading, error: historyError } = useGetHistory(kategori!, id!, selectedPosyanduId || undefined)
   const { data: pendataanStatus, isLoading: isStatusLoading } = useGetPendataanStatus(currentMonth, currentYear, selectedPosyanduId || undefined)
 
-  const { mutate: deletePemeriksaan } = useDeletePemeriksaan()
+  const { mutate: deletePemeriksaan, isPending: isDeleting } = useDeletePemeriksaan()
 
   const isLocked = pendataanStatus?.status === 'selesai'
   const isReadOnly = posyandu?.id !== selectedPosyanduId
@@ -61,8 +61,14 @@ export function PatientHistoryPage() {
 
   const handleConfirmDelete = () => {
     if (confirmDeleteId) {
-      deletePemeriksaan({ kategori: kategori!, id: confirmDeleteId })
-      setConfirmDeleteId(null)
+      deletePemeriksaan(
+        { kategori: kategori!, id: confirmDeleteId },
+        {
+          onSettled: () => {
+            setConfirmDeleteId(null)
+          }
+        }
+      )
     }
   }
 
@@ -150,6 +156,8 @@ export function PatientHistoryPage() {
         title="Hapus Riwayat Pemeriksaan"
         description="Apakah Anda yakin ingin menghapus riwayat pemeriksaan ini? Data yang dihapus tidak dapat dikembalikan."
         onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        variant="destructive"
       />
     </div>
   )

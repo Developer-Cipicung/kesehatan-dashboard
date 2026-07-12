@@ -15,6 +15,37 @@ interface PatientCardProps {
   isReadOnly?: boolean
 }
 
+export function classifyZScore(bb_u: number | null, tb_u: number | null, bb_tb: number | null) {
+  let kategori_bb_u = null;
+  let kategori_tb_u = null;
+  let kategori_bb_tb = null;
+
+  if (bb_u !== null) {
+    if (bb_u < -3) kategori_bb_u = 'Sangat Kurang';
+    else if (bb_u < -2) kategori_bb_u = 'Kurang';
+    else if (bb_u <= 1) kategori_bb_u = 'Normal';
+    else kategori_bb_u = 'Risiko Berat Badan Lebih';
+  }
+
+  if (tb_u !== null) {
+    if (tb_u < -3) kategori_tb_u = 'Sangat Pendek';
+    else if (tb_u < -2) kategori_tb_u = 'Pendek (Stunted)';
+    else if (tb_u <= 3) kategori_tb_u = 'Normal';
+    else kategori_tb_u = 'Tinggi';
+  }
+
+  if (bb_tb !== null) {
+    if (bb_tb < -3) kategori_bb_tb = 'Gizi Buruk';
+    else if (bb_tb < -2) kategori_bb_tb = 'Gizi Kurang';
+    else if (bb_tb <= 1) kategori_bb_tb = 'Gizi Baik';
+    else if (bb_tb <= 2) kategori_bb_tb = 'Risiko Gizi Lebih';
+    else if (bb_tb <= 3) kategori_bb_tb = 'Gizi Lebih';
+    else kategori_bb_tb = 'Obesitas';
+  }
+
+  return { kategori_bb_u, kategori_tb_u, kategori_bb_tb };
+}
+
 export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [tanggalPersalinan, setTanggalPersalinan] = useState(new Date().toISOString().split('T')[0])
@@ -49,6 +80,25 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           {displayLastDate && (
             <div className="text-xs font-medium text-emerald-600 bg-emerald-50 inline-block px-2 py-1 rounded-md mt-2 border border-emerald-100">
               Terakhir diperiksa: {displayLastDate}
+            </div>
+          )}
+          
+          {(kategori === 'balita' || kategori === 'baduta') && latestBalita && (
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Berat & Tinggi</span>
+                <span className="text-sm font-semibold text-slate-800">{latestBalita.bb || '-'} kg / {latestBalita.tb || '-'} cm</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Status Gizi (BB/TB)</span>
+                <span className="text-sm font-semibold text-slate-800">
+                  {classifyZScore(
+                    latestBalita.zscore_bb_u ? Number(latestBalita.zscore_bb_u) : null,
+                    latestBalita.zscore_tb_u ? Number(latestBalita.zscore_tb_u) : null,
+                    latestBalita.zscore_bb_tb ? Number(latestBalita.zscore_bb_tb) : null
+                  ).kategori_bb_tb || '-'}
+                </span>
+              </div>
             </div>
           )}
         </div>

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileText, FileSpreadsheet, Loader2 } from 'lucide-react'
-import { exportWargaToPdf } from '../utils/exportPdf'
+import { FileSpreadsheet, Loader2 } from 'lucide-react'
 import { exportWargaToExcel } from '../utils/exportExcel'
 import { wargaService } from '@/features/warga/services/wargaService'
 import { pemeriksaanService } from '@/features/pemeriksaan/services/pemeriksaanService'
@@ -14,10 +13,9 @@ interface ExportActionsProps {
   posyanduIdParam?: string
   bulan: number
   tahun: number
-  setKategoriFilter: (val: string) => void
 }
 
-export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bulan, tahun, setKategoriFilter }: ExportActionsProps) {
+export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bulan, tahun }: ExportActionsProps) {
   const [isExporting, setIsExporting] = useState(false)
 
   const fetchChunkedData = async () => {
@@ -66,19 +64,6 @@ export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bula
     return { allWarga, filteredPemeriksaan };
   }
 
-  const handleExportPdf = async () => {
-    try {
-      setIsExporting(true)
-      const { allWarga, filteredPemeriksaan } = await fetchChunkedData()
-      exportWargaToPdf(allWarga, `Laporan_${kategoriFilter}_${new Date().toISOString().split('T')[0]}.pdf`, filteredPemeriksaan, kategoriFilter)
-      toast.success('Laporan PDF berhasil diunduh.')
-    } catch (error: any) {
-      toast.error(error.message || 'Gagal mengekspor PDF.')
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
   const handleExportExcel = async () => {
     try {
       setIsExporting(true)
@@ -94,27 +79,7 @@ export function ExportActions({ isLoading, kategoriFilter, posyanduIdParam, bula
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-3">
-      <select 
-        value={kategoriFilter}
-        onChange={(e) => setKategoriFilter(e.target.value)}
-        className="h-10 px-3 rounded-md border border-input bg-background w-full sm:w-auto"
-        disabled={isExporting}
-      >
-        <option value="baduta">Baduta</option>
-        <option value="balita">Balita</option>
-        <option value="bumil">Ibu Hamil</option>
-        <option value="pasca_persalinan">Ibu Pasca Persalinan</option>
-        <option value="lansia">Lansia</option>
-      </select>
-      <Button 
-        variant="outline" 
-        onClick={handleExportPdf}
-        disabled={isLoading || isExporting}
-        className="w-full sm:w-auto"
-      >
-        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
-        {isExporting ? 'Memproses...' : 'Download PDF'}
-      </Button>
+
       <Button 
         variant="default"
         onClick={handleExportExcel}
