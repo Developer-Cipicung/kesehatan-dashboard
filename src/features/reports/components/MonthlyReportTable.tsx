@@ -37,6 +37,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
   const renderHeaders = () => {
     const commonDemographicsHeaders = (
       <>
+        <TableHead>Posyandu</TableHead>
         <TableHead>NIK</TableHead>
         <TableHead>No. HP</TableHead>
         <TableHead>Tempat, Tgl Lahir</TableHead>
@@ -166,6 +167,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
 
     const commonDemographicsCells = (
       <>
+        <TableCell>{(warga as any).posyandu?.nama || '-'}</TableCell>
         <TableCell>{warga.nik || '-'}</TableCell>
         <TableCell>{warga.nomor || '-'}</TableCell>
         <TableCell>{`${warga.tempat_lahir || '-'}, ${warga.tanggal_lahir ? new Date(warga.tanggal_lahir).toLocaleDateString('id-ID') : '-'}`}</TableCell>

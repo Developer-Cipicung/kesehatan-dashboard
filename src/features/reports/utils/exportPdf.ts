@@ -29,7 +29,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
       tableRows.push([index + 1, warga.nik, warga.nama, warga.jenis_kelamin, age, warga.kategori])
     })
   } else {
-    const commonCols = ['NIK', 'No. HP', 'Tempat/Tgl Lahir', 'Alamat', 'L/P']
+    const commonCols = ['Posyandu', 'NIK', 'No. HP', 'Tempat/Tgl Lahir', 'Alamat', 'L/P']
 
     switch (kategoriFilter) {
       case 'baduta':
@@ -68,6 +68,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
       const tglJamKunjungan = `${visitDate} ${visitTime}`
 
       const commonRow = [
+        (warga as any).posyandu?.nama || '-',
         warga.nik || '-',
         warga.nomor || '-',
         `${warga.tempat_lahir || '-'}, ${warga.tanggal_lahir ? new Date(warga.tanggal_lahir).toLocaleDateString('id-ID') : '-'}`,

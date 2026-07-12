@@ -57,6 +57,7 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
     const baseData = {
       No: index + 1,
       ...visitData,
+      Posyandu: (warga as any).posyandu?.nama || '-',
       Nama: warga.nama || '-',
       NIK: warga.nik || '-',
       'No. HP': warga.nomor || '-',
