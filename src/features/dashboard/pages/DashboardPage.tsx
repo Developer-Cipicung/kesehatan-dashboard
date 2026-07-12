@@ -77,7 +77,7 @@ export function DashboardPage() {
               <ClipboardList className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg">Selesai Pendataan Bulan Ini</span>
+              <span className="font-bold text-lg text-white">Selesai Pendataan Bulan Ini</span>
               <span className="text-xs text-white/80">Kunci data & verifikasi riwayat</span>
             </div>
           </Link>
