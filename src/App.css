@@ -3,8 +3,6 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   color-scheme: light;
 
@@ -46,6 +44,32 @@
   --chart-3: #e8b921;
   --chart-4: #165e33;
   --chart-5: #647067;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --sidebar: #ffffff;
   --sidebar-foreground: #17231b;
@@ -106,52 +130,6 @@
   --sidebar-accent-foreground: #d8f8e3;
   --sidebar-border: color-mix(in oklab, #ffffff 12%, transparent);
   --sidebar-ring: #83ffbb;
-}
-
-@theme inline {
-  --font-sans: "Geist Variable", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-heading: "Geist Variable", "Segoe UI", Roboto, Arial, sans-serif;
-
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary-light: var(--primary-light);
-  --color-primary-dark: var(--primary-dark);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 *,
@@ -239,4 +217,285 @@ canvas {
 ::selection {
   background: color-mix(in oklab, var(--primary) 30%, transparent);
   color: var(--foreground);
+}
+
+.bg-background,
+[class~="data-[state=active]:bg-background"][data-state="active"] {
+  background-color: var(--background);
+}
+
+.bg-card {
+  background-color: var(--card);
+}
+
+.bg-popover {
+  background-color: var(--popover);
+}
+
+.bg-primary,
+[class~="data-[selected-single=true]:bg-primary"][data-selected-single="true"],
+[class~="data-[range-start=true]:bg-primary"][data-range-start="true"],
+[class~="data-[range-end=true]:bg-primary"][data-range-end="true"] {
+  background-color: var(--primary);
+}
+
+.bg-primary-dark,
+[class~="hover:bg-primary-dark"]:hover {
+  background-color: var(--primary-dark);
+}
+
+.bg-secondary,
+[class~="hover:bg-secondary/80"]:hover {
+  background-color: var(--secondary);
+}
+
+.bg-muted,
+[class~="hover:bg-muted"]:hover,
+[class~="aria-expanded:bg-muted"][aria-expanded="true"],
+[class~="data-[state=selected]:bg-muted"][data-state="selected"],
+[class~="has-aria-expanded:bg-muted"]:has([aria-expanded="true"]),
+[class~="data-[range-middle=true]:bg-muted"][data-range-middle="true"] {
+  background-color: var(--muted);
+}
+
+.bg-accent,
+[class~="focus:bg-accent"]:focus {
+  background-color: var(--accent);
+}
+
+.bg-border {
+  background-color: var(--border);
+}
+
+.bg-input {
+  background-color: var(--input);
+}
+
+.bg-destructive {
+  background-color: var(--destructive);
+}
+
+.text-foreground,
+[class~="hover:text-foreground"]:hover,
+[class~="aria-expanded:text-foreground"][aria-expanded="true"],
+[class~="data-[range-middle=true]:text-foreground"][data-range-middle="true"] {
+  color: var(--foreground);
+}
+
+.text-card-foreground {
+  color: var(--card-foreground);
+}
+
+.text-popover-foreground {
+  color: var(--popover-foreground);
+}
+
+.text-primary,
+[class~="hover:text-primary"]:hover {
+  color: var(--primary);
+}
+
+.text-primary-foreground,
+[class~="data-[selected-single=true]:text-primary-foreground"][data-selected-single="true"],
+[class~="data-[range-start=true]:text-primary-foreground"][data-range-start="true"],
+[class~="data-[range-end=true]:text-primary-foreground"][data-range-end="true"] {
+  color: var(--primary-foreground);
+}
+
+.text-secondary-foreground {
+  color: var(--secondary-foreground);
+}
+
+.text-muted-foreground,
+[class~="hover:text-muted-foreground"]:hover,
+[class~="aria-selected:text-muted-foreground"][aria-selected="true"] {
+  color: var(--muted-foreground);
+}
+
+.text-accent-foreground,
+[class~="focus:text-accent-foreground"]:focus {
+  color: var(--accent-foreground);
+}
+
+.text-destructive {
+  color: var(--destructive);
+}
+
+.border-border {
+  border-color: var(--border);
+}
+
+.border-input,
+[class~="dark:border-input"]:is(.dark *) {
+  border-color: var(--input);
+}
+
+.border-ring,
+[class~="focus-visible:border-ring"]:focus-visible,
+[class~="group-data-[focused=true]/day:border-ring"][data-focused="true"] {
+  border-color: var(--ring);
+}
+
+.border-primary,
+.border-l-primary,
+.border-t-primary,
+.border-t-primary-dark {
+  border-color: var(--primary);
+}
+
+.border-l-primary {
+  border-left-color: var(--primary);
+}
+
+.border-t-primary {
+  border-top-color: var(--primary);
+}
+
+.border-t-primary-dark {
+  border-top-color: var(--primary-dark);
+}
+
+.border-destructive,
+[class~="aria-invalid:border-destructive"][aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+.ring-ring,
+[class~="focus-visible:ring-ring"]:focus-visible {
+  --tw-ring-color: var(--ring);
+}
+
+.ring-primary,
+[class~="focus-visible:ring-primary"]:focus-visible {
+  --tw-ring-color: var(--primary);
+}
+
+.shadow-primary\/30 {
+  --tw-shadow-color: color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+.bg-background\/80 {
+  background-color: color-mix(in oklab, var(--background) 80%, transparent);
+}
+
+.bg-popover\/80 {
+  background-color: color-mix(in oklab, var(--popover) 80%, transparent);
+}
+
+.bg-popover\/95 {
+  background-color: color-mix(in oklab, var(--popover) 95%, transparent);
+}
+
+.bg-primary\/5,
+[class~="hover:bg-primary/5"]:hover,
+[class~="group-hover:bg-primary/5"]:is(:where(.group):hover *) {
+  background-color: color-mix(in oklab, var(--primary) 5%, transparent);
+}
+
+.bg-primary\/10 {
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+.bg-primary\/20 {
+  background-color: color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+.bg-primary\/80,
+[class~="hover:bg-primary/80"]:hover {
+  background-color: color-mix(in oklab, var(--primary) 80%, transparent);
+}
+
+.bg-primary\/90,
+[class~="hover:bg-primary/90"]:hover {
+  background-color: color-mix(in oklab, var(--primary) 90%, transparent);
+}
+
+.bg-muted\/50,
+[class~="hover:bg-muted/50"]:hover,
+[class~="dark:hover:bg-muted/50"]:is(.dark *):hover {
+  background-color: color-mix(in oklab, var(--muted) 50%, transparent);
+}
+
+.bg-input\/30,
+[class~="dark:bg-input/30"]:is(.dark *) {
+  background-color: color-mix(in oklab, var(--input) 30%, transparent);
+}
+
+.bg-input\/50,
+[class~="hover:bg-input/50"]:hover,
+[class~="disabled:bg-input/50"]:disabled,
+[class~="dark:hover:bg-input/50"]:is(.dark *):hover {
+  background-color: color-mix(in oklab, var(--input) 50%, transparent);
+}
+
+.bg-input\/80,
+[class~="dark:disabled:bg-input/80"]:is(.dark *):disabled {
+  background-color: color-mix(in oklab, var(--input) 80%, transparent);
+}
+
+.bg-destructive\/10 {
+  background-color: color-mix(in oklab, var(--destructive) 10%, transparent);
+}
+
+.bg-destructive\/20,
+[class~="dark:hover:bg-destructive/20"]:is(.dark *):hover {
+  background-color: color-mix(in oklab, var(--destructive) 20%, transparent);
+}
+
+.bg-destructive\/90,
+[class~="hover:bg-destructive/90"]:hover {
+  background-color: color-mix(in oklab, var(--destructive) 90%, transparent);
+}
+
+.text-primary\/70 {
+  color: color-mix(in oklab, var(--primary) 70%, transparent);
+}
+
+.text-destructive\/80 {
+  color: color-mix(in oklab, var(--destructive) 80%, transparent);
+}
+
+.border-primary\/20,
+[class~="group-hover:border-primary/20"]:is(:where(.group):hover *) {
+  border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+.border-input\/60 {
+  border-color: color-mix(in oklab, var(--input) 60%, transparent);
+}
+
+.border-destructive\/20 {
+  border-color: color-mix(in oklab, var(--destructive) 20%, transparent);
+}
+
+.border-destructive\/50,
+[class~="dark:aria-invalid:border-destructive/50"]:is(.dark *)[aria-invalid="true"] {
+  border-color: color-mix(in oklab, var(--destructive) 50%, transparent);
+}
+
+.ring-foreground\/10 {
+  --tw-ring-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+
+.ring-primary\/10 {
+  --tw-ring-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+.ring-primary\/50 {
+  --tw-ring-color: color-mix(in oklab, var(--primary) 50%, transparent);
+}
+
+.ring-ring\/50,
+[class~="focus-visible:ring-ring/50"]:focus-visible {
+  --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+.ring-destructive\/20,
+[class~="aria-invalid:ring-destructive/20"][aria-invalid="true"] {
+  --tw-ring-color: color-mix(in oklab, var(--destructive) 20%, transparent);
+}
+
+.ring-destructive\/40,
+[class~="dark:aria-invalid:ring-destructive/40"]:is(.dark *)[aria-invalid="true"] {
+  --tw-ring-color: color-mix(in oklab, var(--destructive) 40%, transparent);
 }
