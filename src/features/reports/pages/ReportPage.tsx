@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -30,8 +31,19 @@ import { CategorySummaryCards } from '../components/CategorySummaryCards'
 
 export function ReportPage() {
   const navigate = useNavigate()
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => {
+    const saved = localStorage.getItem('rekapitulasi_bulan')
+    return saved ? parseInt(saved) : new Date().getMonth() + 1
+  })
+  const [selectedYear, setSelectedYear] = useState<number>(() => {
+    const saved = localStorage.getItem('rekapitulasi_tahun')
+    return saved ? parseInt(saved) : new Date().getFullYear()
+  })
+
+  useEffect(() => {
+    localStorage.setItem('rekapitulasi_bulan', selectedMonth.toString())
+    localStorage.setItem('rekapitulasi_tahun', selectedYear.toString())
+  }, [selectedMonth, selectedYear])
 
   const [posyanduFilter, setPosyanduFilter] = useState<'my' | 'all'>(
     () =>
@@ -92,21 +104,21 @@ export function ReportPage() {
 
   // Fetch Pendataan Status for completion state
   const { isLoading: isStatusLoading } = useGetPendataanGlobalStatus(
-    currentMonth,
-    currentYear
+    selectedMonth,
+    selectedYear
   )
 
   // Fetch all posyandus status if filter is 'all'
   const { data: allPosyanduData } = useGetAdminStatusPendataan(
-    currentYear,
+    selectedYear,
     posyanduFilter === 'all'
   )
 
   // Fetch Pemeriksaan List for the selected category, month, and year (limit 1000 for full month stats)
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } =
     useGetPemeriksaanList(kategoriFilter, {
-      bulan: currentMonth,
-      tahun: currentYear,
+      bulan: selectedMonth,
+      tahun: selectedYear,
       limit: 1000,
       posyanduId: posyanduIdParam,
     })
@@ -304,6 +316,19 @@ export function ReportPage() {
     })
   }
 
+  const activeFilterBadges = useMemo(() => {
+    const badges: { label: string; value: string }[] = []
+    if (searchQuery.trim() !== '') {
+      badges.push({ label: 'Pencarian', value: searchQuery })
+    }
+    for (const [key, val] of Object.entries(subFilters)) {
+      if (val) {
+        badges.push({ label: key.replace(/_/g, ' ').toUpperCase(), value: val.toUpperCase() })
+      }
+    }
+    return badges
+  }, [searchQuery, subFilters])
+
   if (isDashboardLoading || isStatusLoading) {
     return (
       <div className="space-y-6">
@@ -366,7 +391,30 @@ export function ReportPage() {
 
       <div className="rounded-xl border border-slate-200 bg-card p-3 shadow-sm sm:p-5 lg:p-6">
         {/* Top Controls Row */}
-        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(170px,0.7fr)_minmax(0,1.3fr)] lg:grid-cols-[12rem_minmax(0,1fr)_auto] lg:gap-3">
+        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[auto_12rem_minmax(0,1fr)_auto] lg:gap-3">
+          
+          <div className="flex items-center gap-1.5 sm:col-span-2 lg:col-span-1">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 sm:h-10 lg:w-32"
+            >
+              {Array.from({ length: 12 }).map((_, i) => {
+                const d = new Date(2026, i, 1);
+                return <option key={i} value={i + 1}>{d.toLocaleString('id-ID', { month: 'long' })}</option>
+              })}
+            </select>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="h-9 w-20 rounded-md border border-slate-300 bg-white px-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500 sm:h-10"
+            >
+              {[new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+
           <select
             value={kategoriFilter}
             onChange={(e) => {
@@ -424,8 +472,9 @@ export function ReportPage() {
           </div>
         </div>
 
-        {/* <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 invisible">
-          {activeFilterBadges.length > 0 ? (
+        {/* Active Filters */}
+        {activeFilterBadges.length > 0 && (
+          <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3">
             <div className="space-y-2">
               <p className="text-xs font-semibold text-emerald-900">
                 Filter aktif
@@ -442,13 +491,11 @@ export function ReportPage() {
                 ))}
               </div>
             </div>
-          ) : (
-            <p className="invisible">Menampilkan data pemeriksaan terbaru</p>
-          )}
-          <p className="mt-1 text-[11px] leading-snug text-emerald-700 sm:text-xs invisible">
-            Tabel, Cetak Visum, dan Download Excel mengikuti filter aktif.
-          </p>
-        </div> */}
+            <p className="mt-2 text-[11px] leading-snug text-emerald-700 sm:text-xs">
+              Tabel, Cetak Visum, dan Download Excel mengikuti filter aktif di atas.
+            </p>
+          </div>
+        )}
 
         <CategorySummaryCards
           kategori={kategoriFilter}
@@ -472,7 +519,7 @@ export function ReportPage() {
               className="w-full gap-1.5 text-xs sm:w-auto sm:gap-2 sm:text-sm"
               onClick={() =>
                 navigate(
-                  `/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`
+                  `/laporan/cetak?kategori=${kategoriFilter}&bulan=${selectedMonth}&tahun=${selectedYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`
                 )
               }
             >
@@ -505,8 +552,8 @@ export function ReportPage() {
                 isLoading={isPemeriksaanLoading}
                 kategoriFilter={kategoriFilter}
                 posyanduIdParam={posyanduIdParam}
-                bulan={currentMonth}
-                tahun={currentYear}
+                bulan={selectedMonth}
+                tahun={selectedYear}
               />
             </Suspense>
           </div>
@@ -544,7 +591,7 @@ export function ReportPage() {
           <div className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 lg:grid-cols-3">
             {allPosyanduData.map((posyandu) => {
               const currentMonthStatus =
-                posyandu.status.find((s) => s.bulan === currentMonth)?.status ||
+                posyandu.status.find((s) => s.bulan === selectedMonth)?.status ||
                 'draft'
               return (
                 <div
