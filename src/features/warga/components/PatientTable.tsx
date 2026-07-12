@@ -505,6 +505,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             let lastLilaGds = ''
             let lastJmlAnak = ''
             let lastRiwPen = ''
+            let lastTd = ''
 
             if (latestBumil) {
               lastBb = latestBumil.bb?.toString()
@@ -521,9 +522,11 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
               lastBb = latestLansia.bb?.toString()
               lastTfuTb = latestLansia.tb?.toString()
               lastLilaGds = latestLansia.gula_darah_sewaktu?.toString()
+              lastTd = (latestLansia.tekanan_darah_sistolik && latestLansia.tekanan_darah_diastolik) ? `${latestLansia.tekanan_darah_sistolik}/${latestLansia.tekanan_darah_diastolik}` : ''
             } else if (latestPasca) {
               lastBb = latestPasca.bb?.toString()
               lastTfuTb = latestPasca.tb?.toString() || latestBumil?.tb?.toString()
+              lastTd = (latestPasca.tekanan_darah_sistolik && latestPasca.tekanan_darah_diastolik) ? `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}` : ''
             }
 
             const row = getRow(warga.id)
@@ -543,34 +546,34 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                   </span>
                 </td>
 
-                {isBalita && (
-                  <td className="px-3 py-3">
-                    <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '8.5'} width="w-[70px]" disabled={true} />
-                  </td>
-                )}
+                  {isBalita && (
+                    <td className="px-3 py-3">
+                      <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '-'} width="w-[70px]" disabled={true} />
+                    </td>
+                  )}
 
-                {isBalita && (
-                  <>
-                    <td className="px-3 py-3">
-                      <Cell value={row.nama_ibu} onChange={(v) => set(warga.id, 'nama_ibu', v)} placeholder={warga.ibu?.nama || warga.nama_ibu || "-"} width="w-[140px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell 
-                        type="select"
-                        options={['Pil', 'Suntik', 'IUD', 'Implan', 'Kondom', 'MOW', 'MOP', 'Tidak Pakai']}
-                        value={row.penggunaan_kontrasepsi} 
-                        onChange={(v) => set(warga.id, 'penggunaan_kontrasepsi', v)} 
-                        placeholder={warga.penggunaan_kontrasepsi || "Pilih KB..."} 
-                        width="w-[120px]" 
-                        disabled={true} 
-                      />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '72'} width="w-[70px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder="Sehat" width="w-[80px]" disabled={true} />
-                    </td>
+                  {isBalita && (
+                    <>
+                      <td className="px-3 py-3">
+                        <Cell value={row.nama_ibu} onChange={(v) => set(warga.id, 'nama_ibu', v)} placeholder={warga.ibu?.nama || warga.nama_ibu || "-"} width="w-[140px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell 
+                          type="select"
+                          options={['Pil', 'Suntik', 'IUD', 'Implan', 'Kondom', 'MOW', 'MOP', 'Tidak Pakai']}
+                          value={row.penggunaan_kontrasepsi} 
+                          onChange={(v) => set(warga.id, 'penggunaan_kontrasepsi', v)} 
+                          placeholder={warga.penggunaan_kontrasepsi || "-"} 
+                          width="w-[120px]" 
+                          disabled={true} 
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder="-" width="w-[80px]" disabled={true} />
+                      </td>
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={row.asi_eksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />
                     </td>
@@ -580,47 +583,47 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
                     </td>
-                    <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={true} />
-                    </td>
+                      <td className="px-3 py-3">
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                      </td>
                   </>
                 )}
 
-                {isBumil && (
-                  <>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.jumlah_anak || lastJmlAnak} onChange={(v) => set(warga.id, 'jumlah_anak', v)} placeholder="1" width="w-[60px]" disabled={true} max={20} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="text-xs font-medium text-slate-700 min-w-[100px] px-2 py-1.5 bg-slate-50 rounded-md border border-slate-100 text-center whitespace-nowrap">
-                        {warga.hpht ? new Date(warga.hpht).toISOString().split('T')[0] : '-'}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="text-xs font-medium text-slate-700 min-w-[120px] px-2 py-1.5 bg-slate-50 rounded-md border border-slate-100 text-center whitespace-nowrap">
-                        {calculateHplRange(warga.hpht)}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell
-                        type="number"
-                        value={row.usia || calculateUsiaKandungan(warga.hpht, row.tanggal)}
-                        onChange={(v) => set(warga.id, 'usia', v)}
-                        placeholder="28"
-                        width="w-[80px]"
-                        disabled={true}
-                        max={45} min={0}
-                      />
-                      {parseInt(row.usia || calculateUsiaKandungan(warga.hpht, row.tanggal) || '0') > 42 && (
-                        <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Lewat<br/>Waktu!</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb || lastTfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder="155" width="w-[70px]" disabled={true} max={250} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '55.5'} width="w-[70px]" disabled={true} max={200} min={0} />
-                    </td>
+                  {isBumil && (
+                    <>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.jumlah_anak || lastJmlAnak} onChange={(v) => set(warga.id, 'jumlah_anak', v)} placeholder="-" width="w-[60px]" disabled={true} max={20} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="text-xs font-medium text-slate-700 min-w-[100px] px-2 py-1.5 bg-slate-50 rounded-md border border-slate-100 text-center whitespace-nowrap">
+                          {warga.hpht ? new Date(warga.hpht).toISOString().split('T')[0] : '-'}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="text-xs font-medium text-slate-700 min-w-[120px] px-2 py-1.5 bg-slate-50 rounded-md border border-slate-100 text-center whitespace-nowrap">
+                          {calculateHplRange(warga.hpht)}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell
+                          type="number"
+                          value={row.usia || calculateUsiaKandungan(warga.hpht, row.tanggal)}
+                          onChange={(v) => set(warga.id, 'usia', v)}
+                          placeholder="-"
+                          width="w-[80px]"
+                          disabled={true}
+                          max={45} min={0}
+                        />
+                        {parseInt(row.usia || calculateUsiaKandungan(warga.hpht, row.tanggal) || '0') > 42 && (
+                          <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Lewat<br/>Waktu!</div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tfuTb || lastTfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder="-" width="w-[70px]" disabled={true} max={250} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '-'} width="w-[70px]" disabled={true} max={200} min={0} />
+                      </td>
                     <td className="px-3 py-3">
                       {(() => {
                         const bmiData = calculateBMI(row.bb || lastBb, row.tfuTb || lastTfuTb);
@@ -634,62 +637,62 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         )
                       })()}
                     </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || '85'} width="w-[70px]" disabled={true} max={200} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tinggi_fundus} onChange={(v) => set(warga.id, 'tinggi_fundus', v)} placeholder="20" width="w-[70px]" disabled={true} max={100} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell value={row.riwayat_penyakit || lastRiwPen} onChange={(v) => set(warga.id, 'riwayat_penyakit', v)} placeholder="-" width="w-[120px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder="12" width="w-[60px]" disabled={true} max={30} min={0} />
-                      {parseFloat(row.kadar_hemoglobin) > 0 && parseFloat(row.kadar_hemoglobin) < 11 && (
-                        <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>Anemia</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '24'} width="w-[70px]" disabled={true} max={60} min={0} />
-                      {parseFloat(row.lilaGds) > 0 && parseFloat(row.lilaGds) < 23.5 && (
-                        <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>KEK</div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder="1.5" width="w-[70px]" disabled={true} max={10} min={0} />
-                    </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || '-'} width="w-[70px]" disabled={true} max={200} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tinggi_fundus} onChange={(v) => set(warga.id, 'tinggi_fundus', v)} placeholder="-" width="w-[70px]" disabled={true} max={100} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell value={row.riwayat_penyakit || lastRiwPen} onChange={(v) => set(warga.id, 'riwayat_penyakit', v)} placeholder="-" width="w-[120px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder="-" width="w-[60px]" disabled={true} max={30} min={0} />
+                        {parseFloat(row.kadar_hemoglobin) > 0 && parseFloat(row.kadar_hemoglobin) < 11 && (
+                          <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>Anemia</div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} max={60} min={0} />
+                        {parseFloat(row.lilaGds) > 0 && parseFloat(row.lilaGds) < 23.5 && (
+                          <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>KEK</div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder="-" width="w-[70px]" disabled={true} max={10} min={0} />
+                      </td>
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={row.terpapar_rokok as any} onChange={(v) => set(warga.id, 'terpapar_rokok', v)} width="w-full" disabled={true} />
                     </td>
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
                     </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.suplemen_tambah_darah} onChange={(v) => set(warga.id, 'suplemen_tambah_darah', v)} placeholder="30" width="w-[70px]" disabled={true} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.mms} onChange={(v) => set(warga.id, 'mms', v)} placeholder="30" width="w-[70px]" disabled={true} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={true} />
-                    </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.suplemen_tambah_darah} onChange={(v) => set(warga.id, 'suplemen_tambah_darah', v)} placeholder="-" width="w-[70px]" disabled={true} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.mms} onChange={(v) => set(warga.id, 'mms', v)} placeholder="-" width="w-[70px]" disabled={true} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                      </td>
                   </>
                 )}
 
-                {isLansia && (
-                  <>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '160'} width="w-[70px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '58'} width="w-[70px]" disabled={true} />
-                    </td>
+                  {isLansia && (
+                    <>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '-'} width="w-[70px]" disabled={true} />
+                      </td>
                     <td className="px-3 py-3">
                       {(() => {
                         const bmiData = calculateBMI(row.bb || lastBb, row.tfuTb || lastTfuTb);
@@ -703,95 +706,95 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         )
                       })()}
                     </td>
-                    <td className="px-3 py-3">
-                      <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={true} />
-                      {(() => {
-                        const status = calculateTDStatus(row.td);
-                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '120'} width="w-[70px]" disabled={true} />
-                      {(() => {
-                        const status = calculateGdsStatus(row.lilaGds);
-                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder="150" width="w-[70px]" disabled={true} />
-                      {(() => {
-                        const status = calculateKolesterolStatus(row.kolesterol);
-                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder="5.5" width="w-[70px]" disabled={true} />
-                      {(() => {
-                        const status = calculateAsamUratStatus(row.asam_urat, warga.jenis_kelamin);
-                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={true} />
-                    </td>
+                      <td className="px-3 py-3">
+                        <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />
+                        {(() => {
+                          const status = calculateTDStatus(row.td);
+                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} />
+                        {(() => {
+                          const status = calculateGdsStatus(row.lilaGds);
+                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        {(() => {
+                          const status = calculateKolesterolStatus(row.kolesterol);
+                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        {(() => {
+                          const status = calculateAsamUratStatus(row.asam_urat, warga.jenis_kelamin);
+                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                      </td>
                   </>
                 )}
 
-                {isPasca && (
-                  <>
-                    <td className="px-3 py-3 text-[11px] text-slate-500 whitespace-nowrap">
-                      {warga.tempat_persalinan || '-'}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="date" value={row.tanggal_persalinan} onChange={(v) => set(warga.id, 'tanggal_persalinan', v)} width="w-[130px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tfuTb || lastTfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder="155" width="w-[70px]" disabled={true} max={250} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '62'} width="w-[70px]" disabled={true} max={200} min={0} />
-                    </td>
-                    <td className="px-3 py-3">
-                      {(() => {
-                        const bmiData = calculateBMI(row.bb || lastBb, row.tfuTb || lastTfuTb);
-                        return bmiData ? (
-                          <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${bmiData.color}`} title="Indeks Massa Tubuh">
-                            {bmiData.value}<br/>
-                            <span className="font-medium text-[9px] uppercase tracking-wider">{bmiData.status}</span>
-                          </div>
-                        ) : (
-                          <div className="text-xs text-slate-400 text-center">-</div>
-                        )
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} width="w-[140px]" disabled={true} />
-                      {(() => {
-                        const status = calculateTDStatus(row.td);
-                        return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
-                      })()}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="Baik, tidak ada keluhan" width="w-[150px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder="50" width="w-[70px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="number" value={row.berat_badan_bayi} onChange={(v) => set(warga.id, 'berat_badan_bayi', v)} placeholder="3.2" width="w-[70px]" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="catatan..." width="w-[110px]" disabled={true} />
-                    </td>
+                  {isPasca && (
+                    <>
+                      <td className="px-3 py-3 text-[11px] text-slate-500 whitespace-nowrap">
+                        {warga.tempat_persalinan || '-'}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="date" value={row.tanggal_persalinan} onChange={(v) => set(warga.id, 'tanggal_persalinan', v)} width="w-[130px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tfuTb || lastTfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder="-" width="w-[70px]" disabled={true} max={250} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.bb} onChange={(v) => set(warga.id, 'bb', v)} placeholder={lastBb || '-'} width="w-[70px]" disabled={true} max={200} min={0} />
+                      </td>
+                      <td className="px-3 py-3">
+                        {(() => {
+                          const bmiData = calculateBMI(row.bb || lastBb, row.tfuTb || lastTfuTb);
+                          return bmiData ? (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${bmiData.color}`} title="Indeks Massa Tubuh">
+                              {bmiData.value}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{bmiData.status}</span>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-slate-400 text-center">-</div>
+                          )
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />
+                        {(() => {
+                          const status = calculateTDStatus(row.td);
+                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="-" width="w-[150px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="number" value={row.berat_badan_bayi} onChange={(v) => set(warga.id, 'berat_badan_bayi', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                      </td>
                   </>
                 )}
 

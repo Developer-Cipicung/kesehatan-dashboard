@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, FormProvider, useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Pemeriksaan } from '../services/pemeriksaanService'
+import { Pemeriksaan, pemeriksaanService } from '../services/pemeriksaanService'
 import { useCreatePemeriksaan, useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
 import { useGetWargaById } from '@/features/warga/hooks/useWarga'
 
@@ -155,6 +155,33 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
   }, [open, initialData, previousRecord, defaultTanggalPersalinan, reset, isBumil])
 
   const tglWatch = watch('tanggal_kunjungan')
+  const bbWatch = watch('bb')
+  const tbWatch = watch('tb')
+  const lkWatch = watch('lingkar_kepala')
+  const [zscoreData, setZscoreData] = useState<any>(null)
+
+  useEffect(() => {
+    if (isBalita && warga && bbWatch && tbWatch && tglWatch) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await pemeriksaanService.calculateZscore({
+            jenis_kelamin: warga.jenis_kelamin,
+            tanggal_lahir: warga.tanggal_lahir,
+            tanggal_kunjungan: tglWatch,
+            bb: parseFloat(bbWatch as any),
+            tb: parseFloat(tbWatch as any),
+            lingkar_kepala: lkWatch ? parseFloat(lkWatch as any) : undefined
+          })
+          setZscoreData(res)
+        } catch (e) {
+          console.error(e)
+        }
+      }, 500)
+      return () => clearTimeout(timer)
+    } else {
+      setZscoreData(null)
+    }
+  }, [isBalita, warga, bbWatch, tbWatch, lkWatch, tglWatch])
 
   useEffect(() => {
     if (isBumil && warga?.hpht && tglWatch) {
@@ -325,6 +352,31 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   <input type="checkbox" id="fasilitasi_bantuan_sosial" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <label htmlFor="fasilitasi_bantuan_sosial" className="text-sm font-medium text-slate-700">Bantuan Sosial</label>
                 </div>
+                {zscoreData && (
+                  <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 p-3 bg-blue-50/50 border border-blue-100 rounded-lg">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">BB/U (Berat/Umur)</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-800">{zscoreData.bb_u !== null ? zscoreData.bb_u : '-'}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 bg-white font-medium text-slate-600">{zscoreData.categories?.kategori_bb_u || '-'}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">TB/U (Tinggi/Umur)</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-800">{zscoreData.tb_u !== null ? zscoreData.tb_u : '-'}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 bg-white font-medium text-slate-600">{zscoreData.categories?.kategori_tb_u || '-'}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">BB/TB (Berat/Tinggi)</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-800">{zscoreData.bb_tb !== null ? zscoreData.bb_tb : '-'}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 bg-white font-medium text-slate-600">{zscoreData.categories?.kategori_bb_tb || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
