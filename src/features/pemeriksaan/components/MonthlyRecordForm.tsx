@@ -118,7 +118,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         tanggal_kunjungan: rec.tanggal_kunjungan ? toDateInputValue(rec.tanggal_kunjungan) : new Date().toISOString().split('T')[0],
         tanggal_persalinan: toDateInputValue(rec.tanggal_persalinan || defaultTanggalPersalinan) || new Date().toISOString().split('T')[0],
         bb: rec.bb ?? '',
-        tb: rec.tb ?? (isNew && isBumil ? (prev.tb ?? '') : ''),
+        tb: rec.tb ?? (isNew ? (prev.tb ?? '') : ''),
         lingkar_kepala: rec.lingkar_kepala ?? '',
         lingkar_lengan_atas: rec.lingkar_lengan_atas ?? '',
         lingkar_perut: rec.lingkar_perut ?? '',
@@ -134,19 +134,20 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         kondisi: rec.kondisi ?? '',
         asi_eksklusif: rec.asi_eksklusif ?? false,
         fasilitasi_bantuan_sosial: rec.fasilitasi_bantuan_sosial ?? false,
-        jumlah_anak: rec.jumlah_anak ?? (isNew && isBumil ? (prev.jumlah_anak ?? '') : ''),
-        riwayat_penyakit: rec.riwayat_penyakit ?? (isNew && isBumil ? (prev.riwayat_penyakit ?? '') : ''),
-        kadar_hemoglobin: rec.kadar_hemoglobin ?? '',
+        jumlah_anak: rec.jumlah_anak ?? (isNew ? (prev.jumlah_anak ?? '') : ''),
+        riwayat_penyakit: rec.riwayat_penyakit ?? (isNew ? (prev.riwayat_penyakit ?? '') : ''),
+        kadar_hemoglobin: rec.kadar_hemoglobin ?? (isNew ? (prev.kadar_hemoglobin ?? '') : ''),
         berat_janin: rec.berat_janin ?? '',
-        terpapar_rokok: rec.terpapar_rokok ?? false,
+        terpapar_rokok: rec.terpapar_rokok ?? (isNew ? (prev.terpapar_rokok ?? false) : false),
         kie: rec.kie ?? false,
         suplemen_tambah_darah: rec.suplemen_tambah_darah ?? '',
         mms: rec.mms ?? '',
         tinggi_badan_bayi: rec.tinggi_badan_bayi ?? '',
         berat_badan_bayi: rec.berat_badan_bayi ?? '',
         fasilitasi_rujukan: rec.fasilitasi_rujukan ?? false,
-        nama_ibu: rec.nama_ibu ?? (isNew ? (prev.nama_ibu ?? '') : ''),
-        penggunaan_kontrasepsi: rec.penggunaan_kontrasepsi ?? (isNew ? (prev.penggunaan_kontrasepsi ?? '') : ''),
+        nama_ibu: rec.nama_ibu ?? (isNew ? (prev.nama_ibu ?? warga?.nama_ibu ?? '') : ''),
+        nama_ayah: rec.nama_ayah ?? (isNew ? (prev.nama_ayah ?? warga?.nama_ayah ?? '') : ''),
+        penggunaan_kontrasepsi: rec.penggunaan_kontrasepsi ?? (isNew ? (prev.penggunaan_kontrasepsi ?? warga?.penggunaan_kontrasepsi ?? '') : ''),
         tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : (isNew ? (() => {
           const d = new Date()
           d.setMonth(d.getMonth() + 1)
@@ -227,6 +228,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           asi_eksklusif: values.asi_eksklusif ?? undefined,
           fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
           nama_ibu: values.nama_ibu || undefined,
+          nama_ayah: values.nama_ayah || undefined,
           penggunaan_kontrasepsi: values.penggunaan_kontrasepsi || undefined,
         }
       } else if (isBumil) {
@@ -318,6 +320,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
           <DialogDescription>
             {isEdit ? 'Perbarui data hasil pemeriksaan.' : 'Tambahkan data hasil pemeriksaan baru.'}
+            {!isEdit && previousRecord?.tanggal_kunjungan && (
+              <span className="mt-2 block rounded-md border border-amber-200 bg-amber-50 p-2 text-xs font-medium text-amber-700">
+                Terakhir diperiksa pada: {new Date(previousRecord.tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}. Beberapa data sebelumnya disalin secara otomatis.
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
 

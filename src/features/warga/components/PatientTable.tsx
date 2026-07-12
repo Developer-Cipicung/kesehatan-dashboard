@@ -398,7 +398,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
           <tr className="border-b border-slate-200">
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[160px]">NIK</th>
             <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs w-[190px]">Nama</th>
-            <th colSpan={isBalita ? 11 : isBumil ? 22 : isPasca ? 15 : 9} className="px-4 py-3 border-l border-slate-100">
+            <th colSpan={isBalita ? 12 : isBumil ? 23 : isPasca ? 16 : 10} className="px-4 py-3 border-l border-slate-100">
               <div className="flex items-center text-primary font-bold text-xs uppercase tracking-wider">
                 <ActivitySquare className="w-4 h-4 mr-2" />
                 Record Pemeriksaan Terakhir
@@ -409,6 +409,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
           <tr className="border-b-2 border-primary bg-primary/5">
             <th colSpan={2}></th>
 
+            <th className="px-3 py-3 font-semibold text-primary text-xs">Tgl Periksa</th>
             <th className="px-3 py-3 font-semibold text-primary text-xs">Usia</th>
             {isBalita && (
               <th className="px-3 py-3 font-semibold text-primary text-xs">
@@ -499,6 +500,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             const latestLansia = warga.pemeriksaan_lansia?.[0]
             const latestPasca = warga.pemeriksaan_pasca_persalinan?.[0]
 
+            let lastTgl = ''
             let lastBb = ''
             let lastTfuTb = ''
             let lastLingkarPerut = ''
@@ -506,27 +508,72 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             let lastJmlAnak = ''
             let lastRiwPen = ''
             let lastTd = ''
+            let lastTinggiFundus = ''
+            let lastKadarHb = ''
+            let lastBeratJanin = ''
+            let lastRokok: boolean | undefined = undefined
+            let lastKie: boolean | undefined = undefined
+            let lastSuplemen = ''
+            let lastMms = ''
+            let lastRujukan: boolean | undefined = undefined
+            let lastBansos: boolean | undefined = undefined
+            let lastCatatan = ''
+            let lastKondisi = ''
+            let lastAsiEksklusif: boolean | undefined = undefined
+            let lastKolesterol = ''
+            let lastAsamUrat = ''
+            let lastKondisiIbu = ''
+            let lastTinggiBayi = ''
+            let lastBeratBayi = ''
 
             if (latestBumil) {
+              lastTgl = latestBumil.tanggal_kunjungan ? new Date(latestBumil.tanggal_kunjungan).toISOString().split('T')[0] : ''
               lastBb = latestBumil.bb?.toString()
               lastTfuTb = latestBumil.tb?.toString()
               lastLingkarPerut = latestBumil.lingkar_perut?.toString()
               lastLilaGds = latestBumil.lingkar_lengan_atas?.toString()
               lastJmlAnak = latestBumil.jumlah_anak?.toString() || ''
               lastRiwPen = latestBumil.riwayat_penyakit || ''
+              lastTinggiFundus = latestBumil.tinggi_fundus?.toString() || ''
+              lastKadarHb = latestBumil.kadar_hemoglobin?.toString() || ''
+              lastBeratJanin = latestBumil.berat_janin?.toString() || ''
+              lastRokok = latestBumil.terpapar_rokok ?? undefined
+              lastKie = latestBumil.kie ?? undefined
+              lastSuplemen = latestBumil.suplemen_tambah_darah?.toString() || ''
+              lastMms = latestBumil.mms?.toString() || ''
+              lastRujukan = latestBumil.fasilitasi_rujukan ?? undefined
+              lastBansos = latestBumil.fasilitasi_bantuan_sosial ?? undefined
+              lastCatatan = latestBumil.catatan || ''
             } else if (latestBalita) {
+              lastTgl = latestBalita.tanggal_kunjungan ? new Date(latestBalita.tanggal_kunjungan).toISOString().split('T')[0] : ''
               lastBb = latestBalita.bb?.toString()
               lastTfuTb = latestBalita.tb?.toString()
               lastLilaGds = latestBalita.lingkar_lengan_atas?.toString()
+              lastKondisi = latestBalita.kondisi || ''
+              lastAsiEksklusif = latestBalita.asi_eksklusif ?? undefined
+              lastBansos = latestBalita.fasilitasi_bantuan_sosial ?? undefined
+              lastCatatan = latestBalita.catatan || ''
             } else if (latestLansia) {
+              lastTgl = latestLansia.tanggal_kunjungan ? new Date(latestLansia.tanggal_kunjungan).toISOString().split('T')[0] : ''
               lastBb = latestLansia.bb?.toString()
               lastTfuTb = latestLansia.tb?.toString()
               lastLilaGds = latestLansia.gula_darah_sewaktu?.toString()
               lastTd = (latestLansia.tekanan_darah_sistolik && latestLansia.tekanan_darah_diastolik) ? `${latestLansia.tekanan_darah_sistolik}/${latestLansia.tekanan_darah_diastolik}` : ''
+              lastKolesterol = latestLansia.kolesterol?.toString() || ''
+              lastAsamUrat = latestLansia.asam_urat?.toString() || ''
+              lastCatatan = latestLansia.catatan || ''
             } else if (latestPasca) {
+              lastTgl = latestPasca.tanggal_kunjungan ? new Date(latestPasca.tanggal_kunjungan).toISOString().split('T')[0] : ''
               lastBb = latestPasca.bb?.toString()
               lastTfuTb = latestPasca.tb?.toString() || latestBumil?.tb?.toString()
               lastTd = (latestPasca.tekanan_darah_sistolik && latestPasca.tekanan_darah_diastolik) ? `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}` : ''
+              lastKondisiIbu = latestPasca.kondisi_ibu || ''
+              lastTinggiBayi = latestPasca.tinggi_badan_bayi?.toString() || ''
+              lastBeratBayi = latestPasca.berat_badan_bayi?.toString() || ''
+              lastKie = latestPasca.kie ?? undefined
+              lastRujukan = latestPasca.fasilitasi_rujukan ?? undefined
+              lastBansos = latestPasca.fasilitasi_bantuan_sosial ?? undefined
+              lastCatatan = latestPasca.catatan || ''
             }
 
             const row = getRow(warga.id)
@@ -541,8 +588,14 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                 </td>
 
                 <td className="px-3 py-3">
+                  <div className="text-xs font-medium text-slate-700 min-w-[90px] px-2 py-1.5 bg-slate-50 rounded-md border border-slate-100 text-center whitespace-nowrap">
+                    {lastTgl ? new Date(lastTgl).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                  </div>
+                </td>
+
+                <td className="px-3 py-3">
                   <span className="text-sm font-medium text-slate-700 bg-slate-50 px-2 py-1.5 rounded-md border border-slate-100 whitespace-nowrap inline-block min-w-[70px] text-center">
-                    {calculateAge(warga.tanggal_lahir, row.tanggal, kategori)}
+                    {calculateAge(warga.tanggal_lahir, lastTgl || row.tanggal, kategori)}
                   </span>
                 </td>
 
@@ -572,19 +625,19 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder="-" width="w-[80px]" disabled={true} />
+                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder={lastKondisi || "-"} width="w-[80px]" disabled={true} />
                       </td>
                     <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.asi_eksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />
+                      <Cell type="checkbox" value={lastAsiEksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />
                     </td>
                     <td className="px-3 py-3">
                       <ImunisasiCell wargaId={warga.id} disabled={true} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
+                      <Cell type="checkbox" value={lastBansos as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
                     </td>
                       <td className="px-3 py-3">
-                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder={lastCatatan || "-"} width="w-[110px]" disabled={true} />
                       </td>
                   </>
                 )}
@@ -641,46 +694,46 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         <Cell type="number" value={row.lingkar_perut} onChange={(v) => set(warga.id, 'lingkar_perut', v)} placeholder={lastLingkarPerut || '-'} width="w-[70px]" disabled={true} max={200} min={0} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.tinggi_fundus} onChange={(v) => set(warga.id, 'tinggi_fundus', v)} placeholder="-" width="w-[70px]" disabled={true} max={100} min={0} />
+                        <Cell type="number" value={row.tinggi_fundus} onChange={(v) => set(warga.id, 'tinggi_fundus', v)} placeholder={lastTinggiFundus || "-"} width="w-[70px]" disabled={true} max={100} min={0} />
                       </td>
                       <td className="px-3 py-3">
                         <Cell value={row.riwayat_penyakit || lastRiwPen} onChange={(v) => set(warga.id, 'riwayat_penyakit', v)} placeholder="-" width="w-[120px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder="-" width="w-[60px]" disabled={true} max={30} min={0} />
-                        {parseFloat(row.kadar_hemoglobin) > 0 && parseFloat(row.kadar_hemoglobin) < 11 && (
+                        <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder={lastKadarHb || "-"} width="w-[60px]" disabled={true} max={30} min={0} />
+                        {parseFloat(row.kadar_hemoglobin || lastKadarHb) > 0 && parseFloat(row.kadar_hemoglobin || lastKadarHb) < 11 && (
                           <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>Anemia</div>
                         )}
                       </td>
                       <td className="px-3 py-3">
                         <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} max={60} min={0} />
-                        {parseFloat(row.lilaGds) > 0 && parseFloat(row.lilaGds) < 23.5 && (
+                        {parseFloat(row.lilaGds || lastLilaGds) > 0 && parseFloat(row.lilaGds || lastLilaGds) < 23.5 && (
                           <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>KEK</div>
                         )}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder="-" width="w-[70px]" disabled={true} max={10} min={0} />
+                        <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder={lastBeratJanin || "-"} width="w-[70px]" disabled={true} max={10} min={0} />
                       </td>
                     <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.terpapar_rokok as any} onChange={(v) => set(warga.id, 'terpapar_rokok', v)} width="w-full" disabled={true} />
+                      <Cell type="checkbox" value={lastRokok as any} onChange={(v) => set(warga.id, 'terpapar_rokok', v)} width="w-full" disabled={true} />
                     </td>
                     <td className="px-3 py-3">
-                      <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
+                      <Cell type="checkbox" value={lastKie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
                     </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.suplemen_tambah_darah} onChange={(v) => set(warga.id, 'suplemen_tambah_darah', v)} placeholder="-" width="w-[70px]" disabled={true} min={0} />
+                        <Cell type="number" value={row.suplemen_tambah_darah} onChange={(v) => set(warga.id, 'suplemen_tambah_darah', v)} placeholder={lastSuplemen || "-"} width="w-[70px]" disabled={true} min={0} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.mms} onChange={(v) => set(warga.id, 'mms', v)} placeholder="-" width="w-[70px]" disabled={true} min={0} />
+                        <Cell type="number" value={row.mms} onChange={(v) => set(warga.id, 'mms', v)} placeholder={lastMms || "-"} width="w-[70px]" disabled={true} min={0} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
+                        <Cell type="checkbox" value={lastRujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
+                        <Cell type="checkbox" value={lastBansos as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder={lastCatatan || "-"} width="w-[110px]" disabled={true} />
                       </td>
                   </>
                 )}
@@ -721,21 +774,21 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder={lastKolesterol || "-"} width="w-[70px]" disabled={true} />
                         {(() => {
-                          const status = calculateKolesterolStatus(row.kolesterol);
+                          const status = calculateKolesterolStatus(row.kolesterol || lastKolesterol);
                           return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder={lastAsamUrat || "-"} width="w-[70px]" disabled={true} />
                         {(() => {
-                          const status = calculateAsamUratStatus(row.asam_urat, warga.jenis_kelamin);
+                          const status = calculateAsamUratStatus(row.asam_urat || lastAsamUrat, warga.jenis_kelamin);
                           return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder={lastCatatan || "-"} width="w-[110px]" disabled={true} />
                       </td>
                   </>
                 )}
@@ -775,25 +828,25 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder="-" width="w-[150px]" disabled={true} />
+                        <Cell value={row.kondisi_ibu} onChange={(v) => set(warga.id, 'kondisi_ibu', v)} placeholder={lastKondisiIbu || "-"} width="w-[150px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        <Cell type="number" value={row.tinggi_badan_bayi} onChange={(v) => set(warga.id, 'tinggi_badan_bayi', v)} placeholder={lastTinggiBayi || "-"} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.berat_badan_bayi} onChange={(v) => set(warga.id, 'berat_badan_bayi', v)} placeholder="-" width="w-[70px]" disabled={true} />
+                        <Cell type="number" value={row.berat_badan_bayi} onChange={(v) => set(warga.id, 'berat_badan_bayi', v)} placeholder={lastBeratBayi || "-"} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="checkbox" value={row.kie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
+                        <Cell type="checkbox" value={lastKie as any} onChange={(v) => set(warga.id, 'kie', v)} width="w-full" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="checkbox" value={row.fasilitasi_rujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
+                        <Cell type="checkbox" value={lastRujukan as any} onChange={(v) => set(warga.id, 'fasilitasi_rujukan', v)} width="w-full" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="checkbox" value={row.fasilitasi_bantuan_sosial as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
+                        <Cell type="checkbox" value={lastBansos as any} onChange={(v) => set(warga.id, 'fasilitasi_bantuan_sosial', v)} width="w-full" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder="-" width="w-[110px]" disabled={true} />
+                        <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder={lastCatatan || "-"} width="w-[110px]" disabled={true} />
                       </td>
                   </>
                 )}
