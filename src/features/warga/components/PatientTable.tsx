@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ImunisasiCell } from './ImunisasiCell'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 import { Plus } from 'lucide-react'
+import { classifyZScore } from './PatientCard'
 import { toast } from 'sonner'
 import { useUpdateWarga } from '../hooks/useWarga'
 
@@ -422,7 +423,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                 <th className="px-3 py-3 font-semibold text-primary text-xs w-[160px]">Nama Ibu</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs w-[140px]">Penggunaan<br/>Kontrasepsi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi/Panjang Badan (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Kondisi Bayi</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs">Status Gizi (BB/TB)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">ASI<br/>Eksklusif</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Imunisasi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bantuan<br/>Sosial</th>
@@ -518,7 +519,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             let lastRujukan: boolean | undefined = undefined
             let lastBansos: boolean | undefined = undefined
             let lastCatatan = ''
-            let lastKondisi = ''
+            let lastStatusGizi = ''
             let lastAsiEksklusif: boolean | undefined = undefined
             let lastKolesterol = ''
             let lastAsamUrat = ''
@@ -549,7 +550,14 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
               lastBb = latestBalita.bb?.toString()
               lastTfuTb = latestBalita.tb?.toString()
               lastLilaGds = latestBalita.lingkar_lengan_atas?.toString()
-              lastKondisi = latestBalita.kondisi || ''
+              
+              const { kategori_bb_tb } = classifyZScore(
+                latestBalita.zscore_bb_u != null ? Number(latestBalita.zscore_bb_u) : null,
+                latestBalita.zscore_tb_u != null ? Number(latestBalita.zscore_tb_u) : null,
+                latestBalita.zscore_bb_tb != null ? Number(latestBalita.zscore_bb_tb) : null
+              )
+              lastStatusGizi = kategori_bb_tb || ''
+              
               lastAsiEksklusif = latestBalita.asi_eksklusif ?? undefined
               lastBansos = latestBalita.fasilitasi_bantuan_sosial ?? undefined
               lastCatatan = latestBalita.catatan || ''
@@ -625,7 +633,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder={lastKondisi || "-"} width="w-[80px]" disabled={true} />
+                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder={lastStatusGizi || "-"} width="w-[100px]" disabled={true} />
                       </td>
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={lastAsiEksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />

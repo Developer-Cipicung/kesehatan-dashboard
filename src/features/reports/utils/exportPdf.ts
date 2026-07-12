@@ -34,7 +34,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
     switch (kategoriFilter) {
       case 'baduta':
       case 'balita':
-        tableColumn = ['No', 'Tgl & Jam', 'Nama Balita', ...commonCols, 'Umur', 'Ibu', 'KB', 'BB', 'TB', 'LK', 'Kondisi', 'ASI', 'Bansos', 'Catatan', 'Imunisasi']
+        tableColumn = ['No', 'Tgl & Jam', 'Nama Balita', ...commonCols, 'Umur', 'Ibu', 'KB', 'BB', 'TB', 'LK', 'Status Gizi', 'ASI', 'Bansos', 'Catatan', 'Imunisasi']
         break
       case 'bumil':
         tableColumn = ['No', 'Tgl & Jam', 'Nama Ibu Hamil', ...commonCols, 'Hamil(Mgg)', 'BB', 'TB', 'LILA', 'LP', 'Anak Ke', 'Hb', 'Janin', 'Rokok', 'KIE', 'TTD']
@@ -91,7 +91,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.bb || '-',
             item.tb || '-',
             item.lingkar_kepala || '-',
-            item.kondisi || '-',
+            item.status_gizi?.kategori_bb_tb || '-',
             item.asi_eksklusif ? 'Y' : 'T',
             item.fasilitasi_bantuan_sosial ? 'Y' : 'T',
             item.catatan || '-',

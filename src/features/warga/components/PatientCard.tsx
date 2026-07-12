@@ -93,9 +93,9 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Status Gizi (BB/TB)</span>
                 <span className="text-sm font-semibold text-slate-800">
                   {classifyZScore(
-                    latestBalita.zscore_bb_u ? Number(latestBalita.zscore_bb_u) : null,
-                    latestBalita.zscore_tb_u ? Number(latestBalita.zscore_tb_u) : null,
-                    latestBalita.zscore_bb_tb ? Number(latestBalita.zscore_bb_tb) : null
+                    latestBalita.zscore_bb_u != null ? Number(latestBalita.zscore_bb_u) : null,
+                    latestBalita.zscore_tb_u != null ? Number(latestBalita.zscore_tb_u) : null,
+                    latestBalita.zscore_bb_tb != null ? Number(latestBalita.zscore_bb_tb) : null
                   ).kategori_bb_tb || '-'}
                 </span>
               </div>

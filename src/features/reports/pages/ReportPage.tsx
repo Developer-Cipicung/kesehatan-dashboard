@@ -144,10 +144,9 @@ export function ReportPage() {
     return list
   })()
 
-  // Apply Sub Filters
-  if (Object.keys(subFilters).length > 0) {
-    filteredPemeriksaanList = filteredPemeriksaanList.filter((item: any) => {
-      let passed = true
+  // Apply Sub Filters and Search Query
+  filteredPemeriksaanList = filteredPemeriksaanList.filter((item: any) => {
+    let passed = true
 
       // Bumil
       if (kategoriFilter === 'bumil') {
@@ -302,7 +301,7 @@ export function ReportPage() {
         const query = searchQuery.toLowerCase()
         const nama = (item.warga?.nama || '').toLowerCase()
         const nik = (item.warga?.nik || '').toLowerCase()
-        const hp = (item.warga?.no_hp || '').toLowerCase()
+        const hp = (item.warga?.nomor || '').toLowerCase()
         if (
           !nama.includes(query) &&
           !nik.includes(query) &&
@@ -314,7 +313,6 @@ export function ReportPage() {
 
       return passed
     })
-  }
 
   const activeFilterBadges = useMemo(() => {
     const badges: { label: string; value: string }[] = []
@@ -388,6 +386,11 @@ export function ReportPage() {
           </button>
         </div>
       </div>
+
+      <CategorySummaryCards
+        kategori={kategoriFilter}
+        data={filteredPemeriksaanList}
+      />
 
       <div className="rounded-xl border border-slate-200 bg-card p-3 shadow-sm sm:p-5 lg:p-6">
         {/* Top Controls Row */}
@@ -491,16 +494,8 @@ export function ReportPage() {
                 ))}
               </div>
             </div>
-            <p className="mt-2 text-[11px] leading-snug text-emerald-700 sm:text-xs">
-              Tabel, Cetak Visum, dan Download Excel mengikuti filter aktif di atas.
-            </p>
           </div>
         )}
-
-        <CategorySummaryCards
-          kategori={kategoriFilter}
-          data={filteredPemeriksaanList}
-        />
 
         {/* Export Row */}
         <div className="mb-5 flex flex-col gap-3 border-y py-3 sm:py-4 md:flex-row md:items-center md:justify-between">

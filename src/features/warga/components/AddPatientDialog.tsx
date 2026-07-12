@@ -19,6 +19,7 @@ import { FormControl, FormItem, FormLabel, FormMessage, FormField as RHFFormFiel
 import { pemeriksaanService } from '../../pemeriksaan/services/pemeriksaanService'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { calculateAgeInMonths } from '@/utils/age'
 
 const formSchema = z.object({
   nik: z.string().min(16, 'NIK harus 16 digit').max(16, 'NIK harus 16 digit'),
@@ -190,6 +191,10 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
     control: methods.control,
     name: 'kategori',
   })
+  const watchTanggalLahir = useWatch({
+    control: methods.control,
+    name: 'tanggal_lahir',
+  })
   const isIbuIbu = watchKategori === 'bumil' || watchKategori === 'pasca_persalinan' || watchKategori === 'wus_pus'
   const currentCategory = normalizeCategory(watchKategori)
   const currentConfig = currentCategory ? patientFormConfig[currentCategory] : undefined
@@ -204,6 +209,19 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
       methods.setValue('jenis_kelamin', currentConfig.genderDefault)
     }
   }, [currentConfig, methods])
+
+  useEffect(() => {
+    if (watchTanggalLahir) {
+      const ageInMonths = calculateAgeInMonths(watchTanggalLahir)
+      if (watchKategori === 'baduta' && ageInMonths >= 24) {
+        methods.setValue('kategori', 'balita')
+        toast.info('Bayi berusia 2 tahun ke atas otomatis masuk ke kategori Balita', { id: 'age-auto-switch-balita' })
+      } else if (watchKategori === 'balita' && ageInMonths < 24) {
+        methods.setValue('kategori', 'baduta')
+        toast.info('Bayi berusia di bawah 2 tahun otomatis masuk ke kategori Baduta', { id: 'age-auto-switch-baduta' })
+      }
+    }
+  }, [watchKategori, watchTanggalLahir, methods])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {

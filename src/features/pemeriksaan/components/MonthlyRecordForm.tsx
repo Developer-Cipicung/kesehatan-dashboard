@@ -164,16 +164,20 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
   const [zscoreData, setZscoreData] = useState<any>(null)
 
   useEffect(() => {
-    if (isBalita && warga && bbWatch && tbWatch && tglWatch) {
+    const bbVal = parseNum(bbWatch);
+    const tbVal = parseNum(tbWatch);
+    const lkVal = parseNum(lkWatch);
+
+    if (isBalita && warga && (bbVal !== undefined || tbVal !== undefined || lkVal !== undefined) && tglWatch) {
       const timer = setTimeout(async () => {
         try {
           const res = await pemeriksaanService.calculateZscore({
             jenis_kelamin: warga.jenis_kelamin,
             tanggal_lahir: warga.tanggal_lahir,
             tanggal_kunjungan: tglWatch,
-            bb: parseFloat(bbWatch as any),
-            tb: parseFloat(tbWatch as any),
-            lingkar_kepala: lkWatch ? parseFloat(lkWatch as any) : undefined
+            bb: bbVal,
+            tb: tbVal,
+            lingkar_kepala: lkVal
           })
           setZscoreData(res)
         } catch (e) {

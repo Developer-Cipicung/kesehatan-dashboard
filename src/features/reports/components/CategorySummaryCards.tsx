@@ -21,13 +21,13 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
 
     return (
       <Card className="border border-slate-200 shadow-sm">
-        <CardContent className="p-3 sm:p-4">
-          <p className="mb-1.5 text-xs font-medium leading-tight text-slate-600 sm:text-sm">{title}</p>
+        <CardContent className="p-2 sm:p-4">
+          <p className="mb-1 text-[11px] font-medium leading-tight text-slate-600 sm:mb-1.5 sm:text-sm">{title}</p>
           <div className="flex flex-col">
-            <span className="text-xl font-bold leading-tight text-slate-800 sm:text-2xl">
-              {value} {suffix && <span className="text-xs font-normal text-slate-500 sm:text-sm">{suffix}</span>}
+            <span className="text-lg font-bold leading-tight text-slate-800 sm:text-2xl">
+              {value} {suffix && <span className="text-[10px] font-normal text-slate-500 sm:text-sm">{suffix}</span>}
             </span>
-            {!suffix && <span className={`mt-0.5 text-xs font-medium sm:text-sm ${pctColor}`}>({percentage})</span>}
+            {!suffix && <span className={`mt-0.5 text-[10px] font-medium sm:text-sm ${pctColor}`}>({percentage})</span>}
           </div>
         </CardContent>
       </Card>
@@ -36,18 +36,18 @@ export function CategorySummaryCards({ kategori, data }: CategorySummaryCardsPro
 
   const renderGroupedCard = (title: string, items: { label: string; value: number; color: string }[]) => (
     <Card className="col-span-2 border-l-4 border-l-primary bg-white shadow-sm md:col-span-2">
-      <CardContent className="p-3 sm:p-4">
-        <h3 className="mb-2 border-b pb-2 text-xs font-bold leading-tight text-slate-700 sm:text-sm">{title}</h3>
-        <div className="grid grid-cols-2 gap-2 min-[390px]:grid-cols-3">
+      <CardContent className="p-2 sm:p-4">
+        <h3 className="mb-1.5 border-b pb-1.5 text-[11px] font-bold leading-tight text-slate-700 sm:mb-2 sm:pb-2 sm:text-sm">{title}</h3>
+        <div className="grid grid-cols-2 gap-1.5 min-[390px]:grid-cols-3 sm:gap-2">
           {items.map((d, i) => (
-            <div key={i} className="flex min-h-[68px] flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-2">
-              <span className={`mb-1 text-lg font-bold leading-none sm:text-xl ${
+            <div key={i} className="flex min-h-[52px] flex-col items-center justify-center rounded-lg border border-slate-100 bg-slate-50 p-1.5 sm:min-h-[68px] sm:p-2">
+              <span className={`mb-0.5 text-base font-bold leading-none sm:mb-1 sm:text-xl ${
                 d.color === 'green' ? 'text-emerald-600' :
                 d.color === 'red' ? 'text-rose-600' :
                 d.color === 'orange' ? 'text-amber-600' :
                 'text-blue-600'
               }`}>{d.value}</span>
-              <span className="text-center text-[10px] font-medium uppercase leading-tight text-slate-500">{d.label}</span>
+              <span className="text-center text-[9px] font-medium uppercase leading-tight text-slate-500 sm:text-[10px]">{d.label}</span>
             </div>
           ))}
         </div>
