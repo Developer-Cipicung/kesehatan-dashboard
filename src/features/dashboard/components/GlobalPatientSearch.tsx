@@ -82,7 +82,7 @@ export function GlobalPatientSearch() {
   }
 
   return (
-    <div className="relative w-full z-50 mb-8" ref={wrapperRef}>
+    <div className="relative z-20 mb-8 w-full" ref={wrapperRef}>
       <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

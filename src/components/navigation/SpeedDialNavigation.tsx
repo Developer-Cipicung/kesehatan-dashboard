@@ -44,8 +44,13 @@ export function SpeedDialNavigation() {
       if (event.key === 'Escape') setIsOpen(false)
     }
 
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [isOpen])
 
   if (location.pathname === '/login') return null
@@ -57,18 +62,20 @@ export function SpeedDialNavigation() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-2xl shadow-slate-900/30 transition-all duration-200 hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-900/20 md:hidden"
-        aria-label="Buka Menu Cepat"
-        aria-expanded={isOpen}
-      >
-        <Grid3X3 className="h-6 w-6" />
-      </button>
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-2xl shadow-slate-900/30 transition-all duration-200 hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-900/20 md:hidden"
+          aria-label="Buka Menu Cepat"
+          aria-expanded={isOpen}
+        >
+          <Grid3X3 className="h-6 w-6" />
+        </button>
+      )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-labelledby="quick-menu-title">
+        <div className="fixed inset-0 z-[90] md:hidden" role="dialog" aria-modal="true" aria-labelledby="quick-menu-title">
           <button
             type="button"
             aria-label="Tutup Menu Cepat"
@@ -76,7 +83,7 @@ export function SpeedDialNavigation() {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[28px] bg-white px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl">
+          <div className="absolute inset-x-0 bottom-0 z-10 max-h-[88dvh] overflow-y-auto overflow-x-hidden rounded-t-[28px] bg-white px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl">
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200" />
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
