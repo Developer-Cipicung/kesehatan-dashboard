@@ -76,26 +76,7 @@ export function AdminStatusPendataanPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            {userPosyanduId && (
-              isLocked ? (
-                <Button 
-                  variant="outline"
-                  className="bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed shadow-sm"
-                  disabled
-                >
-                  <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" />
-                  Bulan Ini Sudah Dikunci
-                </Button>
-              ) : (
-                <Button 
-                  variant="default"
-                  className="bg-slate-900 hover:bg-slate-800 shadow-sm"
-                  onClick={() => setIsSubmitOpen(true)}
-                >
-                  Tutup Pendataan Bulan Ini
-                </Button>
-              )
-            )}
+
             <Select value={selectedYear.toString()} onValueChange={(v) => { if(v) setSelectedYear(parseInt(v)) }}>
               <SelectTrigger className="w-[100px] h-10 border-slate-200 font-medium">
                 <SelectValue placeholder="Tahun" />
