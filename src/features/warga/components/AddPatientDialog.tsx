@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -11,11 +12,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/forms/FormField'
 import { FormProvider } from 'react-hook-form'
-import { useAddWarga, useGetWargaList } from '../hooks/useWarga'
+import { useAddWarga } from '../hooks/useWarga'
 import { AddWargaPayload } from '../services/wargaService'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormControl, FormItem, FormLabel, FormMessage, FormField as RHFFormField } from '@/components/ui/form'
-import { WargaCombobox } from './WargaCombobox'
 import { pemeriksaanService } from '../../pemeriksaan/services/pemeriksaanService'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -45,7 +45,129 @@ const formSchema = z.object({
       path: ['nama_ayah'],
     });
   }
+  if (isAnak && (!data.nama_ibu || data.nama_ibu.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Nama Ibu wajib diisi',
+      path: ['nama_ibu'],
+    });
+  }
 })
+
+type PatientCategory = 'balita' | 'baduta' | 'bumil' | 'pasca_persalinan' | 'lansia'
+
+interface PatientFormConfig {
+  categoryLabel: string
+  nameLabel: string
+  phoneLabel: string
+  genderDefault: 'L' | 'P'
+  lockGender?: boolean
+  showParents?: boolean
+  showHpht?: boolean
+  showDelivery?: boolean
+  showContraception?: boolean
+}
+
+const patientFormConfig: Record<PatientCategory, PatientFormConfig> = {
+  balita: {
+    categoryLabel: 'Balita',
+    nameLabel: 'Nama Anak',
+    phoneLabel: 'Nomor Telepon Orang Tua/Keluarga',
+    genderDefault: 'L',
+    showParents: true,
+  },
+  baduta: {
+    categoryLabel: 'Baduta',
+    nameLabel: 'Nama Anak',
+    phoneLabel: 'Nomor Telepon Orang Tua/Keluarga',
+    genderDefault: 'L',
+    showParents: true,
+  },
+  bumil: {
+    categoryLabel: 'Ibu Hamil',
+    nameLabel: 'Nama Ibu Hamil',
+    phoneLabel: 'Nomor Telepon',
+    genderDefault: 'P',
+    lockGender: true,
+    showHpht: true,
+    showContraception: true,
+  },
+  pasca_persalinan: {
+    categoryLabel: 'Ibu Pasca Persalinan',
+    nameLabel: 'Nama Ibu',
+    phoneLabel: 'Nomor Telepon',
+    genderDefault: 'P',
+    lockGender: true,
+    showDelivery: true,
+    showContraception: true,
+  },
+  lansia: {
+    categoryLabel: 'Lansia',
+    nameLabel: 'Nama Lansia',
+    phoneLabel: 'Nomor Telepon',
+    genderDefault: 'L',
+  },
+}
+
+const normalizeCategory = (category?: string): PatientCategory | '' => {
+  if (category === 'pasca-persalinan') return 'pasca_persalinan'
+  if (
+    category === 'balita' ||
+    category === 'baduta' ||
+    category === 'bumil' ||
+    category === 'pasca_persalinan' ||
+    category === 'lansia'
+  ) {
+    return category
+  }
+  return ''
+}
+
+const todayInputValue = () => new Date().toISOString().split('T')[0]
+
+const getDefaultValues = (category: PatientCategory | ''): z.infer<typeof formSchema> => {
+  const config = category ? patientFormConfig[category] : undefined
+  return {
+    nik: '',
+    nomor: '',
+    nama: '',
+    tanggal_lahir: '',
+    jenis_kelamin: config?.genderDefault || 'L',
+    kategori: category,
+    nama_ayah: '',
+    nama_ibu: '',
+    tanggal_persalinan: todayInputValue(),
+    tempat_lahir: '',
+    alamat: '',
+    tempat_persalinan: '',
+    penggunaan_kontrasepsi: '',
+    hpht: '',
+    ibu_id: 'none',
+  }
+}
+
+type PatientFormValues = z.infer<typeof formSchema>
+type PregnancyStatus = NonNullable<AddWargaPayload['status_kehamilan']>
+type PatientSubmitPayload = Partial<PatientFormValues> & {
+  status_kehamilan: PregnancyStatus
+}
+type InitialPascaRecord = Parameters<typeof pemeriksaanService.create>[1] & {
+  tanggal_kunjungan: string
+  tanggal_persalinan: string
+  bb: number
+  tekanan_darah_sistolik: number
+  tekanan_darah_diastolik: number
+  suhu_tubuh: number
+}
+type ApiValidationError = {
+  response?: {
+    data?: {
+      message?: string
+      errors?: Array<{ message?: string }>
+    }
+  }
+  message?: string
+}
 
 interface AddPatientDialogProps {
   open: boolean
@@ -57,41 +179,39 @@ interface AddPatientDialogProps {
 export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSuccess }: AddPatientDialogProps) {
   const { mutateAsync: addWarga, isPending } = useAddWarga()
   const queryClient = useQueryClient()
-  const { data: ibuListRes } = useGetWargaList({ jenis_kelamin: 'P', limit: 1000 }, { enabled: open })
-  const ibuList = (ibuListRes?.data || []).filter(w => w.status_kehamilan === 'HAMIL' || w.status_kehamilan === 'PASCA_PERSALINAN')
+  const normalizedDefaultCategory = normalizeCategory(defaultCategory)
 
   const methods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      nik: '',
-      nomor: '',
-      nama: '',
-      tanggal_lahir: '',
-      jenis_kelamin: 'L',
-      kategori: defaultCategory || '',
-      nama_ayah: '',
-      nama_ibu: '',
-      tanggal_persalinan: new Date().toISOString().split('T')[0],
-      tempat_lahir: '',
-      alamat: '',
-      tempat_persalinan: '',
-      penggunaan_kontrasepsi: '',
-      hpht: '',
-      ibu_id: 'none',
-    },
+    defaultValues: getDefaultValues(normalizedDefaultCategory),
   })
 
-  const watchKategori = methods.watch('kategori')
-  const isAnak = watchKategori === 'balita' || watchKategori === 'baduta'
+  const watchKategori = useWatch({
+    control: methods.control,
+    name: 'kategori',
+  })
   const isIbuIbu = watchKategori === 'bumil' || watchKategori === 'pasca_persalinan' || watchKategori === 'wus_pus'
+  const currentCategory = normalizeCategory(watchKategori)
+  const currentConfig = currentCategory ? patientFormConfig[currentCategory] : undefined
+
+  useEffect(() => {
+    if (!open) return
+    methods.reset(getDefaultValues(normalizedDefaultCategory))
+  }, [open, normalizedDefaultCategory, methods])
+
+  useEffect(() => {
+    if (currentConfig?.lockGender) {
+      methods.setValue('jenis_kelamin', currentConfig.genderDefault)
+    }
+  }, [currentConfig, methods])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      let status_kehamilan = 'TIDAK_HAMIL'
+      let status_kehamilan: PregnancyStatus = 'TIDAK_HAMIL'
       if (values.kategori === 'bumil') status_kehamilan = 'HAMIL'
       if (values.kategori === 'pasca_persalinan') status_kehamilan = 'PASCA_PERSALINAN'
 
-      const payload = { ...values, status_kehamilan }
+      const payload: PatientSubmitPayload = { ...values, status_kehamilan }
       if (values.ibu_id === 'none') {
         delete payload.ibu_id
       }
@@ -99,16 +219,16 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
         payload.jenis_kelamin = 'P'
       }
 
-      Object.keys(payload).forEach(key => {
-        if ((payload as any)[key] === '') {
-          delete (payload as any)[key]
+      ;(Object.keys(payload) as Array<keyof PatientSubmitPayload>).forEach((key) => {
+        if (payload[key] === '') {
+          delete payload[key]
         }
       })
 
       const created = await addWarga(payload as AddWargaPayload)
       if (values.kategori === 'pasca_persalinan' && values.tanggal_persalinan && created?.id) {
         try {
-          await pemeriksaanService.create('pasca_persalinan', {
+          const initialPascaRecord: InitialPascaRecord = {
             warga_id: created.id,
             tanggal_kunjungan: new Date().toISOString().split('T')[0],
             tanggal_persalinan: values.tanggal_persalinan,
@@ -116,7 +236,8 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
             tekanan_darah_sistolik: 120,
             tekanan_darah_diastolik: 80,
             suhu_tubuh: 36.5,
-          } as any)
+          }
+          await pemeriksaanService.create('pasca_persalinan', initialPascaRecord)
           queryClient.invalidateQueries({ queryKey: ['dashboard'] })
           queryClient.invalidateQueries({ queryKey: ['pendataan'] })
           queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list', 'pasca_persalinan'] })
@@ -125,15 +246,16 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
         }
       }
 
-      methods.reset()
+      methods.reset(getDefaultValues(normalizedDefaultCategory))
       onOpenChange(false)
       if (onSuccess) onSuccess()
     } catch (error) {
       console.error(error)
-      let errorMessage = (error as any).response?.data?.message || (error as Error).message || 'Gagal menyimpan data'
-      const validationErrors = (error as any).response?.data?.errors
+      const apiError = error as ApiValidationError
+      let errorMessage = apiError.response?.data?.message || apiError.message || 'Gagal menyimpan data'
+      const validationErrors = apiError.response?.data?.errors
       if (Array.isArray(validationErrors) && validationErrors.length > 0) {
-        errorMessage = validationErrors.map(e => e.message).join(', ')
+        errorMessage = validationErrors.map((e) => e.message).filter(Boolean).join(', ')
       }
       toast.error(errorMessage)
     }
@@ -141,7 +263,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[420px] sm:max-w-xl lg:max-w-2xl">
+      <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[420px] overflow-x-hidden overflow-y-auto sm:max-w-xl lg:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Tambah Pasien Baru</DialogTitle>
           <DialogDescription>
@@ -166,14 +288,14 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                   <FormField
                     control={methods.control}
                     name="nama"
-                    label={<>Nama Lengkap <span className="text-red-500">*</span></>}
+                    label={<>{currentConfig?.nameLabel || 'Nama Lengkap'} <span className="text-red-500">*</span></>}
                     placeholder="Masukkan nama lengkap"
                     type="text"
                   />
                   <FormField
                     control={methods.control}
                     name="nomor"
-                    label={<>Nomor Telepon <span className="text-red-500">*</span></>}
+                    label={<>{currentConfig?.phoneLabel || 'Nomor Telepon'} <span className="text-red-500">*</span></>}
                     placeholder="Contoh: 08123456789"
                     type="text"
                   />
@@ -199,6 +321,14 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                         </FormItem>
                       )}
                     />
+                  )}
+                  {isIbuIbu && (
+                    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span className="block text-sm font-medium leading-snug sm:text-[15px]">
+                        Jenis Kelamin <span className="text-red-500">*</span>
+                      </span>
+                      <span className="mt-1 block text-sm font-semibold text-slate-700">Perempuan</span>
+                    </div>
                   )}
                   {!defaultCategory && (
                     <FormField
@@ -234,16 +364,16 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                 </div>
               </div>
 
-              {(watchKategori === 'pasca_persalinan' || watchKategori === 'bumil' || isAnak) && (
+              {(currentConfig?.showDelivery || currentConfig?.showHpht || currentConfig?.showParents || currentConfig?.showContraception) && (
                 <hr className="border-slate-200" />
               )}
 
               {/* Detail Kategori Tambahan */}
-              {(watchKategori === 'pasca_persalinan' || watchKategori === 'bumil' || isAnak) && (
+              {(currentConfig?.showDelivery || currentConfig?.showHpht || currentConfig?.showParents || currentConfig?.showContraception) && (
                 <div>
                   <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-800 sm:text-sm">Detail Tambahan</h4>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                    {watchKategori === 'pasca_persalinan' && (
+                    {currentConfig?.showDelivery && (
                       <>
                         <FormField
                           control={methods.control}
@@ -260,7 +390,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                         />
                       </>
                     )}
-                    {watchKategori === 'bumil' && (
+                    {currentConfig?.showHpht && (
                       <FormField
                         control={methods.control}
                         name="hpht"
@@ -268,7 +398,7 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                         type="date"
                       />
                     )}
-                    {isAnak && (
+                    {currentConfig?.showParents && (
                       <>
                         <FormField
                           control={methods.control}
@@ -277,51 +407,55 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                           placeholder="Contoh: Budi"
                           type="text"
                         />
-                        <RHFFormField
+                        <FormField
                           control={methods.control}
-                          name="ibu_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nama Ibu <span className="text-red-500">*</span></FormLabel>
-                              <WargaCombobox
-                                wargaList={ibuList}
-                                value={field.value || 'none'}
-                                onChange={field.onChange}
-                                placeholder="Pilih Ibu..."
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                          name="nama_ibu"
+                          label={<>Nama Ibu <span className="text-red-500">*</span></>}
+                          placeholder="Contoh: Siti"
+                          type="text"
                         />
                       </>
                     )}
+                    {currentConfig?.showContraception && (
+                      <FormField
+                        control={methods.control}
+                        name="penggunaan_kontrasepsi"
+                        label="Penggunaan Kontrasepsi"
+                        placeholder="Contoh: Pil / IUD"
+                        type="text"
+                      />
+                    )}
+                    <div className="sm:col-span-2">
+                      <FormField
+                        control={methods.control}
+                        name="alamat"
+                        label="Alamat Lengkap"
+                        placeholder="Contoh: Jl. Mawar No. 12"
+                        type="text"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                <FormField
-                  control={methods.control}
-                  name="penggunaan_kontrasepsi"
-                  label="Penggunaan Kontrasepsi"
-                  placeholder="Contoh: Pil / IUD"
-                  type="text"
-                />
-                <FormField
-                  control={methods.control}
-                  name="alamat"
-                  label="Alamat Lengkap"
-                  placeholder="Contoh: Jl. Mawar No. 12"
-                  type="text"
-                />
-              </div>
+              {(!currentCategory || currentCategory === 'lansia') && (
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                  <FormField
+                    control={methods.control}
+                    name="alamat"
+                    label="Alamat Lengkap"
+                    placeholder="Contoh: Jl. Mawar No. 12"
+                    type="text"
+                  />
+                </div>
+              )}
             </div>
             
-            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-8 w-full text-xs sm:h-9 sm:w-auto sm:text-sm">
                 Batal
               </Button>
-              <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
+              <Button type="submit" disabled={isPending} className="h-8 w-full text-xs sm:h-9 sm:w-auto sm:text-sm">
                 {isPending ? 'Menyimpan...' : 'Simpan'}
               </Button>
             </div>

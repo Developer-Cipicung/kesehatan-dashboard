@@ -175,10 +175,10 @@ export function GlobalPatientSearch() {
           </DialogHeader>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:mt-4 sm:gap-3">
             {[
-              { id: 'bumil', label: 'Ibu Hamil', icon: <User className="w-5 h-5 text-pink-500" /> },
-              { id: 'pasca_persalinan', label: 'Pasca Persalinan', icon: <Baby className="w-5 h-5 text-purple-500" /> },
               { id: 'balita', label: 'Balita (0 - 59 Bulan)', icon: <Activity className="w-5 h-5 text-orange-500" /> },
               { id: 'baduta', label: 'Baduta (0 - 23 Bulan)', icon: <Baby className="w-5 h-5 text-amber-500" /> },
+              { id: 'bumil', label: 'Ibu Hamil', icon: <User className="w-5 h-5 text-pink-500" /> },
+              { id: 'pasca_persalinan', label: 'Ibu Pasca Persalinan', icon: <Baby className="w-5 h-5 text-purple-500" /> },
               { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-5 h-5 text-teal-500" /> }
             ].map((cat) => (
               <button
