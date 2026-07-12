@@ -34,7 +34,7 @@ export const VisumTemplate: React.FC<VisumTemplateProps> = ({
     columns = [
       { header: 'No.', accessor: (_, i) => i + 1, width: '3%' },
       { header: 'Jam & Tanggal\nKunjungan', accessor: (r) => formatDate(r.tanggal_kunjungan), width: '8%' },
-      { header: 'Nama Ibu', accessor: (r) => r.nama_ibu || r.warga?.nama_ibu || '-', width: '8%' },
+      { header: 'Nama Ibu', accessor: (r) => r.warga?.ibu?.nama || r.warga?.nama_ibu || '-', width: '8%' },
       { header: 'NIK', accessor: (r) => r.warga?.nik || '-', width: '8%' },
       { header: 'Tempat Tgl\nLahir', accessor: (r) => `${r.warga?.tempat_lahir || '-'}, ${formatDate(r.warga?.tanggal_lahir)}`, width: '8%' },
       { header: 'Alamat', accessor: (r) => r.warga?.alamat || '-', width: '9%' },
@@ -227,7 +227,7 @@ export const VisumTemplate: React.FC<VisumTemplateProps> = ({
               {/* 12 baris kosong bernomor agar terlihat seperti form asli */}
               {Array.from({ length: 12 }).map((_, i) => (
                 <tr key={`empty-${i}`}>
-                  {columns.map((col, cIdx) => (
+                  {columns.map((_, cIdx) => (
                     <td key={`empty-cell-${cIdx}`} style={{ border: '0.5pt solid black', padding: '5pt 1pt', textAlign: 'center', verticalAlign: 'middle' }}>
                       {cIdx === 0 ? i + 1 : ''}
                     </td>

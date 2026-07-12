@@ -299,7 +299,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
             {/* Balita / Baduta */}
             {isBalita && (
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Nama Ibu"><Input register={register} name="nama_ibu" placeholder="Nama Ibu" /></Field>
                 <Field label="Penggunaan Kontrasepsi">
                   <select {...register('penggunaan_kontrasepsi')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                     <option value="">Pilih KB...</option>
@@ -315,6 +314,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 </Field>
                 <Field label="Berat Badan Anak (kg)" required><Input register={register} name="bb" type="number" placeholder="8.5" /></Field>
                 <Field label="Tinggi/Panjang Badan Anak (cm)" required><Input register={register} name="tb" type="number" placeholder="72" /></Field>
+                <Field label="Lingkar Kepala (cm)" required><Input register={register} name="lingkar_kepala" type="number" placeholder="45" /></Field>
+                <Field label="Lingkar Lengan Atas (cm)" required><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="15" /></Field>
                 <Field label="Kondisi Bayi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
                 <div className="flex items-center gap-2 mt-6">
                   <input type="checkbox" id="asi_eksklusif" {...register('asi_eksklusif')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />

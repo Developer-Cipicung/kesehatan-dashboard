@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { VisumTemplate } from '../components/templates/VisumTemplate';
 import { SummaryTemplate } from '../components/templates/SummaryTemplate';
-import { Printer, ZoomIn, ZoomOut, ArrowLeft } from 'lucide-react';
+import { Printer, ZoomIn, ZoomOut, ArrowLeft, Settings2, FileText } from 'lucide-react';
 import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan';
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats';
 import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton';
 
 export function PrintReportPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [kategoriRaw, setKategoriRaw] = useState(searchParams.get('kategori') || 'baduta');
   const bulan = parseInt(searchParams.get('bulan') || `${new Date().getMonth() + 1}`);
@@ -17,8 +18,20 @@ export function PrintReportPage() {
   const posyanduId = searchParams.get('posyanduId') || 'all';
 
   const [paperSize, setPaperSize] = useState<'A4' | 'F4' | 'Legal' | 'Letter'>('F4');
-  const [zoom, setZoom] = useState(1);
+  // Default zoom 0.4 for mobile to fit screen, 1 for desktop
+  const [zoom, setZoom] = useState(window.innerWidth < 768 ? 0.4 : 1);
 
+  // Enable native pinch-to-zoom on this page
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    const oldContent = meta?.getAttribute('content');
+    if (meta) {
+      meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+    }
+    return () => {
+      if (meta && oldContent) meta.setAttribute('content', oldContent);
+    };
+  }, []);
   // Update URL when category changes
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
@@ -111,72 +124,103 @@ export function PrintReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200 flex flex-col font-sans">
-      {/* TOOLBAR */}
-      <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-300 shadow-sm flex flex-wrap items-center justify-between px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => window.close()} title="Tutup">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex flex-col">
-            <h1 className="font-bold text-slate-800 leading-tight">Print Preview Laporan</h1>
-            <p className="text-xs text-slate-500 capitalize">Visum TPK - {kategoriRaw.replace('_', ' ')}</p>
+    <div className="min-h-screen bg-slate-200 flex font-sans overflow-hidden">
+      {/* SIDEBAR (Desktop Only) */}
+      <aside className="no-print hidden lg:flex flex-col inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-300">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50/80 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <div>
+              <h2 className="font-bold text-slate-800 text-sm leading-tight">Pengaturan Cetak</h2>
+              <p className="text-[10px] text-slate-500 font-medium">Laporan TPK</p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-6 mt-4 sm:mt-0">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-600 hidden sm:block">Kategori:</label>
-            <select 
-              className="border border-slate-300 rounded px-2 py-1 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary font-semibold"
-              value={kategoriRaw}
-              onChange={(e: any) => setKategoriRaw(e.target.value)}
-            >
-              <option value="summary">Ringkasan Keseluruhan</option>
-              <option value="baduta">Baduta (0-23 Bulan)</option>
-              <option value="balita">Balita (0-59 Bulan)</option>
-              <option value="bumil">Ibu Hamil</option>
-              <option value="pasca_persalinan">Pasca Persalinan</option>
-              <option value="lansia">Lansia</option>
-            </select>
+        <div className="p-5 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Settings2 className="w-4 h-4 text-primary" /> Kategori Laporan
+            </label>
+            <div className="relative">
+              <select 
+                className="w-full appearance-none border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm text-slate-700 font-medium cursor-pointer"
+                value={kategoriRaw}
+                onChange={(e: any) => setKategoriRaw(e.target.value)}
+              >
+                <option value="summary">Ringkasan Keseluruhan</option>
+                <option value="baduta">Baduta (0-23 Bulan)</option>
+                <option value="balita">Balita (0-59 Bulan)</option>
+                <option value="bumil">Ibu Hamil</option>
+                <option value="pasca_persalinan">Pasca Persalinan</option>
+                <option value="lansia">Lansia</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-600 hidden sm:block">Kertas:</label>
-            <select 
-              className="border border-slate-300 rounded px-2 py-1 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary"
-              value={paperSize}
-              onChange={(e: any) => setPaperSize(e.target.value)}
-            >
-              <option value="F4">F4 (Folio)</option>
-              <option value="A4">A4</option>
-              <option value="Legal">Legal</option>
-              <option value="Letter">Letter</option>
-            </select>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700">Ukuran Kertas</label>
+            <div className="relative">
+              <select 
+                className="w-full appearance-none border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm text-slate-700 font-medium cursor-pointer"
+                value={paperSize}
+                onChange={(e: any) => setPaperSize(e.target.value)}
+              >
+                <option value="F4">F4 (Folio)</option>
+                <option value="A4">A4</option>
+                <option value="Legal">Legal</option>
+                <option value="Letter">Letter</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 rounded-md p-1 border border-slate-200">
-            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="w-4 h-4 text-slate-600" /></Button>
-            <span className="text-xs font-medium w-10 text-center">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm" onClick={() => setZoom(z => Math.min(2, z + 0.1))}><ZoomIn className="w-4 h-4 text-slate-600" /></Button>
-          </div>
+        </div>
 
-          <Button onClick={handlePrint} className="gap-2 bg-primary text-white hover:bg-primary/90 shadow-md">
-            <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">Cetak Dokumen</span>
+        <div className="p-4 border-t border-slate-200 bg-white">
+          <Button onClick={handlePrint} className="w-full gap-2 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-primary/30 h-12 text-sm font-bold rounded-xl transition-all">
+            <Printer className="w-5 h-5" />
+            CETAK DOKUMEN
           </Button>
         </div>
-      </div>
+      </aside>
 
-      {/* PAPER CANVAS */}
-      <div className="flex-1 overflow-auto p-4 sm:p-10 flex flex-col items-center custom-scrollbar">
+      {/* MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-200 relative">
+        {/* HEADER */}
+        <div className="no-print flex items-center justify-between p-3 bg-white/90 backdrop-blur-md border-b border-slate-300 shadow-sm sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="h-9 w-9 lg:hidden hover:bg-slate-100" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-5 h-5 text-slate-700" />
+            </Button>
+            <Button variant="outline" size="sm" className="hidden lg:flex gap-2 h-9 rounded-full px-4" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-semibold text-xs">Kembali</span>
+            </Button>
+            <h1 className="font-bold text-slate-800 text-sm ml-1">Preview Laporan</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="hidden lg:flex gap-2 h-9 border-primary text-primary hover:bg-primary/5 rounded-full px-4" onClick={handlePrint}>
+              <Printer className="w-4 h-4" />
+              <span className="font-semibold text-xs">Cetak</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* PAPER CANVAS */}
+        <div className="flex-1 overflow-auto p-4 sm:p-10 flex flex-col items-center custom-scrollbar pb-32">
         {kategoriRaw === 'summary' ? (
           <div 
-            className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top mb-8"
+            className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left mb-8"
             style={{
               width: getPaperDimensions().width,
               minHeight: getPaperDimensions().height,
               transform: `scale(${zoom})`,
+              transformOrigin: 'top left',
               padding: '10mm',
               marginBottom: `${(zoom - 1) * 200 + 32}px` 
             }}
@@ -200,11 +244,12 @@ export function PrintReportPage() {
           return pages.map((pageData, pIdx) => (
             <div 
               key={`${pid}-${pIdx}`}
-              className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top mb-8"
+              className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left mb-8"
               style={{
                 width: getPaperDimensions().width,
                 minHeight: getPaperDimensions().height,
                 transform: `scale(${zoom})`,
+                transformOrigin: 'top left',
                 padding: '10mm',
                 pageBreakAfter: (idx === Object.keys(posyanduGroups).length - 1 && pIdx === pages.length - 1) ? 'auto' : 'always',
                 // Adding gap so scaled containers don't overlap in preview
@@ -221,6 +266,67 @@ export function PrintReportPage() {
             </div>
           ));
         })}
+        </div>
+
+        {/* FLOATING ZOOM CONTROLS */}
+        <div className="no-print fixed bottom-24 lg:bottom-10 right-6 lg:right-10 z-40 bg-white/90 backdrop-blur shadow-[0_4px_20px_-2px_rgba(0,0,0,0.15)] border border-slate-200 rounded-full flex items-center p-1.5 transition-all">
+          <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-slate-100 hover:text-primary transition-colors shrink-0" onClick={() => setZoom(z => Math.max(0.3, z - 0.1))}>
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <span className="text-[11px] font-bold w-10 text-center text-slate-700 select-none">
+            {Math.round(zoom * 100)}%
+          </span>
+          <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-slate-100 hover:text-primary transition-colors shrink-0" onClick={() => setZoom(z => Math.min(2.5, z + 0.1))}>
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* MOBILE BOTTOM NAVIGATION */}
+        <div className="no-print lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] flex items-center justify-around z-50 pb-safe">
+          {/* Kategori Button */}
+          <div className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-600 hover:bg-slate-50 transition-colors">
+            <Settings2 className="w-5 h-5" />
+            <span className="text-[10px] font-medium leading-none mt-0.5">Kategori</span>
+            <select 
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              value={kategoriRaw}
+              onChange={(e: any) => setKategoriRaw(e.target.value)}
+            >
+              <option value="summary">Ringkasan Keseluruhan</option>
+              <option value="baduta">Baduta (0-23 Bulan)</option>
+              <option value="balita">Balita (0-59 Bulan)</option>
+              <option value="bumil">Ibu Hamil</option>
+              <option value="pasca_persalinan">Pasca Persalinan</option>
+              <option value="lansia">Lansia</option>
+            </select>
+          </div>
+          
+          {/* Kertas Button */}
+          <div className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-600 hover:bg-slate-50 transition-colors border-l border-slate-100">
+            <FileText className="w-5 h-5" />
+            <span className="text-[10px] font-medium leading-none mt-0.5">Kertas</span>
+            <select 
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              value={paperSize}
+              onChange={(e: any) => setPaperSize(e.target.value)}
+            >
+              <option value="F4">F4 (Folio)</option>
+              <option value="A4">A4</option>
+              <option value="Legal">Legal</option>
+              <option value="Letter">Letter</option>
+            </select>
+          </div>
+
+
+          {/* Cetak Button */}
+          <button 
+            className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-primary hover:bg-primary/5 transition-colors border-l border-slate-100 outline-none"
+            onClick={handlePrint}
+          >
+            <Printer className="w-5 h-5" />
+            <span className="text-[10px] font-bold leading-none mt-0.5">Cetak</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats'
+import { useNavigate } from 'react-router-dom'
 import { useGetPendataanGlobalStatus, useGetAdminStatusPendataan } from '@/features/pendataan/hooks/usePendataanBulanan'
 import { lazy, Suspense } from 'react'
 import { MonthlySummaryWidget } from '../components/MonthlySummaryWidget'
@@ -14,6 +15,7 @@ import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
 import { Button } from '@/components/ui/button'
 
 export function ReportPage() {
+  const navigate = useNavigate()
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
 
@@ -133,7 +135,7 @@ export function ReportPage() {
           <Button 
             variant="outline" 
             className="gap-2 text-primary border-primary hover:bg-primary/5"
-            onClick={() => window.open(`/laporan/cetak?kategori=summary&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`, '_blank')}
+            onClick={() => navigate(`/laporan/cetak?kategori=summary&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-pie-chart"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/><path d="M16 22h2a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v2"/></svg>
             <span className="hidden sm:inline">Cetak Ringkasan</span>
@@ -142,7 +144,7 @@ export function ReportPage() {
           <Button 
             variant="outline" 
             className="gap-2"
-            onClick={() => window.open(`/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`, '_blank')}
+            onClick={() => navigate(`/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-printer"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
             <span className="hidden sm:inline">Cetak Visum</span>
