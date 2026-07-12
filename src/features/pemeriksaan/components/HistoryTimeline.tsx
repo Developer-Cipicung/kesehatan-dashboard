@@ -45,7 +45,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
             
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">HPHT / HTP</th>}
             
-            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tensi</th>}
+            {(isLansia || isPasca) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tensi</th>}
             {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Cek Darah</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Kondisi Ibu</th>}
 
@@ -127,7 +127,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                   </td>
                 )}
 
-                {isLansia && (
+                {(isLansia || isPasca) && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                     {td}
                   </td>

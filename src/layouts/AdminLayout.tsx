@@ -77,9 +77,9 @@ export default function AdminLayout() {
   )
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex min-h-[100dvh] w-full bg-slate-50">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 bg-slate-900 text-slate-100 flex-col">
+      <aside className="hidden md:flex w-64 bg-slate-900 text-slate-100 flex-col sticky top-0 h-[100dvh]">
         <SidebarContent />
       </aside>
 
@@ -102,16 +102,16 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile Header (Admin) */}
-        <header className="md:hidden flex items-center p-4 border-b bg-white">
+        <header className="md:hidden flex items-center p-4 border-b bg-white sticky top-0 z-40">
           <Button variant="ghost" size="icon" aria-label="Buka Menu" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
           <span className="ml-4 text-lg font-bold">Admin Cipicung</span>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex-1 p-4 md:p-8">
           <Outlet />
         </div>
       </main>

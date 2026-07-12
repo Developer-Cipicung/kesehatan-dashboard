@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { isBalitaByBirthDate, isBadutaByBirthDate } from '@/utils/age'
+
 import { useAuthStore } from '@/stores/authStore'
 import { useGetPendataanStatus, useGetPendataanSummary, useSubmitPendataan } from '../hooks/usePendataanBulanan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
@@ -72,7 +74,7 @@ export function VerifikasiPendataanPage() {
               <TableRow>
                 <TableHead className="w-12">No</TableHead>
                 <TableHead>Nama Warga</TableHead>
-                {category === 'balita' && (
+                {(category === 'balita' || category === 'baduta') && (
                   <>
                     <TableHead>BB (kg)</TableHead>
                     <TableHead>TB (cm)</TableHead>
@@ -111,10 +113,10 @@ export function VerifikasiPendataanPage() {
                 <TableRow key={item.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell className="font-medium">{item.nama}</TableCell>
-                  {category === 'balita' && (
+                  {(category === 'balita' || category === 'baduta') && (
                     <>
-                      <TableCell>{item.bb}</TableCell>
-                      <TableCell>{item.tb}</TableCell>
+                      <TableCell>{item.bb} kg</TableCell>
+                      <TableCell>{item.tb} cm</TableCell>
                     </>
                   )}
                   {category === 'bumil' && (
@@ -231,7 +233,8 @@ export function VerifikasiPendataanPage() {
               <h3 className="text-md font-semibold text-slate-600 mb-3 border-b pb-2">Riwayat Pemeriksaan Ditambahkan</h3>
               {(summaryData.balita.length > 0 || summaryData.bumil.length > 0 || summaryData.pasca_persalinan.length > 0 || summaryData.lansia.length > 0) ? (
                 <>
-                  {renderTable('Balita & Baduta', 'balita', summaryData.balita)}
+                  {renderTable('Baduta', 'baduta', summaryData.balita.filter(b => isBadutaByBirthDate(b.tanggal_lahir, b.tanggal)))}
+                  {renderTable('Balita', 'balita', summaryData.balita.filter(b => isBalitaByBirthDate(b.tanggal_lahir, b.tanggal)))}
                   {renderTable('Ibu Hamil', 'bumil', summaryData.bumil)}
                   {renderTable('Ibu Pasca Persalinan', 'pasca_persalinan', summaryData.pasca_persalinan)}
                   {renderTable('Lansia', 'lansia', summaryData.lansia)}

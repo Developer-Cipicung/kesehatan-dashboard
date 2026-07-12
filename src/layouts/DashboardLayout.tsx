@@ -12,16 +12,18 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden">
+    <div className="flex h-[100dvh] w-full bg-background overflow-hidden">
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden md:block flex-shrink-0">
+      <div className="hidden md:block flex-shrink-0 h-[100dvh] overflow-y-auto border-r border-slate-200">
         <Sidebar />
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
+      <div className="flex flex-1 flex-col min-w-0 h-full overflow-y-auto relative">
+        <div className="sticky top-0 z-40 w-full">
+          <Header />
+        </div>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
           <Outlet />
           <SpeedDialNavigation />
         </main>

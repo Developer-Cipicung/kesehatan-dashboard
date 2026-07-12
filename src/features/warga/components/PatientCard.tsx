@@ -171,17 +171,17 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
         </DialogContent>
       </Dialog>
 
-      {addRecordWargaId && (
-        <MonthlyRecordForm
-          open={!!addRecordWargaId}
-          onOpenChange={(open) => {
-            if (!open) setAddRecordWargaId(null)
-          }}
-          kategori={kategori}
-          wargaId={addRecordWargaId}
-          initialData={null}
-        />
-      )}
+      <MonthlyRecordForm
+        open={!!addRecordWargaId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTimeout(() => setAddRecordWargaId(null), 300)
+          }
+        }}
+        kategori={kategori}
+        wargaId={addRecordWargaId || ''}
+        initialData={null}
+      />
     </div>
   )
 }

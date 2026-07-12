@@ -58,7 +58,7 @@ export function DashboardPage() {
     pendataan
   } = data
 
-  const pendataan_status = pendataan ? Object.values(pendataan).every((status: any) => status === 'selesai') ? 'selesai' : 'draft' : 'draft';
+  const isPendataanSelesai = pendataan && Object.values(pendataan).every((status: any) => status === 'selesai')
 
   return (
     <div className="flex flex-col max-w-full">
@@ -71,7 +71,7 @@ export function DashboardPage() {
             {currentDate} · {posyandu ? `Posyandu ${posyandu.nama}` : 'Pusat Pendataan Kesehatan Cipicung'}
           </p>
         </div>
-        {pendataan_status === 'draft' ? (
+        {!isPendataanSelesai ? (
           <Link to="/verifikasi-pendataan" className="bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-200">
             <div className="bg-white/20 p-2 rounded-lg">
               <ClipboardList className="w-6 h-6 text-white" />

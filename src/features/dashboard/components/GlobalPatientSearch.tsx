@@ -4,6 +4,7 @@ import { wargaService, Warga } from '@/features/warga/services/wargaService'
 import { calculateAgeInMonths } from '@/utils/age'
 import { useNavigate } from 'react-router-dom'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
+import { AddPatientDialog } from '@/features/warga/components/AddPatientDialog'
 
 export function GlobalPatientSearch() {
   const [search, setSearch] = useState('')
@@ -13,6 +14,7 @@ export function GlobalPatientSearch() {
   
   const [selectedWarga, setSelectedWarga] = useState<Warga | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [showAddWarga, setShowAddWarga] = useState(false)
   const [detectedCategory, setDetectedCategory] = useState<string>('')
   
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -125,7 +127,7 @@ export function GlobalPatientSearch() {
         
         <div className="flex shrink-0 gap-3 w-full md:w-auto">
           <button 
-            onClick={() => navigate('/warga?add=true')} 
+            onClick={() => setShowAddWarga(true)} 
             className="flex-1 md:flex-none bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 rounded-xl px-6 py-4 font-bold text-base flex items-center justify-center gap-2 transition-all duration-200"
           >
             <Plus className="w-5 h-5" />
@@ -134,15 +136,24 @@ export function GlobalPatientSearch() {
         </div>
       </div>
 
-      {showForm && selectedWarga && (
-        <MonthlyRecordForm
-          open={showForm}
-          onOpenChange={setShowForm}
-          kategori={detectedCategory}
-          wargaId={selectedWarga.id}
-          initialData={null}
-        />
-      )}
+      <MonthlyRecordForm
+        open={showForm}
+        onOpenChange={(open) => {
+          setShowForm(open)
+          if (!open) {
+            setTimeout(() => setSelectedWarga(null), 300)
+          }
+        }}
+        kategori={detectedCategory}
+        wargaId={selectedWarga?.id || ''}
+        initialData={null}
+      />
+
+      <AddPatientDialog
+        open={showAddWarga}
+        onOpenChange={setShowAddWarga}
+        onSuccess={() => setShowAddWarga(false)}
+      />
     </div>
   )
 }
