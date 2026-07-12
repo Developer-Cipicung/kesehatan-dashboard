@@ -17,6 +17,7 @@ const DashboardPage = Loadable(lazy(() => import('@/features/dashboard/pages/Das
 const SharedPatientList = Loadable(lazy(() => import('@/features/warga/components/SharedPatientList').then(m => ({ default: m.SharedPatientList }))))
 const PatientHistoryPage = Loadable(lazy(() => import('@/features/pemeriksaan/pages/PatientHistoryPage').then(m => ({ default: m.PatientHistoryPage }))))
 const ReportPage = Loadable(lazy(() => import('@/features/reports/pages/ReportPage').then(m => ({ default: m.ReportPage }))))
+const PrintReportPage = Loadable(lazy(() => import('@/features/reports/pages/PrintReportPage').then(m => ({ default: m.PrintReportPage }))))
 const AdminDashboardPage = Loadable(lazy(() => import('@/features/admin/pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage }))))
 const PosyanduManagementPage = Loadable(lazy(() => import('@/features/admin/pages/PosyanduManagementPage').then(m => ({ default: m.PosyanduManagementPage }))))
 const UserManagementPage = Loadable(lazy(() => import('@/features/admin/pages/UserManagementPage').then(m => ({ default: m.UserManagementPage }))))
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
       {
         path: '/warga/:id/kartu',
         element: <PrintKartuPage />,
+      },
+      {
+        path: '/laporan/cetak',
+        element: <PrintReportPage />,
       },
     ],
   },

@@ -11,6 +11,7 @@ import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksa
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
+import { Button } from '@/components/ui/button'
 
 export function ReportPage() {
   const currentMonth = new Date().getMonth() + 1
@@ -128,16 +129,36 @@ export function ReportPage() {
           </p>
         </div>
         
-        <Suspense fallback={<div className="h-10 w-32 bg-slate-100 animate-pulse rounded-md"></div>}>
-          <ExportActions 
-            isLoading={isPemeriksaanLoading} 
-            kategoriFilter={kategoriFilter}
-            posyanduIdParam={posyanduIdParam}
-            bulan={currentMonth}
-            tahun={currentYear}
-            setKategoriFilter={setKategoriFilter}
-          />
-        </Suspense>
+        <div className="flex gap-2 items-center flex-wrap justify-end">
+          <Button 
+            variant="outline" 
+            className="gap-2 text-primary border-primary hover:bg-primary/5"
+            onClick={() => window.open(`/laporan/cetak?kategori=summary&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`, '_blank')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-pie-chart"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/><path d="M16 22h2a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v2"/></svg>
+            <span className="hidden sm:inline">Cetak Ringkasan</span>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => window.open(`/laporan/cetak?kategori=${kategoriFilter}&bulan=${currentMonth}&tahun=${currentYear}${posyanduFilter === 'all' ? '&posyanduId=all' : ''}`, '_blank')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-printer"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+            <span className="hidden sm:inline">Cetak Visum</span>
+          </Button>
+
+          <Suspense fallback={<div className="h-10 w-32 bg-slate-100 animate-pulse rounded-md"></div>}>
+            <ExportActions 
+              isLoading={isPemeriksaanLoading} 
+              kategoriFilter={kategoriFilter}
+              posyanduIdParam={posyanduIdParam}
+              bulan={currentMonth}
+              tahun={currentYear}
+              setKategoriFilter={setKategoriFilter}
+            />
+          </Suspense>
+        </div>
       </div>
 
       <div className="bg-card p-6 rounded-lg border mt-6 overflow-hidden">
