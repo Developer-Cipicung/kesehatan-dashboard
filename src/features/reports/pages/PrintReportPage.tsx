@@ -88,9 +88,11 @@ export function PrintReportPage() {
         margin: 10mm;
       }
       @media print {
-        body { margin: 0; padding: 0; background: white; }
+        html, body { height: auto !important; overflow: visible !important; margin: 0; padding: 0; background: white; }
         .no-print { display: none !important; }
-        .print-container { transform: none !important; box-shadow: none !important; border: none !important; width: 100% !important; height: auto !important; margin: 0 !important; }
+        .print-reset { display: block !important; height: auto !important; overflow: visible !important; position: static !important; padding: 0 !important; background: white !important; }
+        .print-wrapper { width: 100% !important; height: auto !important; margin: 0 !important; }
+        .print-container { transform: none !important; box-shadow: none !important; border: none !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; page-break-inside: avoid; }
       }
     `;
     document.head.appendChild(style);
@@ -135,7 +137,7 @@ export function PrintReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200 flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-slate-200 flex font-sans overflow-hidden print-reset">
       {/* SIDEBAR (Desktop Only) */}
       <aside className="no-print hidden lg:flex flex-col inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-300">
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50/80 backdrop-blur">
@@ -242,7 +244,7 @@ export function PrintReportPage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-200 relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-200 relative print-reset">
         {/* HEADER */}
         <div className="no-print flex items-center justify-between p-3 bg-white/90 backdrop-blur-md border-b border-slate-300 shadow-sm sticky top-0 z-30">
           <div className="flex items-center gap-3">
@@ -264,10 +266,10 @@ export function PrintReportPage() {
         </div>
 
         {/* PAPER CANVAS */}
-        <div className="flex-1 overflow-auto p-4 sm:p-10 custom-scrollbar pb-32">
+        <div className="flex-1 overflow-auto p-4 sm:p-10 custom-scrollbar pb-32 print-reset">
         {kategoriRaw === 'summary' ? (
           <div 
-            className="mx-auto" 
+            className="mx-auto print-wrapper"
             style={{ 
               width: `calc(${getPaperDimensions().width} * ${zoom})`, 
               height: `calc(${getPaperDimensions().height} * ${zoom})`,
@@ -303,7 +305,7 @@ export function PrintReportPage() {
           return pages.map((pageData, pIdx) => (
             <div 
               key={`${pid}-${pIdx}`}
-              className="mx-auto" 
+              className="mx-auto print-wrapper" 
               style={{ 
                 width: `calc(${getPaperDimensions().width} * ${zoom})`, 
                 height: `calc(${getPaperDimensions().height} * ${zoom})`,
