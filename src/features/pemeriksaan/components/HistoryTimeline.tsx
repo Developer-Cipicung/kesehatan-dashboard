@@ -1,16 +1,18 @@
 import { Pemeriksaan } from '../services/pemeriksaanService'
 import { Button } from '@/components/ui/button'
 import { Edit, Trash2 } from 'lucide-react'
+import { calculateHplRange } from '../../warga/components/PatientTable'
 
 interface HistoryTimelineProps {
   history: Pemeriksaan[]
+  warga?: any
   kategori: string
   isLocked: boolean
   onEdit: (record: Pemeriksaan) => void
   onDelete: (id: string) => void
 }
 
-export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete }: HistoryTimelineProps) {
+export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, onDelete }: HistoryTimelineProps) {
   if (!history || history.length === 0) {
     return (
       <div className="text-center p-8 text-muted-foreground border rounded-lg bg-card">
@@ -22,7 +24,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
   const isBumil = kategori === 'bumil'
   
   if (isBumil) {
-    return <BumilTimelineTable history={history} isLocked={isLocked} onEdit={onEdit} onDelete={onDelete} />
+    return <BumilTimelineTable history={history} warga={warga} isLocked={isLocked} onEdit={onEdit} onDelete={onDelete} />
   }
 
   const isLansia = kategori === 'lansia'
@@ -78,12 +80,14 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
               ? `${record.tekanan_darah_sistolik}/${record.tekanan_darah_diastolik} mmHg` 
               : (record.tekanan_darah || '-')
 
+            const parseDate = (d: string) => d ? new Date(d).toLocaleDateString('id-ID') : '-'
+
             const renderHphtHtp = () => {
-              const parseDate = (d: string) => d ? new Date(d).toLocaleDateString('id-ID') : '-'
+              if (!warga?.hpht) return <div className="text-slate-400 italic">Belum diset</div>
               return (
-                <div className="text-xs">
-                  <div><span className="text-muted-foreground">HPHT:</span> {parseDate(record.hpht)}</div>
-                  <div className="mt-0.5"><span className="text-muted-foreground">HTP:</span> {parseDate(record.htp)}</div>
+                <div className="text-xs whitespace-nowrap">
+                  <div><span className="text-muted-foreground">HPHT:</span> {parseDate(warga.hpht)}</div>
+                  <div className="mt-0.5"><span className="text-muted-foreground">HPL:</span> {calculateHplRange(warga.hpht)}</div>
                 </div>
               )
             }
@@ -236,7 +240,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
   )
 }
 
-function BumilTimelineTable({ history, isLocked, onEdit, onDelete }: Omit<HistoryTimelineProps, 'kategori'>) {
+function BumilTimelineTable({ history, warga, isLocked, onEdit, onDelete }: { history: Pemeriksaan[], warga?: any, isLocked: boolean, onEdit: any, onDelete: any }) {
   const getBadgeColor = (status: string) => {
     if (status?.includes('KEK & Anemia')) return 'bg-red-100 text-red-800 border-red-200'
     if (status?.includes('KEK') || status?.includes('Anemia')) return 'bg-amber-100 text-amber-800 border-amber-200'
@@ -315,8 +319,8 @@ function BumilTimelineTable({ history, isLocked, onEdit, onDelete }: Omit<Histor
               <tr key={record.id} className="hover:bg-primary/5 transition-colors">
                 <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap text-xs">{parseDate(record.tanggal_kunjungan || record.created_at)}</td>
                 <td className="px-4 py-3 text-slate-600 text-[11px] whitespace-nowrap">
-                  <div><span className="text-muted-foreground">HPHT:</span> {parseDate(record.hpht)}</div>
-                  <div className="mt-0.5"><span className="text-muted-foreground">HPL:</span> {getHplRange(record.hpht)}</div>
+                  <div><span className="text-muted-foreground">HPHT:</span> {parseDate(warga?.hpht)}</div>
+                  <div className="mt-0.5"><span className="text-muted-foreground">HPL:</span> {getHplRange(warga?.hpht)}</div>
                 </td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.jumlah_anak ?? '-'}</td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.usia_kehamilan_minggu ?? '-'} Mg</td>

@@ -8,9 +8,8 @@ export interface CreateBumilPayload {
   tb: number
   lingkar_perut: number
   lingkar_lengan_atas: number
+  tinggi_fundus?: number
   usia_kehamilan_minggu: number
-  hpht: string // YYYY-MM-DD
-  htp: string  // YYYY-MM-DD
   jumlah_anak?: number
   riwayat_penyakit?: string
   kadar_hemoglobin?: number

@@ -11,6 +11,18 @@ export function calculateAgeInMonths(birthDate: string | Date, referenceDate: st
   return Math.max(0, months)
 }
 
+export function calculateAgeInWeeks(birthDate: string | Date, referenceDate: string | Date = new Date()) {
+  const birth = new Date(birthDate)
+  const reference = new Date(referenceDate)
+  
+  birth.setHours(0, 0, 0, 0)
+  reference.setHours(0, 0, 0, 0)
+
+  const diffTime = reference.getTime() - birth.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.max(0, Math.floor(diffDays / 7))
+}
+
 export function isBadutaByBirthDate(birthDate: string | Date, referenceDate: string | Date = new Date()) {
   return calculateAgeInMonths(birthDate, referenceDate) < 24
 }

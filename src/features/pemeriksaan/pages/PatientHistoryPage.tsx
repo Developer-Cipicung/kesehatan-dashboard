@@ -127,6 +127,7 @@ export function PatientHistoryPage() {
 
       <HistoryTimeline
         history={history || []}
+        warga={warga}
         kategori={kategori!}
         isLocked={isReadOnly}
         onEdit={handleEdit}

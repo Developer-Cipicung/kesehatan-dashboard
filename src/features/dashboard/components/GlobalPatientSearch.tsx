@@ -5,6 +5,7 @@ import { calculateAgeInMonths } from '@/utils/age'
 import { useNavigate } from 'react-router-dom'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 import { AddPatientDialog } from '@/features/warga/components/AddPatientDialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 export function GlobalPatientSearch() {
   const [search, setSearch] = useState('')
@@ -15,6 +16,8 @@ export function GlobalPatientSearch() {
   const [selectedWarga, setSelectedWarga] = useState<Warga | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showAddWarga, setShowAddWarga] = useState(false)
+  const [showCategorySelect, setShowCategorySelect] = useState(false)
+  const [selectedNewCategory, setSelectedNewCategory] = useState<string>('')
   const [detectedCategory, setDetectedCategory] = useState<string>('')
   
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -127,7 +130,7 @@ export function GlobalPatientSearch() {
         
         <div className="flex shrink-0 gap-3 w-full md:w-auto">
           <button 
-            onClick={() => setShowAddWarga(true)} 
+            onClick={() => setShowCategorySelect(true)} 
             className="flex-1 md:flex-none bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 rounded-xl px-6 py-4 font-bold text-base flex items-center justify-center gap-2 transition-all duration-200"
           >
             <Plus className="w-5 h-5" />
@@ -151,9 +154,51 @@ export function GlobalPatientSearch() {
 
       <AddPatientDialog
         open={showAddWarga}
-        onOpenChange={setShowAddWarga}
-        onSuccess={() => setShowAddWarga(false)}
+        onOpenChange={(open) => {
+          setShowAddWarga(open)
+          if (!open) setSelectedNewCategory('')
+        }}
+        defaultCategory={selectedNewCategory}
+        onSuccess={() => {
+          setShowAddWarga(false)
+          setSelectedNewCategory('')
+        }}
       />
+
+      <Dialog open={showCategorySelect} onOpenChange={setShowCategorySelect}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pilih Jenis Warga</DialogTitle>
+            <DialogDescription>
+              Silakan pilih kategori warga yang ingin ditambahkan
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 mt-4">
+            {[
+              { id: 'bumil', label: 'Ibu Hamil', icon: <User className="w-5 h-5 text-pink-500" /> },
+              { id: 'pasca_persalinan', label: 'Pasca Persalinan', icon: <Baby className="w-5 h-5 text-purple-500" /> },
+              { id: 'balita', label: 'Balita (0 - 59 Bulan)', icon: <Activity className="w-5 h-5 text-orange-500" /> },
+              { id: 'baduta', label: 'Baduta (0 - 23 Bulan)', icon: <Baby className="w-5 h-5 text-amber-500" /> },
+              { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-5 h-5 text-teal-500" /> }
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setSelectedNewCategory(cat.id)
+                  setShowCategorySelect(false)
+                  setTimeout(() => setShowAddWarga(true), 150)
+                }}
+                className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+              >
+                <div className="bg-white shadow-sm p-2 rounded-full border border-slate-100">
+                  {cat.icon}
+                </div>
+                <span className="font-semibold text-slate-700">{cat.label}</span>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
