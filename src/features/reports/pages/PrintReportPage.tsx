@@ -212,24 +212,31 @@ export function PrintReportPage() {
         </div>
 
         {/* PAPER CANVAS */}
-        <div className="flex-1 overflow-auto p-4 sm:p-10 flex flex-col items-center custom-scrollbar pb-32">
+        <div className="flex-1 overflow-auto p-4 sm:p-10 custom-scrollbar pb-32">
         {kategoriRaw === 'summary' ? (
           <div 
-            className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left mb-8"
-            style={{
-              width: getPaperDimensions().width,
-              minHeight: getPaperDimensions().height,
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top left',
-              padding: '10mm',
-              marginBottom: `${(zoom - 1) * 200 + 32}px` 
+            className="mx-auto" 
+            style={{ 
+              width: `calc(${getPaperDimensions().width} * ${zoom})`, 
+              height: `calc(${getPaperDimensions().height} * ${zoom})`,
+              marginBottom: '2rem'
             }}
           >
+            <div 
+              className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left"
+              style={{
+                width: getPaperDimensions().width,
+                minHeight: getPaperDimensions().height,
+                transform: `scale(${zoom})`,
+                padding: '10mm',
+              }}
+            >
             <SummaryTemplate 
               bulan={bulan} 
               tahun={tahun} 
               data={dashboardData} 
             />
+          </div>
           </div>
         ) : Object.keys(posyanduGroups).map((pid, idx) => {
           const group = posyanduGroups[pid];
@@ -244,18 +251,23 @@ export function PrintReportPage() {
           return pages.map((pageData, pIdx) => (
             <div 
               key={`${pid}-${pIdx}`}
-              className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left mb-8"
-              style={{
-                width: getPaperDimensions().width,
-                minHeight: getPaperDimensions().height,
-                transform: `scale(${zoom})`,
-                transformOrigin: 'top left',
-                padding: '10mm',
-                pageBreakAfter: (idx === Object.keys(posyanduGroups).length - 1 && pIdx === pages.length - 1) ? 'auto' : 'always',
-                // Adding gap so scaled containers don't overlap in preview
-                marginBottom: `${(zoom - 1) * 200 + 32}px` 
+              className="mx-auto" 
+              style={{ 
+                width: `calc(${getPaperDimensions().width} * ${zoom})`, 
+                height: `calc(${getPaperDimensions().height} * ${zoom})`,
+                marginBottom: '2rem'
               }}
             >
+              <div 
+                className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left"
+                style={{
+                  width: getPaperDimensions().width,
+                  minHeight: getPaperDimensions().height,
+                  transform: `scale(${zoom})`,
+                  padding: '10mm',
+                  pageBreakAfter: (idx === Object.keys(posyanduGroups).length - 1 && pIdx === pages.length - 1) ? 'auto' : 'always',
+                }}
+              >
               <VisumTemplate 
                 kategori={kategoriRaw} 
                 data={pageData} 
@@ -263,6 +275,7 @@ export function PrintReportPage() {
                 tahun={tahun} 
                 posyanduName={group.name}
               />
+            </div>
             </div>
           ));
         })}
