@@ -13,9 +13,21 @@ export function PrintReportPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [kategoriRaw, setKategoriRaw] = useState(searchParams.get('kategori') || 'baduta');
-  const bulan = parseInt(searchParams.get('bulan') || `${new Date().getMonth() + 1}`);
-  const tahun = parseInt(searchParams.get('tahun') || `${new Date().getFullYear()}`);
+  const bulanQuery = parseInt(searchParams.get('bulan') || `${new Date().getMonth() + 1}`);
+  const tahunQuery = parseInt(searchParams.get('tahun') || `${new Date().getFullYear()}`);
   const posyanduId = searchParams.get('posyanduId') || 'all';
+
+  const [periodeType, setPeriodeType] = useState<'this_month' | 'last_month' | 'custom'>('this_month');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Derived target month/year based on periodeType if not custom
+  const targetBulan = periodeType === 'this_month' ? new Date().getMonth() + 1 : 
+                      periodeType === 'last_month' ? (new Date().getMonth() === 0 ? 12 : new Date().getMonth()) : 
+                      undefined;
+  const targetTahun = periodeType === 'this_month' ? new Date().getFullYear() :
+                      periodeType === 'last_month' ? (new Date().getMonth() === 0 ? new Date().getFullYear() - 1 : new Date().getFullYear()) :
+                      undefined;
 
   const [paperSize, setPaperSize] = useState<'A4' | 'F4' | 'Legal' | 'Letter'>('F4');
   // Default zoom 0.4 for mobile to fit screen, 1 for desktop
@@ -44,8 +56,7 @@ export function PrintReportPage() {
 
   // For regular reports
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(queryKategori, {
-    bulan,
-    tahun,
+    ...(periodeType !== 'custom' ? { bulan: targetBulan, tahun: targetTahun } : { startDate, endDate }),
     posyanduId: posyanduId === 'all' ? undefined : posyanduId,
     limit: 1000 // Get all for report
   });
@@ -161,6 +172,47 @@ export function PrintReportPage() {
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700">Periode Waktu</label>
+            <div className="relative">
+              <select 
+                className="w-full appearance-none border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm text-slate-700 font-medium cursor-pointer"
+                value={periodeType}
+                onChange={(e: any) => setPeriodeType(e.target.value)}
+              >
+                <option value="this_month">Bulan Ini</option>
+                <option value="last_month">Bulan Lalu</option>
+                <option value="custom">Rentang Waktu</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          {periodeType === 'custom' && (
+            <div className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-600">Dari Tanggal</label>
+                <input 
+                  type="date" 
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-600">Sampai Tanggal</label>
+                <input 
+                  type="date" 
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-700">Ukuran Kertas</label>
             <div className="relative">
               <select 
@@ -232,8 +284,8 @@ export function PrintReportPage() {
               }}
             >
             <SummaryTemplate 
-              bulan={bulan} 
-              tahun={tahun} 
+              bulan={targetBulan || bulanQuery} 
+              tahun={targetTahun || tahunQuery} 
               data={dashboardData} 
             />
           </div>
@@ -271,8 +323,8 @@ export function PrintReportPage() {
               <VisumTemplate 
                 kategori={kategoriRaw} 
                 data={pageData} 
-                bulan={bulan} 
-                tahun={tahun} 
+                bulan={targetBulan || bulanQuery} 
+                tahun={targetTahun || tahunQuery} 
                 posyanduName={group.name}
               />
             </div>
