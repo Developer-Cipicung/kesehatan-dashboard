@@ -91,7 +91,7 @@ export function GlobalPatientSearch() {
           <input
             type="text"
             className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-inner text-lg"
-            placeholder="Cari Nama Pasien atau NIK..."
+            placeholder="Cari nama pasien atau NIK..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => { if (search.length >= 2) setIsOpen(true) }}

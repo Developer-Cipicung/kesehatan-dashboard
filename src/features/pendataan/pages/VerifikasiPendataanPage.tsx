@@ -17,6 +17,27 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { CheckCircle2, Lock } from 'lucide-react'
+import { formatDateTimeWib } from '@/utils/dateTime'
+
+type SummaryCategory = 'baduta' | 'balita' | 'bumil' | 'pasca_persalinan' | 'lansia' | 'warga_baru'
+
+interface SummaryRow {
+  id: string
+  nama: string
+  tanggal?: string
+  created_at?: string
+  tanggal_daftar?: string
+  bb?: number
+  tb?: number
+  tanggal_lahir?: string
+  usia_kehamilan_minggu?: number
+  lingkar_lengan_atas?: number
+  td_sistolik?: number
+  td_diastolik?: number
+  gula_darah_sewaktu?: number
+  nik?: string
+  jenis_kelamin?: string
+}
 
 export function VerifikasiPendataanPage() {
   const { selectedPosyanduId } = useAuthStore()
@@ -60,7 +81,12 @@ export function VerifikasiPendataanPage() {
     )
   }
 
-  const renderTable = (title: string, category: string, data: any[]) => {
+  const getInputTime = (category: SummaryCategory, item: SummaryRow) => {
+    if (category === 'warga_baru') return formatDateTimeWib(item.tanggal_daftar)
+    return formatDateTimeWib(item.created_at)
+  }
+
+  const renderTable = (title: string, category: SummaryCategory, data: SummaryRow[]) => {
     if (data.length === 0) return null
 
     return (
@@ -144,7 +170,7 @@ export function VerifikasiPendataanPage() {
                       <TableCell>{item.jenis_kelamin}</TableCell>
                     </>
                   )}
-                  <TableCell className="text-right text-slate-500 text-sm">{new Date(item.tanggal || item.tanggal_daftar).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
+                  <TableCell className="text-right text-slate-500 text-sm">{getInputTime(category, item)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

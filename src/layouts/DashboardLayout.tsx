@@ -6,8 +6,9 @@ import { SpeedDialNavigation } from '@/components/navigation/SpeedDialNavigation
 
 export default function DashboardLayout() {
   const user = useAuthStore((state) => state.user)
+  const userRole = typeof user?.role === 'string' ? user.role : undefined
 
-  if ((user as any)?.role === 'admin') {
+  if (userRole === 'admin') {
     return <Navigate to="/admin" replace />
   }
 
@@ -23,7 +24,7 @@ export default function DashboardLayout() {
         <div className="sticky top-0 z-40 w-full">
           <Header />
         </div>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 pb-28 md:p-6 md:pb-6 lg:p-8">
           <Outlet />
           <SpeedDialNavigation />
         </main>

@@ -1,8 +1,10 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { Warga } from '@/features/warga/services/wargaService'
+import { formatTimeWib } from '@/utils/dateTime'
+import type { ReportImmunisasi, ReportPemeriksaanItem } from '../types/reportPemeriksaan'
 
-export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan_Warga.pdf', pemeriksaanList: any[] = [], kategoriFilter: string = '') {
+export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan_Warga.pdf', pemeriksaanList: ReportPemeriksaanItem[] = [], kategoriFilter: string = '') {
   const usePemeriksaan = pemeriksaanList && pemeriksaanList.length > 0
   const dataToExport = usePemeriksaan ? pemeriksaanList : wargaList
 
@@ -17,12 +19,12 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
   doc.text(`Tanggal Dicetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 22)
 
   let tableColumn: string[] = []
-  const tableRows: any[] = []
+  const tableRows: Array<Array<string | number>> = []
 
   if (!usePemeriksaan) {
     tableColumn = ['No', 'NIK', 'Nama', 'L/P', 'Usia (Thn)', 'Kategori']
-    dataToExport.forEach((item, index) => {
-      const warga = item as Warga
+    dataToExport.forEach((rawItem, index) => {
+      const warga = rawItem as Warga
       const age = new Date().getFullYear() - new Date(warga.tanggal_lahir).getFullYear()
       tableRows.push([index + 1, warga.nik, warga.nama, warga.jenis_kelamin, age, warga.kategori])
     })
@@ -47,10 +49,11 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
         tableColumn = ['No', 'Tgl & Jam', 'Nama Warga', ...commonCols]
     }
 
-    dataToExport.forEach((item, index) => {
+    dataToExport.forEach((rawItem, index) => {
+      const item = rawItem as ReportPemeriksaanItem
       const warga = item.warga || {}
       let ageText = '-'
-      if (warga.tanggal_lahir) {
+      if (warga.tanggal_lahir && item.tanggal_kunjungan) {
         if (kategoriFilter === 'baduta' || kategoriFilter === 'balita') {
           const ageMonths = Math.floor((new Date(item.tanggal_kunjungan).getTime() - new Date(warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44))
           ageText = `${ageMonths} bln`
@@ -61,7 +64,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
       }
 
       const visitDate = item.tanggal_kunjungan ? new Date(item.tanggal_kunjungan).toLocaleDateString('id-ID') : '-'
-      const visitTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
+      const visitTime = formatTimeWib(item.created_at)
       const tglJamKunjungan = `${visitDate} ${visitTime}`
 
       const commonRow = [
@@ -74,7 +77,7 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
 
       switch (kategoriFilter) {
         case 'baduta':
-        case 'balita':
+        case 'balita': {
           const namaIbu = item.nama_ibu || '-'
           tableRows.push([
             index + 1,
@@ -91,9 +94,10 @@ export function exportWargaToPdf(wargaList: Warga[], filename: string = 'Laporan
             item.asi_eksklusif ? 'Y' : 'T',
             item.fasilitasi_bantuan_sosial ? 'Y' : 'T',
             item.catatan || '-',
-            (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'
+            (warga.riwayat_imunisasi || []).map((i: ReportImmunisasi) => i.jenis_vaksin).join(', ') || '-'
           ])
           break
+        }
         case 'bumil':
           tableRows.push([
             index + 1,

@@ -1,8 +1,10 @@
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import { Warga } from '@/features/warga/services/wargaService'
+import { formatTimeWib } from '@/utils/dateTime'
+import type { ReportImmunisasi, ReportPemeriksaanItem } from '../types/reportPemeriksaan'
 
-export async function exportWargaToExcel(wargaList: Warga[], filename: string = 'Laporan_Warga.xlsx', pemeriksaanList: any[] = [], kategoriFilter: string = '') {
+export async function exportWargaToExcel(wargaList: Warga[], filename: string = 'Laporan_Warga.xlsx', pemeriksaanList: ReportPemeriksaanItem[] = [], kategoriFilter: string = '') {
   // Use pemeriksaanList if provided, otherwise fallback to wargaList
   const usePemeriksaan = pemeriksaanList && pemeriksaanList.length > 0
   
@@ -13,10 +15,10 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
   }
 
   // Format data for Excel dynamically based on category
-  const formattedData = dataToExport.map((item, index) => {
+  const formattedData = dataToExport.map((rawItem, index) => {
     if (!usePemeriksaan) {
       // Basic Warga Export
-      const warga = item as Warga
+      const warga = rawItem as Warga
       return {
         No: index + 1,
         NIK: warga.nik,
@@ -31,9 +33,10 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
       }
     }
 
+    const item = rawItem as ReportPemeriksaanItem
     const warga = item.warga || {}
     let ageText = '-'
-    if (warga.tanggal_lahir) {
+    if (warga.tanggal_lahir && item.tanggal_kunjungan) {
       if (kategoriFilter === 'baduta' || kategoriFilter === 'balita') {
         const ageMonths = Math.floor((new Date(item.tanggal_kunjungan).getTime() - new Date(warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44))
         ageText = `${ageMonths} bln`
@@ -44,7 +47,7 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
     }
 
     const visitDate = item.tanggal_kunjungan ? new Date(item.tanggal_kunjungan).toLocaleDateString('id-ID') : '-'
-    const visitTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
+    const visitTime = formatTimeWib(item.created_at)
 
     const visitData = {
       'Tgl Kunjungan': visitDate,
@@ -65,7 +68,7 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
 
     switch (kategoriFilter) {
       case 'baduta':
-      case 'balita':
+      case 'balita': {
         const namaIbu = item.nama_ibu || '-'
         return {
           ...baseData,
@@ -79,8 +82,9 @@ export async function exportWargaToExcel(wargaList: Warga[], filename: string = 
           'ASI Eksklusif': item.asi_eksklusif ? 'Ya' : 'Tidak',
           'Bansos': item.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak',
           'Catatan': item.catatan || '-',
-          'Imunisasi': (warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-',
+          'Imunisasi': (warga.riwayat_imunisasi || []).map((i: ReportImmunisasi) => i.jenis_vaksin).join(', ') || '-',
         }
+      }
       case 'bumil':
         return {
           ...baseData,

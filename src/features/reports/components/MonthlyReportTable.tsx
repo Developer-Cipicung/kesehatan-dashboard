@@ -1,9 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
+import { formatTimeWib } from '@/utils/dateTime'
+import type { ReportImmunisasi, ReportPemeriksaanItem } from '../types/reportPemeriksaan'
 
 interface MonthlyReportTableProps {
   kategori: string
-  data: any[]
+  data: ReportPemeriksaanItem[]
   isLoading: boolean
 }
 
@@ -114,12 +116,12 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
     }
   }
 
-  const renderCells = (item: any) => {
+  const renderCells = (item: ReportPemeriksaanItem) => {
     const warga = item.warga || {}
     
     // Calculate Age
     let ageText = '-'
-    if (warga.tanggal_lahir) {
+    if (warga.tanggal_lahir && item.tanggal_kunjungan) {
       if (kategori === 'baduta' || kategori === 'balita') {
         const ageMonths = Math.floor((new Date(item.tanggal_kunjungan).getTime() - new Date(warga.tanggal_lahir).getTime()) / (1000 * 60 * 60 * 24 * 30.44))
         ageText = `${ageMonths} bln`
@@ -130,7 +132,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
     }
 
     const visitDate = item.tanggal_kunjungan ? new Date(item.tanggal_kunjungan).toLocaleDateString('id-ID') : '-'
-    const visitTime = item.created_at ? new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
+    const visitTime = formatTimeWib(item.created_at)
     const tglJamKunjungan = `${visitDate} ${visitTime}`
 
     const commonDemographicsCells = (
@@ -147,7 +149,7 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
 
     switch (kategori) {
       case 'baduta':
-      case 'balita':
+      case 'balita': {
         const namaIbu = item.nama_ibu || '-'
         return (
           <>
@@ -164,9 +166,10 @@ export function MonthlyReportTable({ kategori, data, isLoading }: MonthlyReportT
             <TableCell>{item.asi_eksklusif ? 'Ya' : 'Tidak'}</TableCell>
             <TableCell>{item.fasilitasi_bantuan_sosial ? 'Ya' : 'Tidak'}</TableCell>
             <TableCell>{item.catatan || '-'}</TableCell>
-            <TableCell>{(warga.riwayat_imunisasi || []).map((i: any) => i.jenis_vaksin).join(', ') || '-'}</TableCell>
+            <TableCell>{(warga.riwayat_imunisasi || []).map((i: ReportImmunisasi) => i.jenis_vaksin).join(', ') || '-'}</TableCell>
           </>
         )
+      }
       case 'bumil':
         return (
           <>
