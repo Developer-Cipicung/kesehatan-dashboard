@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit3, Plus } from 'lucide-react'
+import { Edit3, Plus, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Warga } from '../services/wargaService'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -63,13 +63,22 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
             </Button>
           )}
           
-          <Button
-            variant="outline"
-            className="w-full h-10 text-sm border-slate-200 text-slate-600 flex items-center justify-center gap-1 hover:bg-slate-50"
-            onClick={() => onView(data.id)}
-          >
-            <Edit3 className="w-4 h-4" /> Profil Lengkap & Riwayat
-          </Button>
+          <div className="flex gap-2 w-full">
+            <Button
+              variant="outline"
+              className="flex-1 h-10 text-sm border-slate-200 text-slate-600 flex items-center justify-center gap-1 hover:bg-slate-50"
+              onClick={() => onView(data.id)}
+            >
+              <Edit3 className="w-4 h-4" /> Profil
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 h-10 text-sm border-blue-200 text-blue-600 flex items-center justify-center gap-1 hover:bg-blue-50"
+              onClick={() => window.open(`/warga/${data.id}/kartu`, '_blank')}
+            >
+              <Printer className="w-4 h-4" /> Cetak Kartu
+            </Button>
+          </div>
           
           {isBumil && !isReadOnly && (
             <Button

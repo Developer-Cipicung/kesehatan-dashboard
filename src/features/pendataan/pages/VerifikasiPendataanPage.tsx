@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useGetPendataanStatus, useGetPendataanSummary, useSubmitPendataan } from '../hooks/usePendataanBulanan'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'

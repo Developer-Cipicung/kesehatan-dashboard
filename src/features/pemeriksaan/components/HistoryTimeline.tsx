@@ -49,6 +49,7 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
             {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Cek Darah</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Kondisi Ibu</th>}
 
+            {isBalita && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status Gizi (WHO)</th>}
             {isBalita && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Lainnya</th>}
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Kehamilan</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Detail Bayi & Layanan</th>}
@@ -85,6 +86,15 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                   <div className="mt-0.5"><span className="text-muted-foreground">HTP:</span> {parseDate(record.htp)}</div>
                 </div>
               )
+            }
+
+            const getZScoreColor = (kategori: string) => {
+              if (!kategori) return 'bg-slate-100 text-slate-700'
+              const k = kategori.toLowerCase()
+              if (k.includes('sangat kurang') || k.includes('sangat pendek') || k.includes('buruk') || k.includes('obesitas')) return 'bg-red-100 text-red-700 font-bold'
+              if (k.includes('kurang') || k.includes('pendek') || k.includes('risiko') || k.includes('lebih')) return 'bg-amber-100 text-amber-700 font-semibold'
+              if (k.includes('normal') || k.includes('baik')) return 'bg-emerald-100 text-emerald-700 font-semibold'
+              return 'bg-slate-100 text-slate-700'
             }
 
             return (
@@ -135,6 +145,30 @@ export function HistoryTimeline({ history, kategori, isLocked, onEdit, onDelete 
                 {isPasca && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                     {record.kondisi_ibu ? <div className="text-xs mt-0.5"><span className="text-muted-foreground">Kondisi:</span> {record.kondisi_ibu}</div> : '-'}
+                  </td>
+                )}
+
+                {isBalita && (
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                    {record.status_gizi ? (
+                      <div className="flex flex-col gap-1.5">
+                        {record.status_gizi.kategori_bb_u && (
+                           <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${getZScoreColor(record.status_gizi.kategori_bb_u)}`}>
+                             BB/U: {record.status_gizi.kategori_bb_u}
+                           </span>
+                        )}
+                        {record.status_gizi.kategori_tb_u && (
+                           <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${getZScoreColor(record.status_gizi.kategori_tb_u)}`}>
+                             TB/U: {record.status_gizi.kategori_tb_u}
+                           </span>
+                        )}
+                        {record.status_gizi.kategori_bb_tb && (
+                           <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${getZScoreColor(record.status_gizi.kategori_bb_tb)}`}>
+                             BB/TB: {record.status_gizi.kategori_bb_tb}
+                           </span>
+                        )}
+                      </div>
+                    ) : '-'}
                   </td>
                 )}
 
