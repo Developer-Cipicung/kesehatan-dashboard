@@ -331,12 +331,29 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
                     </div>
                   )}
                   {!defaultCategory && (
-                    <FormField
+                    <RHFFormField
                       control={methods.control}
                       name="kategori"
-                      label={<>Kategori <span className="text-red-500">*</span></>}
-                      placeholder="Contoh: bumil, balita, lansia"
-                      type="text"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kategori <span className="text-red-500">*</span></FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-9 text-sm sm:h-10 sm:text-base">
+                                <SelectValue placeholder="Pilih kategori pasien" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="baduta">Baduta</SelectItem>
+                              <SelectItem value="balita">Balita</SelectItem>
+                              <SelectItem value="bumil">Ibu Hamil</SelectItem>
+                              <SelectItem value="pasca_persalinan">Ibu Pasca Persalinan</SelectItem>
+                              <SelectItem value="lansia">Lansia</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   )}
                 </div>

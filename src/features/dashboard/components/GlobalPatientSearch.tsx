@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, Plus, User, Baby, HeartPulse, PersonStanding, Activity, Loader2 } from 'lucide-react'
 import { wargaService, Warga } from '@/features/warga/services/wargaService'
 import { calculateAgeInMonths } from '@/utils/age'
-import { useNavigate } from 'react-router-dom'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 import { AddPatientDialog } from '@/features/warga/components/AddPatientDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -21,7 +20,6 @@ export function GlobalPatientSearch() {
   const [detectedCategory, setDetectedCategory] = useState<string>('')
   
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,20 +59,13 @@ export function GlobalPatientSearch() {
     if (ageMonths < 60) return { id: 'balita', label: 'Balita', icon: <Baby className="w-4 h-4 text-blue-500" /> }
     if (warga.status_kehamilan === 'HAMIL') return { id: 'bumil', label: 'Ibu Hamil', icon: <HeartPulse className="w-4 h-4 text-pink-500" /> }
     if (warga.status_kehamilan === 'PASCA_PERSALINAN') return { id: 'pasca_persalinan', label: 'Pasca Salin', icon: <Activity className="w-4 h-4 text-rose-500" /> }
-    if (ageMonths >= 720) return { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-4 h-4 text-amber-500" /> }
     
-    return { id: 'umum', label: 'Umum', icon: <User className="w-4 h-4 text-slate-500" /> }
+    return { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-4 h-4 text-amber-500" /> }
   }
 
   const handleSelectWarga = (warga: Warga) => {
     setIsOpen(false)
     const cat = determineCategory(warga)
-    
-    if (cat.id === 'umum') {
-      // Navigate to profile if no specific recording form
-      navigate(`/warga/${warga.id}`)
-      return
-    }
 
     setDetectedCategory(cat.id)
     setSelectedWarga(warga)
