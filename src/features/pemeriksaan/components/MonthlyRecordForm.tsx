@@ -320,9 +320,9 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
           <DialogDescription>
             {isEdit ? 'Perbarui data hasil pemeriksaan.' : 'Tambahkan data hasil pemeriksaan baru.'}
-            {!isEdit && previousRecord?.tanggal_kunjungan && (
+            {!isEdit && (previousRecord as any)?.tanggal_kunjungan && (
               <span className="mt-2 block rounded-md border border-amber-200 bg-amber-50 p-2 text-xs font-medium text-amber-700">
-                Terakhir diperiksa pada: {new Date(previousRecord.tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}. Beberapa data sebelumnya disalin secara otomatis.
+                Terakhir diperiksa pada: {new Date((previousRecord as any).tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}. Beberapa data sebelumnya disalin secara otomatis.
               </span>
             )}
           </DialogDescription>
