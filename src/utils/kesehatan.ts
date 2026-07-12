@@ -12,9 +12,12 @@ export function classifyIMT(imt: number | null): string {
   return 'Obesitas';
 }
 
-export function classifyTekananDarah(sistolik: number | null | undefined, diastolik: number | null | undefined): string {
-  if (!sistolik || !diastolik) return '-';
+export function classifyTekananDarah(sistolikInput: number | string | null | undefined, diastolikInput: number | string | null | undefined): string {
+  if (!sistolikInput || !diastolikInput) return '-';
   
+  const sistolik = Number(sistolikInput);
+  const diastolik = Number(diastolikInput);
+
   if (sistolik < 90 && diastolik < 60) {
     return 'Hipotensi';
   } else if (sistolik >= 140 || diastolik >= 90) {

@@ -38,4 +38,11 @@ export interface ReportPemeriksaanItem {
   berat_badan_bayi?: string | number
   fasilitasi_rujukan?: boolean
   gula_darah_sewaktu?: string | number
+  kolesterol?: string | number
+  asam_urat?: string | number
+  status_gizi?: {
+    kategori_bb_tb?: string
+    kategori_bb_u?: string
+    kategori_tb_u?: string
+  }
 }
