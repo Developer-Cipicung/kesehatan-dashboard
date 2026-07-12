@@ -6,7 +6,7 @@ import { EditPatientDialog } from '@/features/warga/components/EditPatientDialog
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit2 } from 'lucide-react'
-import { calculateAgeInMonths, isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
+import { calculateAgeInWeeks, isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age'
 
 interface PatientProfileCardProps {
   warga: Warga
@@ -16,7 +16,8 @@ interface PatientProfileCardProps {
 export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps) {
   const isBalita = kategori === 'balita' || kategori === 'baduta'
   const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
-  const isIbu = kategori === 'bumil' || isPasca
+  const isBumil = kategori === 'bumil'
+  const isIbu = isBumil || isPasca
   const { data: imunisasiList = [] } = useGetImunisasiByWarga(isBalita ? warga.id : '')
   
   // Fetch anak terkait hanya saat profil ibu/pasca dibuka.
@@ -27,7 +28,9 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
   const allWarga = wargaListRes?.data || []
   const listAnak = allWarga.filter(a => {
     const isAnak = a.tanggal_lahir && (isBadutaByBirthDate(a.tanggal_lahir) || isBalitaByBirthDate(a.tanggal_lahir))
-    return isAnak && (a.nama_ibu === warga.nama || a.pemeriksaan_balita_baduta?.[0]?.nama_ibu === warga.nama)
+    if (!isAnak) return false
+    if (a.ibu_id === warga.id) return true
+    return !a.ibu_id && (a.nama_ibu === warga.nama || a.pemeriksaan_balita_baduta?.[0]?.nama_ibu === warga.nama)
   })
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -97,6 +100,36 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
             </div>
           )}
 
+          {isBumil && (
+            <>
+              <div>
+                <span className="text-muted-foreground block text-xs">HPHT (Hari Pertama Haid Terakhir)</span>
+                <span className="font-medium">
+                  {warga.hpht ? new Date(warga.hpht).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  }) : '-'}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block text-xs">HPL (Hari Perkiraan Lahir)</span>
+                <span className="font-medium">
+                  {(() => {
+                    if (!warga.hpht) return '-'
+                    const hpht = new Date(warga.hpht)
+                    const start = new Date(hpht)
+                    start.setDate(start.getDate() + 280 - 7)
+                    const end = new Date(hpht)
+                    end.setDate(end.getDate() + 280 + 7)
+                    const fmt = (d: Date) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+                    return `${fmt(start)} - ${fmt(end)}`
+                  })()}
+                </span>
+              </div>
+            </>
+          )}
+
           {isBalita && (
             <>
               <div>
@@ -109,7 +142,13 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
               </div>
               <div>
                 <span className="text-muted-foreground block text-xs">Nama Ibu</span>
-                <span className="font-medium">{warga.nama_ibu || '-'}</span>
+                <span className="font-medium">
+                  {warga.ibu ? (
+                    <span>{warga.ibu.nama}</span>
+                  ) : (
+                    warga.nama_ibu || '-'
+                  )}
+                </span>
               </div>
             </>
           )}
@@ -123,7 +162,7 @@ export function PatientProfileCard({ warga, kategori }: PatientProfileCardProps)
                     <div key={anak.id} className="text-sm border border-slate-100 bg-slate-50 rounded px-3 py-2 flex items-center justify-between">
                       <span className="font-medium">{anak.nama}</span>
                       <span className="text-xs text-slate-500">
-                        {anak.tanggal_lahir ? `${calculateAgeInMonths(anak.tanggal_lahir)} bln` : ''}
+                        {anak.tanggal_lahir ? `${calculateAgeInWeeks(anak.tanggal_lahir)} mgg` : ''}
                       </span>
                     </div>
                   ))

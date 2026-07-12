@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { Pemeriksaan } from '../services/pemeriksaanService'
 import { useCreatePemeriksaan, useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
+import { useGetWargaById } from '@/features/warga/hooks/useWarga'
 
 interface MonthlyRecordFormProps {
   open: boolean
@@ -62,7 +63,7 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
           value={s}
           onChange={e => setValue(name, `${e.target.value}${d ? '/' + d : ''}`)}
           placeholder="120"
-          className={`flex-1 h-10 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+          className={`w-20 sm:w-24 h-10 rounded-md border bg-background px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
         />
         <span className="text-slate-400 font-bold">/</span>
         <input
@@ -70,7 +71,7 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
           value={d}
           onChange={e => setValue(name, `${s ? s + '/' : ''}${e.target.value}`)}
           placeholder="80"
-          className={`flex-1 h-10 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+          className={`w-20 sm:w-24 h-10 rounded-md border bg-background px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
         />
       </div>
       {error && <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">{error}</p>}
@@ -81,20 +82,6 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
 const toDateInputValue = (value?: string | Date | null) => {
   if (!value) return ''
   return new Date(value).toISOString().split('T')[0]
-}
-
-const calculateHplRange = (hphtStr?: string): string => {
-  if (!hphtStr) return '-'
-  const hpht = new Date(hphtStr)
-  
-  const start = new Date(hpht)
-  start.setDate(start.getDate() + 259) // 37 weeks
-  
-  const end = new Date(hpht)
-  end.setDate(end.getDate() + 294) // 42 weeks
-  
-  const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
-  return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
 }
 
 const parseNum = (val: any, isInt = false) => {
@@ -112,6 +99,9 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
   const isPasca = kategori === 'pasca_persalinan' || kategori === 'pasca-persalinan'
   const isBalita = kategori === 'balita' || kategori === 'baduta'
   const isEdit = !!initialData
+  
+  const { data: wargaResponse } = useGetWargaById(wargaId, undefined)
+  const warga = wargaResponse
   const mutationPending = isCreating || isUpdating
 
   const methods = useForm<any>()
@@ -134,8 +124,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         lingkar_perut: rec.lingkar_perut ?? '',
         tinggi_fundus: rec.tinggi_fundus ?? '',
         usia_kehamilan_minggu: rec.usia_kehamilan_minggu ?? '',
-        hpht: rec.hpht ? toDateInputValue(rec.hpht) : '',
-        htp: rec.htp ? toDateInputValue(rec.htp) : '',
         td: (rec.tekanan_darah_sistolik && rec.tekanan_darah_diastolik) ? `${rec.tekanan_darah_sistolik}/${rec.tekanan_darah_diastolik}` : '',
         gula_darah_sewaktu: rec.gula_darah_sewaktu ?? '',
         suhu_tubuh: rec.suhu_tubuh ?? '',
@@ -155,6 +143,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         tinggi_badan_bayi: rec.tinggi_badan_bayi ?? '',
         berat_badan_bayi: rec.berat_badan_bayi ?? '',
         fasilitasi_rujukan: rec.fasilitasi_rujukan ?? false,
+        nama_ibu: rec.nama_ibu ?? (isNew ? (prev.nama_ibu ?? '') : ''),
+        penggunaan_kontrasepsi: rec.penggunaan_kontrasepsi ?? (isNew ? (prev.penggunaan_kontrasepsi ?? '') : ''),
         tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : (isNew ? (() => {
           const d = new Date()
           d.setMonth(d.getMonth() + 1)
@@ -164,12 +154,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
     }
   }, [open, initialData, previousRecord, defaultTanggalPersalinan, reset, isBumil])
 
-  const hphtWatch = watch('hpht')
   const tglWatch = watch('tanggal_kunjungan')
 
   useEffect(() => {
-    if (isBumil && hphtWatch && tglWatch) {
-      const hphtDate = new Date(hphtWatch)
+    if (isBumil && warga?.hpht && tglWatch) {
+      const hphtDate = new Date(warga.hpht)
       const tglDate = new Date(tglWatch)
       const diffTime = tglDate.getTime() - hphtDate.getTime()
       if (diffTime >= 0) {
@@ -178,13 +167,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           setValue('usia_kehamilan_minggu', weeks)
         }
       }
-      if (!(initialData as any)?.htp) {
-        const hplDate = new Date(hphtWatch)
-        hplDate.setDate(hplDate.getDate() + 280)
-        setValue('htp', hplDate.toISOString().split('T')[0])
-      }
     }
-  }, [hphtWatch, tglWatch, isBumil, setValue, initialData])
+  }, [warga?.hpht, tglWatch, isBumil, setValue, initialData])
 
   const parseTd = (td: string) => {
     const p = td.split('/')
@@ -213,6 +197,8 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           kondisi: values.kondisi || undefined,
           asi_eksklusif: values.asi_eksklusif ?? undefined,
           fasilitasi_bantuan_sosial: values.fasilitasi_bantuan_sosial ?? undefined,
+          nama_ibu: values.nama_ibu || undefined,
+          penggunaan_kontrasepsi: values.penggunaan_kontrasepsi || undefined,
         }
       } else if (isBumil) {
         payload = {
@@ -223,8 +209,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
           lingkar_lengan_atas: parseNum(values.lingkar_lengan_atas),
           tinggi_fundus: parseNum(values.tinggi_fundus),
           usia_kehamilan_minggu: parseNum(values.usia_kehamilan_minggu, true),
-          hpht: values.hpht || undefined,
-          htp: values.htp || undefined,
           jumlah_anak: parseNum(values.jumlah_anak, true),
           riwayat_penyakit: values.riwayat_penyakit || undefined,
           kadar_hemoglobin: parseNum(values.kadar_hemoglobin),
@@ -400,12 +384,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   {watch('lingkar_lengan_atas') > 0 && watch('lingkar_lengan_atas') < 23.5 && (
                     <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">⚠️ Risiko KEK</p>
                   )}
-                </Field>
-                <Field label="HPHT" required><Input register={register} name="hpht" type="date" /></Field>
-                <Field label="Rentang HPL">
-                  <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
-                    {calculateHplRange(hphtWatch)}
-                  </div>
                 </Field>
                 <Field label="Riwayat Penyakit"><Input register={register} name="riwayat_penyakit" placeholder="Tidak ada" /></Field>
                 <Field label="Kadar HB" required>
