@@ -37,6 +37,7 @@ export interface Warga {
   pemeriksaan_bumil?: Array<any>
   pemeriksaan_pasca_persalinan?: Array<any>
   pemeriksaan_lansia?: Array<any>
+  riwayat_imunisasi?: Array<any>
 }
 
 export interface WargaListResponse {

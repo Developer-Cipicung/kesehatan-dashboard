@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { VisumTemplate } from '../components/templates/VisumTemplate';
 import { SummaryTemplate } from '../components/templates/SummaryTemplate';
-import { Printer, ZoomIn, ZoomOut, ArrowLeft, Settings2, FileText } from 'lucide-react';
+import { Printer, ZoomIn, ZoomOut, Settings2, FileText, ArrowLeft } from 'lucide-react';
 import { useGetPemeriksaanList } from '@/features/pemeriksaan/hooks/usePemeriksaan';
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats';
 import { isBadutaByBirthDate, isBalitaByBirthDate } from '@/utils/age';
@@ -30,8 +30,9 @@ export function PrintReportPage() {
                       undefined;
 
   const [paperSize, setPaperSize] = useState<'A4' | 'F4' | 'Legal' | 'Letter'>('F4');
-  // Default zoom 0.4 for mobile to fit screen, 1 for desktop
-  const [zoom, setZoom] = useState(window.innerWidth < 768 ? 0.4 : 1);
+  // Default zoom is responsive to screen
+  const [zoom, setZoom] = useState(window.innerWidth < 1024 ? 0.4 : 1);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Enable native pinch-to-zoom on this page
   useEffect(() => {
@@ -44,6 +45,7 @@ export function PrintReportPage() {
       if (meta && oldContent) meta.setAttribute('content', oldContent);
     };
   }, []);
+
   // Update URL when category changes
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
@@ -51,53 +53,30 @@ export function PrintReportPage() {
     window.history.replaceState(null, '', `?${newParams.toString()}`);
   }, [kategoriRaw, searchParams]);
 
-  // Map to API query categories (since API uses 'balita' for both balita & baduta)
   const queryKategori = (kategoriRaw === 'baduta' || kategoriRaw === 'balita' || kategoriRaw === 'summary') ? 'balita' : kategoriRaw;
 
-  // For regular reports
   const { data: pemeriksaanData, isLoading: isPemeriksaanLoading } = useGetPemeriksaanList(queryKategori, {
     ...(periodeType !== 'custom' ? { bulan: targetBulan, tahun: targetTahun } : { startDate, endDate }),
     posyanduId: posyanduId === 'all' ? undefined : posyanduId,
-    limit: 1000 // Get all for report
+    limit: 1000
   });
 
-  // For summary
   const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardStats(posyanduId === 'all' ? 'all' : posyanduId);
 
   const isLoading = kategoriRaw === 'summary' ? isDashboardLoading : isPemeriksaanLoading;
 
   const getPaperDimensions = () => {
     switch (paperSize) {
-      case 'A4': return { width: '297mm', height: '210mm' };
-      case 'Legal': return { width: '355.6mm', height: '215.9mm' };
-      case 'Letter': return { width: '279.4mm', height: '215.9mm' };
-      case 'F4': default: return { width: '330mm', height: '215mm' };
+      case 'A4': return { width: '297mm', height: '210mm', pageRule: 'A4 landscape' };
+      case 'Legal': return { width: '355.6mm', height: '215.9mm', pageRule: 'Legal landscape' };
+      case 'Letter': return { width: '279.4mm', height: '215.9mm', pageRule: 'Letter landscape' };
+      case 'F4': default: return { width: '330.2mm', height: '215.9mm', pageRule: '330.2mm 215.9mm landscape' };
     }
   };
 
   const handlePrint = () => {
     window.print();
   };
-
-  useEffect(() => {
-    // Add landscape page style dynamically to document head for printing
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @page {
-        size: ${paperSize.toLowerCase()} landscape;
-        margin: 10mm;
-      }
-      @media print {
-        html, body { height: auto !important; overflow: visible !important; margin: 0; padding: 0; background: white; }
-        .no-print { display: none !important; }
-        .print-reset { display: block !important; height: auto !important; overflow: visible !important; position: static !important; padding: 0 !important; background: white !important; }
-        .print-wrapper { width: 100% !important; height: auto !important; margin: 0 !important; }
-        .print-container { transform: none !important; box-shadow: none !important; border: none !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; page-break-inside: avoid; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, [paperSize]);
 
   if (isLoading) {
     return <div className="p-10"><SkeletonCard /></div>;
@@ -137,9 +116,59 @@ export function PrintReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200 flex font-sans overflow-hidden print-reset">
+    <div className="min-h-screen bg-slate-200 flex font-sans overflow-hidden print-wrapper">
+      <style>{`
+        @media print {
+          .hide-on-print {
+            display: none !important;
+          }
+          .print-wrapper {
+            display: block !important;
+            height: auto !important;
+            min-height: auto !important;
+            overflow: visible !important;
+          }
+          @page {
+            size: ${getPaperDimensions().pageRule};
+            margin: 10mm;
+          }
+          html, body, #root {
+            background: white !important;
+            height: auto !important;
+            min-height: auto !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .page-break {
+            transform: none !important;
+            width: 100% !important;
+            min-height: 0 !important;
+            height: auto !important;
+            page-break-after: always;
+            break-after: page;
+          }
+          .page-break:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+          .page-content {
+            width: 100% !important;
+            min-height: 0 !important;
+            height: auto !important;
+            padding: 0 !important; /* Rely on @page margin instead */
+            border: none !important;
+            box-shadow: none !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
+
       {/* SIDEBAR (Desktop Only) */}
-      <aside className="no-print hidden lg:flex flex-col inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-300">
+      <aside className="hide-on-print hidden lg:flex flex-col inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-300 shrink-0">
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50/80 backdrop-blur">
           <div className="flex items-center gap-3">
             <div>
@@ -235,18 +264,18 @@ export function PrintReportPage() {
 
         </div>
 
-        <div className="p-4 border-t border-slate-200 bg-white">
-          <Button onClick={handlePrint} className="w-full gap-2 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-primary/30 h-12 text-sm font-bold rounded-xl transition-all">
+        <div className="p-4 border-t border-slate-200 bg-white space-y-2">
+          <Button onClick={handlePrint} className="w-full gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg h-12 text-sm font-bold rounded-xl transition-all">
             <Printer className="w-5 h-5" />
-            CETAK DOKUMEN
+            CETAK / SAVE PDF
           </Button>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-200 relative print-reset">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-200 relative print:!h-auto print:!overflow-visible print:!bg-white print-wrapper">
         {/* HEADER */}
-        <div className="no-print flex items-center justify-between p-3 bg-white/90 backdrop-blur-md border-b border-slate-300 shadow-sm sticky top-0 z-30">
+        <div className="hide-on-print flex items-center justify-between p-3 bg-white/90 backdrop-blur-md border-b border-slate-300 shadow-sm sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="h-9 w-9 lg:hidden hover:bg-slate-100" onClick={() => navigate(-1)}>
               <ArrowLeft className="w-5 h-5 text-slate-700" />
@@ -263,80 +292,71 @@ export function PrintReportPage() {
               <span className="font-semibold text-xs">Cetak</span>
             </Button>
           </div>
-        </div>
-
-        {/* PAPER CANVAS */}
-        <div className="flex-1 overflow-auto p-4 sm:p-10 custom-scrollbar pb-32 print-reset">
+        </div>        {/* PAPER CANVAS */}
+        <div ref={previewContainerRef} className="flex-1 overflow-auto p-4 sm:p-10 custom-scrollbar pb-32 print:p-0 print:overflow-visible print:block bg-slate-200/50 print:bg-white">
         {kategoriRaw === 'summary' ? (
-          <div 
-            className="mx-auto print-wrapper"
-            style={{ 
-              width: `calc(${getPaperDimensions().width} * ${zoom})`, 
-              height: `calc(${getPaperDimensions().height} * ${zoom})`,
-              marginBottom: '2rem'
-            }}
-          >
+          <div className="flex justify-center mb-8 print:mb-0 print:block">
             <div 
-              className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left"
-              style={{
-                width: getPaperDimensions().width,
-                minHeight: getPaperDimensions().height,
-                transform: `scale(${zoom})`,
-                padding: '10mm',
-              }}
+              className="origin-top page-break"
+              style={{ transform: `scale(${zoom})`, width: getPaperDimensions().width, minHeight: getPaperDimensions().height }}
             >
-            <SummaryTemplate 
-              bulan={targetBulan || bulanQuery} 
-              tahun={targetTahun || tahunQuery} 
-              data={dashboardData} 
-            />
-          </div>
+              <div 
+                className="bg-white border border-slate-300 shadow-2xl transition-all duration-200 page-content"
+                style={{
+                  width: getPaperDimensions().width,
+                  minHeight: getPaperDimensions().height,
+                  padding: '10mm',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <SummaryTemplate 
+                  bulan={targetBulan || bulanQuery} 
+                  tahun={targetTahun || tahunQuery} 
+                  data={dashboardData} 
+                />
+              </div>
+            </div>
           </div>
         ) : Object.keys(posyanduGroups).map((pid, idx) => {
           const group = posyanduGroups[pid];
-          // Determine chunks if data is too large for one page (assume ~20 rows per page max)
-          const rowsPerPage = 20;
+          const rowsPerPage = 12;
           const pages = [];
           for (let i = 0; i < group.data.length; i += rowsPerPage) {
             pages.push(group.data.slice(i, i + rowsPerPage));
           }
-          if (pages.length === 0) pages.push([]); // Ensure at least one page is rendered
+          if (pages.length === 0) pages.push([]);
 
           return pages.map((pageData, pIdx) => (
-            <div 
-              key={`${pid}-${pIdx}`}
-              className="mx-auto print-wrapper" 
-              style={{ 
-                width: `calc(${getPaperDimensions().width} * ${zoom})`, 
-                height: `calc(${getPaperDimensions().height} * ${zoom})`,
-                marginBottom: '2rem'
-              }}
-            >
+            <div key={`${pid}-${pIdx}`} className="flex justify-center mb-8 print:mb-0 print:block">
               <div 
-                className="print-container bg-white border border-slate-300 shadow-2xl transition-all duration-200 origin-top-left"
-                style={{
-                  width: getPaperDimensions().width,
-                  minHeight: getPaperDimensions().height,
-                  transform: `scale(${zoom})`,
-                  padding: '10mm',
-                  pageBreakAfter: (idx === Object.keys(posyanduGroups).length - 1 && pIdx === pages.length - 1) ? 'auto' : 'always',
-                }}
+                className="origin-top page-break"
+                style={{ transform: `scale(${zoom})`, width: getPaperDimensions().width, minHeight: getPaperDimensions().height }}
               >
-              <VisumTemplate 
-                kategori={kategoriRaw} 
-                data={pageData} 
-                bulan={targetBulan || bulanQuery} 
-                tahun={targetTahun || tahunQuery} 
-                posyanduName={group.name}
-              />
-            </div>
+                <div 
+                  className="bg-white border border-slate-300 shadow-2xl transition-all duration-200 page-content"
+                  style={{
+                    width: getPaperDimensions().width,
+                    minHeight: getPaperDimensions().height,
+                    padding: '10mm',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <VisumTemplate 
+                    kategori={kategoriRaw} 
+                    data={pageData} 
+                    bulan={targetBulan || bulanQuery} 
+                    tahun={targetTahun || tahunQuery} 
+                    posyanduName={group.name}
+                  />
+                </div>
+              </div>
             </div>
           ));
         })}
         </div>
 
         {/* FLOATING ZOOM CONTROLS */}
-        <div className="no-print fixed bottom-24 lg:bottom-10 right-6 lg:right-10 z-40 bg-white/90 backdrop-blur shadow-[0_4px_20px_-2px_rgba(0,0,0,0.15)] border border-slate-200 rounded-full flex items-center p-1.5 transition-all">
+        <div className="hide-on-print fixed bottom-24 lg:bottom-10 right-6 lg:right-10 z-40 bg-white/90 backdrop-blur shadow-[0_4px_20px_-2px_rgba(0,0,0,0.15)] border border-slate-200 rounded-full flex items-center p-1.5 transition-all">
           <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-slate-100 hover:text-primary transition-colors shrink-0" onClick={() => setZoom(z => Math.max(0.3, z - 0.1))}>
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -349,7 +369,7 @@ export function PrintReportPage() {
         </div>
 
         {/* MOBILE BOTTOM NAVIGATION */}
-        <div className="no-print lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] flex items-center justify-around z-50 pb-safe">
+        <div className="hide-on-print lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] flex items-center justify-around z-50 pb-safe">
           {/* Kategori Button */}
           <div className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-600 hover:bg-slate-50 transition-colors">
             <Settings2 className="w-5 h-5" />
@@ -387,11 +407,11 @@ export function PrintReportPage() {
 
           {/* Cetak Button */}
           <button 
-            className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-primary hover:bg-primary/5 transition-colors border-l border-slate-100 outline-none"
+            className="relative flex-1 flex flex-col items-center justify-center py-3 gap-1 text-emerald-600 hover:bg-emerald-50 transition-colors border-l border-slate-100 outline-none"
             onClick={handlePrint}
           >
             <Printer className="w-5 h-5" />
-            <span className="text-[10px] font-bold leading-none mt-0.5">Cetak</span>
+            <span className="text-[10px] font-bold leading-none mt-0.5">Cetak/Save</span>
           </button>
         </div>
       </div>

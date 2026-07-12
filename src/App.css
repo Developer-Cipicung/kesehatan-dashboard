@@ -164,6 +164,14 @@ body {
   min-height: 100svh;
 }
 
+@media print {
+  html, body, #root {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
 button,
 input,
 select,

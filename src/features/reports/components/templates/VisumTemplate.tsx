@@ -248,7 +248,6 @@ export const VisumTemplate: React.FC<VisumTemplateProps> = ({
                         textAlign: 'center',
                         verticalAlign: 'middle',
                         wordBreak: 'break-word',
-                        overflow: 'hidden',
                       }}
                     >
                       {renderHeader(col.accessor(row, rIdx))}
@@ -275,28 +274,28 @@ export const VisumTemplate: React.FC<VisumTemplateProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '7.5pt', marginTop: '4pt' }}>
         <div style={{ textAlign: 'center', width: '160pt' }}>
           <p style={{ marginBottom: '2pt' }}>Mengetahui,</p>
-          <p style={{ marginBottom: '50pt' }}>Koordinator Lapangan</p>
+          <p style={{ marginBottom: '30pt' }}>Koordinator Lapangan</p>
           <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>SULAEMAN, S.Pd, M.H.</p>
           <p>NIP. 198311142022211004</p>
         </div>
 
         <div style={{ textAlign: 'center' }}>
-          <p style={{ textAlign: 'right', marginBottom: '4pt' }}>{kecamatan}, ........................... {tahun}</p>
+          <p style={{ textAlign: 'right', marginBottom: '4pt' }}>{kecamatan}, 28 {getBulanStr(bulan)} {tahun}</p>
           <p style={{ fontWeight: 'bold', marginBottom: '4pt' }}>TIM PENDAMPING KELUARGA</p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '32pt', marginTop: '6pt' }}>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ marginBottom: '50pt' }}>Nakes/Kader KB</p>
-              <p style={{ borderBottom: '0.5pt dotted black', width: '80pt' }}>&nbsp;</p>
+              <p style={{ marginBottom: '30pt' }}>Nakes/Kader KB</p>
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>DR. HJ. SITI AMINAH</p>
             </div>
             <div style={{ textAlign: 'center' }}>
               <p>Pendamping TPK</p>
-              <p style={{ marginBottom: '40pt' }}>Kader PKK</p>
-              <p style={{ borderBottom: '0.5pt dotted black', width: '80pt' }}>&nbsp;</p>
+              <p style={{ marginBottom: '20pt' }}>Kader PKK</p>
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>NURHAYATI, S.Kep</p>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ marginBottom: '50pt' }}>Kader KB</p>
-              <p style={{ borderBottom: '0.5pt dotted black', width: '80pt' }}>&nbsp;</p>
+              <p style={{ marginBottom: '30pt' }}>Kader KB</p>
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>RINA MARLINA</p>
             </div>
           </div>
         </div>
