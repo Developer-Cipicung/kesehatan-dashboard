@@ -98,14 +98,14 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           setTempatPersalinan('')
         }
       }}>
-        <DialogContent className="w-[90vw] max-w-[425px] rounded-xl">
+        <DialogContent className="max-w-[420px] sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Tandai Telah Bersalin</DialogTitle>
             <DialogDescription>
               Tandai ibu ini telah bersalin? Masukkan tanggal dan tempat persalinan untuk memindahkan data pasien ke Pasca Persalinan.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-3 py-2 sm:space-y-4 sm:py-4">
             <div className="space-y-2">
               <label htmlFor="tanggal_persalinan" className="text-sm font-medium leading-none">
                 Tanggal Persalinan <span className="text-red-500">*</span>
@@ -115,7 +115,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 type="date"
                 value={tanggalPersalinan}
                 onChange={(e) => setTanggalPersalinan(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-base"
               />
             </div>
             <div className="space-y-2">
@@ -128,11 +128,11 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 value={tempatPersalinan}
                 onChange={(e) => setTempatPersalinan(e.target.value)}
                 placeholder="Contoh: RSUD / Bidan"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-base"
               />
             </div>
           </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="grid grid-cols-2 gap-2 sm:flex sm:flex-row">
             <Button variant="outline" className="w-full sm:w-auto" onClick={() => {
               setShowConfirm(false)
               setTempatPersalinan('')

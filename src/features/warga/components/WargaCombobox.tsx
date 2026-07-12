@@ -34,19 +34,21 @@ export function WargaCombobox({ wargaList, value, onChange, placeholder = 'Pilih
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full min-w-0 justify-between overflow-hidden text-left"
         />
       }>
-        {value === 'none' ? (
-          '-- Ibu Belum Terdaftar --'
-        ) : selectedWarga ? (
-          `${selectedWarga.nama} (${selectedWarga.nik})`
-        ) : (
-          placeholder
-        )}
+        <span className="min-w-0 truncate">
+          {value === 'none' ? (
+            '-- Ibu Belum Terdaftar --'
+          ) : selectedWarga ? (
+            `${selectedWarga.nama} (${selectedWarga.nik})`
+          ) : (
+            placeholder
+          )}
+        </span>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent className="w-80 max-w-[calc(100vw-2rem)] p-0" align="start">
         <div className="flex items-center border-b px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
@@ -81,8 +83,8 @@ export function WargaCombobox({ wargaList, value, onChange, placeholder = 'Pilih
                 className={`relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-slate-100 focus:bg-slate-100 ${value === warga.id ? 'bg-slate-100' : ''}`}
               >
                 <Check className={`mr-2 h-4 w-4 ${value === warga.id ? 'opacity-100' : 'opacity-0'}`} />
-                <div className="flex flex-col text-left">
-                  <span className="font-medium">{warga.nama}</span>
+                <div className="flex min-w-0 flex-col text-left">
+                  <span className="truncate font-medium">{warga.nama}</span>
                   <span className="text-xs text-muted-foreground">NIK: {warga.nik}</span>
                 </div>
               </button>

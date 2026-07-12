@@ -20,7 +20,7 @@ interface MonthlyRecordFormProps {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium leading-snug text-slate-700 sm:text-[15px]">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -41,7 +41,7 @@ function Input({ register, name, type = 'text', placeholder, min, max, step }: {
         max={max}
         step={step || (type === 'number' ? 'any' : undefined)}
         placeholder={placeholder}
-        className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground ${error ? 'border-red-500' : 'border-input'}`}
+        className={`flex h-9 w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground sm:h-10 sm:text-base ${error ? 'border-red-500' : 'border-input'}`}
       />
       {error && <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">{error}</p>}
     </div>
@@ -57,13 +57,13 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
   const d = parts[1] || ''
   return (
     <div>
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
         <input
           type="number"
           value={s}
           onChange={e => setValue(name, `${e.target.value}${d ? '/' + d : ''}`)}
           placeholder="120"
-          className={`w-20 sm:w-24 h-10 rounded-md border bg-background px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+          className={`h-9 w-full min-w-0 rounded-md border bg-background px-2 py-2 text-center text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-base ${error ? 'border-red-500' : 'border-input'}`}
         />
         <span className="text-slate-400 font-bold">/</span>
         <input
@@ -71,7 +71,7 @@ function TdInput({ setValue, watch, name }: { setValue: any; watch: any; name: s
           value={d}
           onChange={e => setValue(name, `${s ? s + '/' : ''}${e.target.value}`)}
           placeholder="80"
-          className={`w-20 sm:w-24 h-10 rounded-md border bg-background px-3 py-2 text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${error ? 'border-red-500' : 'border-input'}`}
+          className={`h-9 w-full min-w-0 rounded-md border bg-background px-2 py-2 text-center text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-10 sm:text-base ${error ? 'border-red-500' : 'border-input'}`}
         />
       </div>
       {error && <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight">{error}</p>}
@@ -282,7 +282,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
     <Dialog open={open} onOpenChange={(nextOpen) => {
       if (!isPending) onOpenChange(nextOpen)
     }}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[420px] sm:max-w-xl md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Pemeriksaan' : 'Tambah Riwayat Pemeriksaan'}</DialogTitle>
           <DialogDescription>
@@ -291,16 +291,16 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 pt-1 sm:space-y-4 sm:pt-2">
             <Field label="Tanggal Kunjungan" required>
               <Input register={register} name="tanggal_kunjungan" type="date" />
             </Field>
 
             {/* Balita / Baduta */}
             {isBalita && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Penggunaan Kontrasepsi">
-                  <select {...register('penggunaan_kontrasepsi')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <select {...register('penggunaan_kontrasepsi')} className="flex h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:text-base">
                     <option value="">Pilih KB...</option>
                     <option value="Pil">Pil</option>
                     <option value="Suntik">Suntik</option>
@@ -317,11 +317,11 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="Lingkar Kepala (cm)" required><Input register={register} name="lingkar_kepala" type="number" placeholder="45" /></Field>
                 <Field label="Lingkar Lengan Atas (cm)" required><Input register={register} name="lingkar_lengan_atas" type="number" placeholder="15" /></Field>
                 <Field label="Kondisi Bayi"><Input register={register} name="kondisi" placeholder="Sehat" /></Field>
-                <div className="flex items-center gap-2 mt-6">
+                <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2 sm:mt-6">
                   <input type="checkbox" id="asi_eksklusif" {...register('asi_eksklusif')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <label htmlFor="asi_eksklusif" className="text-sm font-medium text-slate-700">ASI Eksklusif</label>
                 </div>
-                <div className="flex items-center gap-2 mt-6">
+                <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2 sm:mt-6">
                   <input type="checkbox" id="fasilitasi_bantuan_sosial" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <label htmlFor="fasilitasi_bantuan_sosial" className="text-sm font-medium text-slate-700">Bantuan Sosial</label>
                 </div>
@@ -330,7 +330,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
 
             {/* Ibu Hamil */}
             {isBumil && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Usia Kandungan (Minggu)" required>
                   <Input register={register} name="usia_kehamilan_minggu" type="number" placeholder="28" max={45} min={0} />
                   {watch('usia_kehamilan_minggu') > 42 && (
@@ -365,14 +365,14 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                       }
 
                       return (
-                        <div className={`flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold ${color}`}>
+                        <div className={`flex h-9 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold sm:h-10 ${color}`}>
                           <span>{bmi.toFixed(1)}</span>
                           <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{status}</span>
                         </div>
                       )
                     }
                     return (
-                      <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+                      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 sm:h-10">
                         -
                       </div>
                     )
@@ -394,26 +394,26 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   )}
                 </Field>
                 <Field label="Berat Janin (kg)"><Input register={register} name="berat_janin" type="number" placeholder="1.5" max={10} min={0} /></Field>
-                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
-                  <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-2 sm:gap-3 sm:mt-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="terpapar_rokok" {...register('terpapar_rokok')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="terpapar_rokok" className="text-sm font-medium text-slate-700">Terpapar Rokok</label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="kie" {...register('kie')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="kie" className="text-sm font-medium text-slate-700">KIE</label>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="grid grid-cols-1 gap-3 sm:col-span-2 sm:grid-cols-2 sm:mt-2">
                   <Field label="TTD (Tablet)"><Input register={register} name="suplemen_tambah_darah" type="number" placeholder="30" min={0} /></Field>
                   <Field label="MMS (Tablet)"><Input register={register} name="mms" type="number" placeholder="30" min={0} /></Field>
                 </div>
-                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
-                  <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-2 sm:gap-3 sm:mt-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="bumil_rujukan" {...register('fasilitasi_rujukan')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="bumil_rujukan" className="text-sm font-medium text-slate-700">Rujukan</label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="bumil_bansos" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="bumil_bansos" className="text-sm font-medium text-slate-700">Bansos</label>
                   </div>
@@ -423,7 +423,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
 
             {/* Lansia */}
             {isLansia && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Berat Badan Lansia (kg)" required><Input register={register} name="bb" type="number" placeholder="58" /></Field>
                 <Field label="Tinggi Badan Lansia (cm)" required><Input register={register} name="tb" type="number" placeholder="160" /></Field>
                 <Field label="Tekanan Darah (mmHg)" required>
@@ -437,29 +437,29 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
 
             {/* Pasca Persalinan */}
             {isPasca && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Tanggal Persalinan" required><Input register={register} name="tanggal_persalinan" type="date" /></Field>
                 <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
                 <Field label="Berat Badan Ibu (kg)" required><Input register={register} name="bb" type="number" placeholder="62" /></Field>
                 <Field label="Tekanan Darah (mmHg)" required>
                   <TdInput setValue={setValue} watch={watch} name="td" />
                 </Field>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 </div>
                 <Field label="Tinggi Bayi (cm)"><Input register={register} name="tinggi_badan_bayi" type="number" placeholder="50" /></Field>
                 <Field label="Berat Bayi (kg)"><Input register={register} name="berat_badan_bayi" type="number" placeholder="3.2" /></Field>
                 
-                <div className="col-span-2 grid grid-cols-2 gap-3 mt-2">
-                  <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-2 sm:gap-3 sm:mt-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="kie_pasca" {...register('kie')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="kie_pasca" className="text-sm font-medium text-slate-700">KIE</label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="fasilitasi_rujukan" {...register('fasilitasi_rujukan')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="fasilitasi_rujukan" className="text-sm font-medium text-slate-700">Fasilitasi Rujukan</label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 px-3 py-2">
                     <input type="checkbox" id="fasilitasi_bantuan_sosial_pasca" {...register('fasilitasi_bantuan_sosial')} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                     <label htmlFor="fasilitasi_bantuan_sosial_pasca" className="text-sm font-medium text-slate-700">Bantuan Sosial</label>
                   </div>
@@ -478,13 +478,13 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 {...register('catatan')}
                 rows={2}
                 placeholder="Catatan pemeriksaan..."
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground resize-none"
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground resize-none sm:text-base"
               />
             </Field>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>Batal</Button>
-              <Button type="submit" disabled={isPending}>{isPending ? 'Menyimpan...' : 'Simpan'}</Button>
+            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
+              <Button type="button" variant="outline" disabled={isPending} onClick={() => onOpenChange(false)} className="w-full sm:w-auto">Batal</Button>
+              <Button type="submit" disabled={isPending} className="w-full sm:w-auto">{isPending ? 'Menyimpan...' : 'Simpan'}</Button>
             </div>
           </form>
         </FormProvider>

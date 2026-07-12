@@ -138,7 +138,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[420px] sm:max-w-xl lg:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Profil Pasien</DialogTitle>
           <DialogDescription>
@@ -147,12 +147,12 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-6">
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <div className="space-y-5 sm:space-y-6">
               {/* Grup Data Diri */}
               <div>
-                <h4 className="text-sm font-semibold text-slate-800 mb-3 uppercase tracking-wider">Data Diri</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-800 sm:text-sm">Data Diri</h4>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   <FormField
                     control={methods.control}
                     name="nik"
@@ -183,7 +183,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
                           <FormLabel>Jenis Kelamin <span className="text-red-500">*</span></FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="h-9 text-sm sm:h-10 sm:text-base">
                                 <SelectValue placeholder="Pilih jenis kelamin" />
                               </SelectTrigger>
                             </FormControl>
@@ -206,7 +206,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
                           <FormLabel>Status Kehamilan <span className="text-red-500">*</span></FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="h-9 text-sm sm:h-10 sm:text-base">
                                 <SelectValue placeholder="Pilih status kehamilan" />
                               </SelectTrigger>
                             </FormControl>
@@ -228,8 +228,8 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
 
               {/* Grup Tempat Tanggal Lahir */}
               <div>
-                <h4 className="text-sm font-semibold text-slate-800 mb-3 uppercase tracking-wider">Kelahiran</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-800 sm:text-sm">Kelahiran</h4>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   <FormField
                     control={methods.control}
                     name="tempat_lahir"
@@ -253,8 +253,8 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
               {/* Detail Kategori Tambahan */}
               {(isIbuIbu || isAnak) && (
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-800 mb-3 uppercase tracking-wider">Detail Tambahan</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-800 sm:text-sm">Detail Tambahan</h4>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                     {isIbuIbu && watchStatusKehamilan === 'PASCA_PERSALINAN' && (
                       <FormField
                         control={methods.control}
@@ -303,7 +303,7 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
                 </div>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 <FormField
                   control={methods.control}
                   name="alamat"
@@ -314,11 +314,11 @@ export function EditPatientDialog({ warga, kategori, open, onOpenChange, onSucce
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="sticky bottom-0 -mx-3 -mb-3 grid grid-cols-2 gap-2 border-t bg-popover/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-popover/80 sm:-mx-4 sm:-mb-4 sm:flex sm:justify-end sm:p-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Batal
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
                 {isPending ? 'Menyimpan...' : 'Simpan'}
               </Button>
             </div>

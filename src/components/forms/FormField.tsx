@@ -37,8 +37,8 @@ export function FormField<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>
+        <FormItem className="space-y-1.5">
+          <FormLabel className="text-sm leading-snug sm:text-[15px]">
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
           </FormLabel>
@@ -50,12 +50,13 @@ export function FormField<T extends FieldValues>({
                 placeholder={placeholder}
                 type={type}
                 disabled={disabled}
+                className="h-9 px-3 text-sm sm:h-10 sm:text-base"
                 {...field}
               />
             )}
           </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
-          <FormMessage />
+          {description && <FormDescription className="text-xs sm:text-sm">{description}</FormDescription>}
+          <FormMessage className="text-xs sm:text-sm" />
         </FormItem>
       )}
     />

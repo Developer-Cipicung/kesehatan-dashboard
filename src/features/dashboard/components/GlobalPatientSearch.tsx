@@ -166,14 +166,14 @@ export function GlobalPatientSearch() {
       />
 
       <Dialog open={showCategorySelect} onOpenChange={setShowCategorySelect}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[420px] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Pilih Jenis Warga</DialogTitle>
             <DialogDescription>
               Silakan pilih kategori warga yang ingin ditambahkan
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 gap-3 mt-4">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:mt-4 sm:gap-3">
             {[
               { id: 'bumil', label: 'Ibu Hamil', icon: <User className="w-5 h-5 text-pink-500" /> },
               { id: 'pasca_persalinan', label: 'Pasca Persalinan', icon: <Baby className="w-5 h-5 text-purple-500" /> },
@@ -188,7 +188,7 @@ export function GlobalPatientSearch() {
                   setShowCategorySelect(false)
                   setTimeout(() => setShowAddWarga(true), 150)
                 }}
-                className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all hover:border-primary hover:bg-primary/5 sm:gap-4 sm:p-4"
               >
                 <div className="bg-white shadow-sm p-2 rounded-full border border-slate-100">
                   {cat.icon}
