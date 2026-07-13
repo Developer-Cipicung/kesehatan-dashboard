@@ -317,7 +317,7 @@ export function PrintReportPage() {
               </div>
             </div>
           </div>
-        ) : Object.keys(posyanduGroups).map((pid, idx) => {
+        ) : Object.keys(posyanduGroups).map((pid) => {
           const group = posyanduGroups[pid];
           const rowsPerPage = 12;
           const pages = [];

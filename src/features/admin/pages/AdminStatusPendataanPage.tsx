@@ -37,7 +37,6 @@ export function AdminStatusPendataanPage() {
   const { data, isLoading, isError, refetch } = useGetAdminStatusPendataan(selectedYear)
   const { data: pendataanStatus, refetch: refetchStatus } = useGetPendataanStatus(currentMonth, currentDate.getFullYear(), userPosyanduId || undefined)
   const { mutate: submitPendataan, isPending: isSubmitting } = useSubmitPendataan()
-  const isLocked = pendataanStatus?.status === 'selesai'
   const filteredData = data?.filter(posyandu => 
     posyandu.nama.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
     posyandu.kode.toLowerCase().includes(debouncedSearch.toLowerCase())
