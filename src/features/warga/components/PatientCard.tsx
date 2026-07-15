@@ -7,6 +7,7 @@ import { useUpdateWarga } from '../hooks/useWarga'
 import { toast } from 'sonner'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 import { pemeriksaanService } from '../services/pemeriksaanService'
+import { calculateBMI, calculateTDStatus, calculateKolesterolStatus, calculateAsamUratStatus, calculateGdsStatus } from './PatientTable'
 
 interface PatientCardProps {
   data: Warga
@@ -98,6 +99,154 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                     latestBalita.zscore_bb_tb != null ? Number(latestBalita.zscore_bb_tb) : null
                   ).kategori_bb_tb || '-'}
                 </span>
+              </div>
+            </div>
+          )}
+
+          {isBumil && latestBumil && (
+            <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Berat & Tinggi</span>
+                  <span className="text-sm font-semibold text-slate-800">{latestBumil.bb || '-'} kg / {latestBumil.tb || '-'} cm</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">IMT</span>
+                  {(() => {
+                    const bmiData = calculateBMI(latestBumil.bb?.toString(), latestBumil.tb?.toString());
+                    return bmiData ? (
+                      <span className={`text-sm font-semibold ${bmiData.color.split(' ')[0]}`}>{bmiData.value} ({bmiData.status})</span>
+                    ) : <span className="text-sm font-semibold text-slate-800">-</span>;
+                  })()}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Kadar Hb</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-semibold text-slate-800">{latestBumil.kadar_hemoglobin || '-'}</span>
+                    {latestBumil.kadar_hemoglobin && parseFloat(latestBumil.kadar_hemoglobin) > 0 && parseFloat(latestBumil.kadar_hemoglobin) < 11 && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border font-bold bg-red-100 text-red-600 border-red-200">Risiko Anemia</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">LiLA</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-semibold text-slate-800">{latestBumil.lingkar_lengan_atas || '-'}</span>
+                    {latestBumil.lingkar_lengan_atas && parseFloat(latestBumil.lingkar_lengan_atas) > 0 && parseFloat(latestBumil.lingkar_lengan_atas) < 23.5 && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border font-bold bg-red-100 text-red-600 border-red-200">Risiko KEK</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {kategori === 'pasca_persalinan' && latestPasca && (
+            <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Berat & Tinggi</span>
+                  <span className="text-sm font-semibold text-slate-800">{latestPasca.bb || '-'} kg / {latestPasca.tb || latestBumil?.tb || '-'} cm</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">IMT</span>
+                  {(() => {
+                    const bmiData = calculateBMI(latestPasca.bb?.toString(), (latestPasca.tb || latestBumil?.tb)?.toString());
+                    return bmiData ? (
+                      <span className={`text-sm font-semibold ${bmiData.color.split(' ')[0]}`}>{bmiData.value} ({bmiData.status})</span>
+                    ) : <span className="text-sm font-semibold text-slate-800">-</span>;
+                  })()}
+                </div>
+              </div>
+              <div className="flex flex-col mt-1">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tekanan Darah</span>
+                {(() => {
+                  const tdStr = (latestPasca.tekanan_darah_sistolik && latestPasca.tekanan_darah_diastolik) 
+                    ? `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}` : '';
+                  const status = calculateTDStatus(tdStr);
+                  return (
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-semibold text-slate-800">{tdStr || '-'}</span>
+                      {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
+                    </div>
+                  )
+                })()}
+              </div>
+            </div>
+          )}
+
+          {kategori === 'lansia' && latestLansia && (
+            <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Berat & Tinggi</span>
+                  <span className="text-sm font-semibold text-slate-800">{latestLansia.bb || '-'} kg / {latestLansia.tb || '-'} cm</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">IMT</span>
+                  {(() => {
+                    const bmiData = calculateBMI(latestLansia.bb?.toString(), latestLansia.tb?.toString());
+                    return bmiData ? (
+                      <span className={`text-sm font-semibold ${bmiData.color.split(' ')[0]}`}>{bmiData.value} ({bmiData.status})</span>
+                    ) : <span className="text-sm font-semibold text-slate-800">-</span>;
+                  })()}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tekanan Darah</span>
+                  {(() => {
+                    const tdStr = (latestLansia.tekanan_darah_sistolik && latestLansia.tekanan_darah_diastolik) 
+                      ? `${latestLansia.tekanan_darah_sistolik}/${latestLansia.tekanan_darah_diastolik}` : '';
+                    const status = calculateTDStatus(tdStr);
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-semibold text-slate-800">{tdStr || '-'}</span>
+                        {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
+                      </div>
+                    )
+                  })()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Gula Darah</span>
+                  {(() => {
+                    const status = calculateGdsStatus(latestLansia.gula_darah_sewaktu?.toString());
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-semibold text-slate-800">{latestLansia.gula_darah_sewaktu || '-'}</span>
+                        {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Kolesterol</span>
+                  {(() => {
+                    const status = calculateKolesterolStatus(latestLansia.kolesterol?.toString());
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-semibold text-slate-800">{latestLansia.kolesterol || '-'}</span>
+                        {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
+                      </div>
+                    )
+                  })()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Asam Urat</span>
+                  {(() => {
+                    const status = calculateAsamUratStatus(latestLansia.asam_urat?.toString(), data.jenis_kelamin);
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-semibold text-slate-800">{latestLansia.asam_urat || '-'}</span>
+                        {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
+                      </div>
+                    )
+                  })()}
+                </div>
               </div>
             </div>
           )}

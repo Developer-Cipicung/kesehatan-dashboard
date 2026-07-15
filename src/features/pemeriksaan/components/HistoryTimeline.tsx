@@ -1,7 +1,7 @@
 import { Pemeriksaan } from '../services/pemeriksaanService'
 import { Button } from '@/components/ui/button'
 import { Edit, Trash2 } from 'lucide-react'
-import { calculateHplRange } from '../../warga/components/PatientTable'
+import { calculateHplRange, calculateBMI, calculateTDStatus, calculateKolesterolStatus, calculateAsamUratStatus, calculateGdsStatus } from '../../warga/components/PatientTable'
 
 interface HistoryTimelineProps {
   history: Pemeriksaan[]
@@ -47,8 +47,8 @@ export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, on
             
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">HPHT / HTP</th>}
             
-            {(isLansia || isPasca) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tensi</th>}
-            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Cek Darah</th>}
+            {(isLansia || isPasca) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tekanan Darah</th>}
+            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Pemeriksaan Darah</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Kondisi Ibu</th>}
 
             {isBalita && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Status Gizi (WHO)</th>}
@@ -112,8 +112,22 @@ export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, on
                 )}
                 
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                  {bb !== undefined && bb !== null ? `${bb} kg` : '-'}
-                  {(tb !== undefined && tb !== null) ? ` / ${tb} cm` : ''}
+                  <div className="flex items-center gap-2">
+                    <span>
+                      {bb !== undefined && bb !== null ? `${bb} kg` : '-'}
+                      {(tb !== undefined && tb !== null) ? ` / ${tb} cm` : ''}
+                    </span>
+                    {(isLansia || isPasca) && bb && tb && (
+                      <span className="ml-2">
+                        {(() => {
+                          const bmi = calculateBMI(bb, tb);
+                          return bmi ? (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${bmi.color}`}>{bmi.value} ({bmi.status})</span>
+                          ) : null;
+                        })()}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 
                 {(isBalita || isBumil) && (
@@ -133,16 +147,53 @@ export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, on
 
                 {(isLansia || isPasca) && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                    {td}
+                    <div className="flex items-center gap-1.5">
+                      <span>{td}</span>
+                      {(isLansia || isPasca) && record.tekanan_darah_sistolik && (
+                        (() => {
+                          const status = calculateTDStatus(`${record.tekanan_darah_sistolik}/${record.tekanan_darah_diastolik}`);
+                          return status ? <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span> : null;
+                        })()
+                      )}
+                    </div>
                   </td>
                 )}
 
                 {isLansia && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                    {record.gula_darah_sewaktu !== undefined && record.gula_darah_sewaktu !== null && <div className="text-xs"><span className="text-muted-foreground">GDS:</span> {record.gula_darah_sewaktu}</div>}
-                    {record.kolesterol !== undefined && record.kolesterol !== null && <div className="text-xs"><span className="text-muted-foreground">Kolesterol:</span> {record.kolesterol}</div>}
-                    {record.asam_urat !== undefined && record.asam_urat !== null && <div className="text-xs"><span className="text-muted-foreground">Asam Urat:</span> {record.asam_urat}</div>}
-                    {(record.gula_darah_sewaktu === undefined && record.kolesterol === undefined && record.asam_urat === undefined) && '-'}
+                    <div className="flex flex-col gap-1.5">
+                      {record.gula_darah_sewaktu !== undefined && record.gula_darah_sewaktu !== null && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-muted-foreground w-16">GDS:</span>
+                          <span>{record.gula_darah_sewaktu}</span>
+                          {(() => {
+                            const st = calculateGdsStatus(record.gula_darah_sewaktu);
+                            return st ? <span className={`text-[9px] px-1 py-0.5 rounded border font-bold ${st.color}`}>{st.status}</span> : null;
+                          })()}
+                        </div>
+                      )}
+                      {record.kolesterol !== undefined && record.kolesterol !== null && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-muted-foreground w-16">Kolesterol:</span>
+                          <span>{record.kolesterol}</span>
+                          {(() => {
+                            const st = calculateKolesterolStatus(record.kolesterol);
+                            return st ? <span className={`text-[9px] px-1 py-0.5 rounded border font-bold ${st.color}`}>{st.status}</span> : null;
+                          })()}
+                        </div>
+                      )}
+                      {record.asam_urat !== undefined && record.asam_urat !== null && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-muted-foreground w-16">Asam Urat:</span>
+                          <span>{record.asam_urat}</span>
+                          {(() => {
+                            const st = calculateAsamUratStatus(record.asam_urat, warga?.jenis_kelamin);
+                            return st ? <span className={`text-[9px] px-1 py-0.5 rounded border font-bold ${st.color}`}>{st.status}</span> : null;
+                          })()}
+                        </div>
+                      )}
+                      {(record.gula_darah_sewaktu === undefined && record.kolesterol === undefined && record.asam_urat === undefined) && '-'}
+                    </div>
                   </td>
                 )}
 
@@ -323,7 +374,12 @@ function BumilTimelineTable({ history, warga, isLocked, onEdit, onDelete }: { hi
                   <div className="mt-0.5"><span className="text-muted-foreground">HPL:</span> {getHplRange(warga?.hpht)}</div>
                 </td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.jumlah_anak ?? '-'}</td>
-                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.usia_kehamilan_minggu ?? '-'} Mg</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">
+                  {record.usia_kehamilan_minggu ?? '-'} Mg
+                  {record.usia_kehamilan_minggu && record.usia_kehamilan_minggu > 42 && (
+                    <div className="text-[9px] text-red-500 font-bold mt-1 leading-tight">Lewat<br/>Waktu!</div>
+                  )}
+                </td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.tb ?? '-'}</td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.bb ?? '-'}</td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">
@@ -340,8 +396,18 @@ function BumilTimelineTable({ history, warga, isLocked, onEdit, onDelete }: { hi
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.lingkar_perut ?? '-'}</td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.tinggi_fundus ?? '-'}</td>
                 <td className="px-4 py-3 text-slate-600 text-xs max-w-[120px] truncate" title={record.riwayat_penyakit}>{record.riwayat_penyakit || '-'}</td>
-                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.kadar_hemoglobin ?? '-'}</td>
-                <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.lingkar_lengan_atas ?? '-'}</td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">
+                  {record.kadar_hemoglobin ?? '-'}
+                  {record.kadar_hemoglobin && parseFloat(record.kadar_hemoglobin) > 0 && parseFloat(record.kadar_hemoglobin) < 11 && (
+                    <div className="text-[9px] text-red-500 font-bold mt-1 leading-tight">Risiko<br/>Anemia</div>
+                  )}
+                </td>
+                <td className="px-3 py-3 text-slate-600 text-xs text-center">
+                  {record.lingkar_lengan_atas ?? '-'}
+                  {record.lingkar_lengan_atas && parseFloat(record.lingkar_lengan_atas) > 0 && parseFloat(record.lingkar_lengan_atas) < 23.5 && (
+                    <div className="text-[9px] text-red-500 font-bold mt-1 leading-tight">Risiko<br/>KEK</div>
+                  )}
+                </td>
                 <td className="px-3 py-3 text-slate-600 text-xs text-center">{record.berat_janin ?? '-'}</td>
                 
                 <td className="px-4 py-3 text-slate-600 text-[11px] whitespace-nowrap">

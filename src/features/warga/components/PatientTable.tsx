@@ -85,10 +85,10 @@ export function calculateHplRange(hphtStr?: string): string {
   return `${start.toLocaleDateString('id-ID', formatOpts)} - ${end.toLocaleDateString('id-ID', { ...formatOpts, year: 'numeric' })}`
 }
 
-const calculateBMI = (bbStr?: string, tbStr?: string) => {
+export const calculateBMI = (bbStr?: string | number, tbStr?: string | number) => {
   if (!bbStr || !tbStr) return null;
-  const bb = parseFloat(bbStr);
-  const tb = parseFloat(tbStr);
+  const bb = typeof bbStr === 'string' ? parseFloat(bbStr) : bbStr;
+  const tb = typeof tbStr === 'string' ? parseFloat(tbStr) : tbStr;
   if (bb > 0 && tb > 0) {
     const tbMeters = tb / 100;
     const bmi = bb / (tbMeters * tbMeters);
@@ -112,7 +112,7 @@ const calculateBMI = (bbStr?: string, tbStr?: string) => {
   return null;
 }
 
-const calculateTDStatus = (tdStr?: string) => {
+export const calculateTDStatus = (tdStr?: string) => {
   if (!tdStr || !tdStr.includes('/')) return null;
   const parts = tdStr.split('/');
   const sys = parseInt(parts[0]);
@@ -124,9 +124,9 @@ const calculateTDStatus = (tdStr?: string) => {
   return { status: 'Normal', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
 }
 
-const calculateKolesterolStatus = (valStr?: string) => {
+export const calculateKolesterolStatus = (valStr?: string | number) => {
   if (!valStr) return null;
-  const val = parseFloat(valStr);
+  const val = typeof valStr === 'string' ? parseFloat(valStr) : valStr;
   if (isNaN(val)) return null;
   
   if (val >= 240) return { status: 'Tinggi', color: 'text-red-600 bg-red-50 border-red-200' };
@@ -134,9 +134,9 @@ const calculateKolesterolStatus = (valStr?: string) => {
   return { status: 'Normal', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
 }
 
-const calculateAsamUratStatus = (valStr?: string, jk?: string) => {
+export const calculateAsamUratStatus = (valStr?: string | number, jk?: string) => {
   if (!valStr) return null;
-  const val = parseFloat(valStr);
+  const val = typeof valStr === 'string' ? parseFloat(valStr) : valStr;
   if (isNaN(val)) return null;
   
   const isMale = jk === 'L';
@@ -146,9 +146,9 @@ const calculateAsamUratStatus = (valStr?: string, jk?: string) => {
   return { status: 'Normal', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
 }
 
-const calculateGdsStatus = (valStr?: string) => {
+export const calculateGdsStatus = (valStr?: string | number) => {
   if (!valStr) return null;
-  const val = parseFloat(valStr);
+  const val = typeof valStr === 'string' ? parseFloat(valStr) : valStr;
   if (isNaN(val)) return null;
   if (val >= 200) return { status: 'Tinggi', color: 'text-red-600 bg-red-50 border-red-200' };
   return { status: 'Normal', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
