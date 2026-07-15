@@ -9,6 +9,17 @@ export interface RiwayatImunisasi {
   updated_at: string
 }
 
+export const VAKSIN_OPTIONS = [
+  'HB0', 'BCG',
+  'POLIO1', 'POLIO2', 'POLIO3', 'POLIO4',
+  'ROTAVIRUS 1', 'ROTAVIRUS 2', 'ROTAVIRUS 3',
+  'DPT 1', 'DPT 2', 'DPT 3',
+  'PCV 1', 'PCV 2', 'PCV 3',
+  'IPV 1', 'IPV 2',
+  'MR(CAMPAK)',
+  'BOSTER DPT', 'BOSTER MR(CAMPAK)'
+]
+
 export const imunisasiService = {
   getByWarga: async (wargaId: string): Promise<RiwayatImunisasi[]> => {
     const res = await api.get('/imunisasi', { params: { wargaId, limit: 1000 } })

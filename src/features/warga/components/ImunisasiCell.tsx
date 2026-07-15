@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { X, Plus, Loader2 } from 'lucide-react'
 import { useGetImunisasiByWarga, useCreateImunisasi, useDeleteImunisasi } from '../hooks/useImunisasi'
-
-const VAKSIN_OPTIONS = [
-  'HB0', 'BCG',
-  'POLIO1', 'POLIO2', 'POLIO3', 'POLIO4',
-  'ROTAVIRUS 1', 'ROTAVIRUS 2', 'ROTAVIRUS 3',
-  'DPT 1', 'DPT 2', 'DPT 3',
-  'PCV 1', 'PCV 2', 'PCV 3',
-  'IPV 1', 'IPV 2',
-  'MR(CAMPAK)',
-  'BOSTER DPT', 'BOSTER MR(CAMPAK)'
-]
+import { VAKSIN_OPTIONS } from '../services/imunisasiService'
 
 interface ImunisasiCellProps {
   wargaId: string

@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { useForm, FormProvider, useFormContext } from 'react-hook-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Pemeriksaan, pemeriksaanService } from '../services/pemeriksaanService'
 import { useCreatePemeriksaan, useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
 import { useGetWargaById } from '@/features/warga/hooks/useWarga'
+import { imunisasiService, VAKSIN_OPTIONS } from '@/features/warga/services/imunisasiService'
 
 interface MonthlyRecordFormProps {
   open: boolean
@@ -15,6 +17,13 @@ interface MonthlyRecordFormProps {
   initialData?: Pemeriksaan | null
   previousRecord?: Pemeriksaan | null
   defaultTanggalPersalinan?: string
+}
+
+interface OptionalImunisasiValues {
+  tambah_imunisasi?: boolean
+  imunisasi_jenis_vaksin?: string
+  imunisasi_tanggal_pemberian?: string
+  tanggal_kunjungan?: string
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
@@ -93,6 +102,7 @@ const parseNum = (val: any, isInt = false) => {
 export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initialData, previousRecord, defaultTanggalPersalinan }: MonthlyRecordFormProps) {
   const { mutateAsync: createRecord, isPending: isCreating } = useCreatePemeriksaan()
   const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdatePemeriksaan()
+  const queryClient = useQueryClient()
 
   const isBumil = kategori === 'bumil'
   const isLansia = kategori === 'lansia'
@@ -107,15 +117,17 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
   const methods = useForm<any>()
   const { register, handleSubmit, watch, setValue, reset } = methods
   const isPending = mutationPending || methods.formState.isSubmitting
+  const [pemeriksaanAlreadySaved, setPemeriksaanAlreadySaved] = useState(false)
 
   useEffect(() => {
     if (open) {
       const isNew = !initialData;
       const rec: any = initialData || {}
       const prev: any = previousRecord || {}
+      const tanggalKunjungan = rec.tanggal_kunjungan ? toDateInputValue(rec.tanggal_kunjungan) : new Date().toISOString().split('T')[0]
 
       reset({
-        tanggal_kunjungan: rec.tanggal_kunjungan ? toDateInputValue(rec.tanggal_kunjungan) : new Date().toISOString().split('T')[0],
+        tanggal_kunjungan: tanggalKunjungan,
         tanggal_persalinan: toDateInputValue(rec.tanggal_persalinan || defaultTanggalPersalinan) || new Date().toISOString().split('T')[0],
         bb: rec.bb ?? '',
         tb: rec.tb ?? (isNew ? (prev.tb ?? '') : ''),
@@ -148,12 +160,16 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         nama_ibu: rec.nama_ibu ?? (isNew ? (prev.nama_ibu ?? warga?.nama_ibu ?? '') : ''),
         nama_ayah: rec.nama_ayah ?? (isNew ? (prev.nama_ayah ?? warga?.nama_ayah ?? '') : ''),
         penggunaan_kontrasepsi: rec.penggunaan_kontrasepsi ?? (isNew ? (prev.penggunaan_kontrasepsi ?? warga?.penggunaan_kontrasepsi ?? '') : ''),
+        tambah_imunisasi: false,
+        imunisasi_jenis_vaksin: '',
+        imunisasi_tanggal_pemberian: tanggalKunjungan,
         tanggal_kunjungan_berikut: rec.tanggal_kunjungan_berikut ? toDateInputValue(rec.tanggal_kunjungan_berikut) : (isNew ? (() => {
           const d = new Date()
           d.setMonth(d.getMonth() + 1)
           return d.toISOString().split('T')[0]
         })() : ''),
       })
+      setPemeriksaanAlreadySaved(false)
     }
   }, [open, initialData, previousRecord, defaultTanggalPersalinan, reset, isBumil])
 
@@ -161,6 +177,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
   const bbWatch = watch('bb')
   const tbWatch = watch('tb')
   const lkWatch = watch('lingkar_kepala')
+  const tambahImunisasiWatch = watch('tambah_imunisasi')
   const [zscoreData, setZscoreData] = useState<any>(null)
 
   useEffect(() => {
@@ -211,6 +228,28 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
     const d = parseInt(p[1])
     if (isNaN(s) || isNaN(d)) return null
     return { s, d }
+  }
+
+  const invalidateImunisasiRelatedQueries = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['imunisasi', wargaId] }),
+      queryClient.invalidateQueries({ queryKey: ['warga'] }),
+      queryClient.invalidateQueries({ queryKey: ['pemeriksaan_list'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['pendataan'] }),
+    ])
+  }
+
+  const createOptionalImunisasi = async (values: OptionalImunisasiValues) => {
+    const jenisVaksin = values.imunisasi_jenis_vaksin?.trim()
+    if (!isBalita || !values.tambah_imunisasi || !jenisVaksin) return
+
+    await imunisasiService.create({
+      warga_id: wargaId,
+      jenis_vaksin: jenisVaksin,
+      tanggal_pemberian: values.imunisasi_tanggal_pemberian || values.tanggal_kunjungan || new Date().toISOString().split('T')[0],
+    })
+    void invalidateImunisasiRelatedQueries()
   }
 
   const onSubmit = async (values: any) => {
@@ -285,12 +324,24 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
         }
       }
 
-      if (isEdit && initialData) {
-        await updateRecord({ kategori, id: initialData.id, payload })
-      } else {
-        await createRecord({ kategori, payload: { ...payload, warga_id: wargaId } })
+      if (!pemeriksaanAlreadySaved) {
+        if (isEdit && initialData) {
+          await updateRecord({ kategori, id: initialData.id, payload })
+        } else {
+          await createRecord({ kategori, payload: { ...payload, warga_id: wargaId } })
+        }
       }
 
+      try {
+        await createOptionalImunisasi(values)
+      } catch (imunisasiError) {
+        console.error('Pemeriksaan tersimpan, tetapi imunisasi gagal disimpan', imunisasiError)
+        setPemeriksaanAlreadySaved(true)
+        toast.error('Pemeriksaan tersimpan, tetapi imunisasi gagal disimpan. Periksa data imunisasi lalu coba simpan lagi.')
+        return
+      }
+
+      setPemeriksaanAlreadySaved(false)
       reset()
       onOpenChange(false)
       toast.success('Data berhasil disimpan')
@@ -392,6 +443,50 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                     </div>
                   </div>
                 )}
+                <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50/60 p-3 sm:col-span-2 sm:p-4">
+                  <div>
+                    <h4 className="text-sm font-semibold leading-snug text-slate-800 sm:text-base">Imunisasi</h4>
+                    <p className="mt-0.5 text-xs leading-snug text-slate-500 sm:text-sm">
+                      Tambahkan riwayat imunisasi jika ada pada kunjungan ini.
+                    </p>
+                  </div>
+                  <div className="flex min-h-9 items-center gap-2 rounded-md border border-input/60 bg-white px-3 py-2">
+                    <input
+                      type="checkbox"
+                      id="tambah_imunisasi"
+                      {...register('tambah_imunisasi', {
+                        onChange: (event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.checked) {
+                            setValue('imunisasi_tanggal_pemberian', tglWatch || new Date().toISOString().split('T')[0])
+                          }
+                        },
+                      })}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="tambah_imunisasi" className="text-xs font-medium text-slate-700 sm:text-sm">
+                      Tambahkan imunisasi pada kunjungan ini
+                    </label>
+                  </div>
+
+                  {tambahImunisasiWatch && (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                      <Field label="Jenis Vaksin">
+                        <select
+                          {...register('imunisasi_jenis_vaksin')}
+                          className="flex h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:text-base"
+                        >
+                          <option value="">Pilih vaksin...</option>
+                          {VAKSIN_OPTIONS.map((vaksin) => (
+                            <option key={vaksin} value={vaksin}>{vaksin}</option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Tanggal Pemberian">
+                        <Input register={register} name="imunisasi_tanggal_pemberian" type="date" />
+                      </Field>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
