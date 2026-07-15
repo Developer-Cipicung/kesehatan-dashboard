@@ -8,6 +8,7 @@ import { Pemeriksaan, pemeriksaanService } from '../services/pemeriksaanService'
 import { useCreatePemeriksaan, useUpdatePemeriksaan } from '../hooks/usePemeriksaan'
 import { useGetWargaById } from '@/features/warga/hooks/useWarga'
 import { imunisasiService, VAKSIN_OPTIONS } from '@/features/warga/services/imunisasiService'
+import { calculateBMI, calculateTDStatus, calculateGdsStatus, calculateKolesterolStatus, calculateAsamUratStatus } from '@/features/warga/components/PatientTable'
 
 interface MonthlyRecordFormProps {
   open: boolean
@@ -506,30 +507,12 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                   {(() => {
                     const bb = watch('bb')
                     const tb = watch('tb')
-                    if (bb && tb && bb > 0 && tb > 0) {
-                      const tbM = tb / 100
-                      const bmi = bb / (tbM * tbM)
-                      
-                      let status = ''
-                      let color = ''
-                      if (bmi < 18.5) {
-                        status = 'Kurus'
-                        color = 'text-amber-700 bg-amber-50 border-amber-200'
-                      } else if (bmi < 25.0) {
-                        status = 'Normal'
-                        color = 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                      } else if (bmi <= 27.0) {
-                        status = 'Gemuk'
-                        color = 'text-amber-700 bg-amber-50 border-amber-200'
-                      } else {
-                        status = 'Obesitas'
-                        color = 'text-red-700 bg-red-50 border-red-200'
-                      }
-
+                    const bmi = calculateBMI(bb, tb)
+                    if (bmi) {
                       return (
-                        <div className={`flex h-9 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold sm:h-10 ${color}`}>
-                          <span>{bmi.toFixed(1)}</span>
-                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{status}</span>
+                        <div className={`flex h-9 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold sm:h-10 ${bmi.color}`}>
+                          <span>{bmi.value}</span>
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{bmi.status}</span>
                         </div>
                       )
                     }
@@ -588,12 +571,86 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Berat Badan Lansia (kg)" required><Input register={register} name="bb" type="number" placeholder="58" /></Field>
                 <Field label="Tinggi Badan Lansia (cm)" required><Input register={register} name="tb" type="number" placeholder="160" /></Field>
-                <Field label="Tekanan Darah (mmHg)" required>
-                  <TdInput setValue={setValue} watch={watch} name="td" />
+                <Field label="IMT">
+                  {(() => {
+                    const bb = watch('bb')
+                    const tb = watch('tb')
+                    const bmi = calculateBMI(bb, tb)
+                    if (bmi) {
+                      return (
+                        <div className={`flex h-9 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold sm:h-10 ${bmi.color}`}>
+                          <span>{bmi.value}</span>
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{bmi.status}</span>
+                        </div>
+                      )
+                    }
+                    return (
+                      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 sm:h-10">
+                        -
+                      </div>
+                    )
+                  })()}
                 </Field>
-                <Field label="Gula Darah Sewaktu (mg/dL)" required><Input register={register} name="gula_darah_sewaktu" type="number" placeholder="120" /></Field>
-                <Field label="Kolesterol (mg/dL)"><Input register={register} name="kolesterol" type="number" placeholder="150" /></Field>
-                <Field label="Asam Urat (mg/dL)"><Input register={register} name="asam_urat" type="number" placeholder="5.5" step="0.1" /></Field>
+                <Field label="Tekanan Darah (mmHg)" required>
+                  <div className="relative">
+                    <TdInput setValue={setValue} watch={watch} name="td" />
+                    {(() => {
+                      const td = watch('td')
+                      if (td) {
+                        const st = calculateTDStatus(td)
+                        if (st) {
+                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
+                        }
+                      }
+                      return null
+                    })()}
+                  </div>
+                </Field>
+                <Field label="Gula Darah Sewaktu (mg/dL)" required>
+                  <div className="relative">
+                    <Input register={register} name="gula_darah_sewaktu" type="number" placeholder="120" />
+                    {(() => {
+                      const gds = watch('gula_darah_sewaktu')
+                      if (gds) {
+                        const st = calculateGdsStatus(gds)
+                        if (st) {
+                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
+                        }
+                      }
+                      return null
+                    })()}
+                  </div>
+                </Field>
+                <Field label="Kolesterol (mg/dL)">
+                  <div className="relative">
+                    <Input register={register} name="kolesterol" type="number" placeholder="150" />
+                    {(() => {
+                      const kol = watch('kolesterol')
+                      if (kol) {
+                        const st = calculateKolesterolStatus(kol)
+                        if (st) {
+                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
+                        }
+                      }
+                      return null
+                    })()}
+                  </div>
+                </Field>
+                <Field label="Asam Urat (mg/dL)">
+                  <div className="relative">
+                    <Input register={register} name="asam_urat" type="number" placeholder="5.5" step="0.1" />
+                    {(() => {
+                      const au = watch('asam_urat')
+                      if (au) {
+                        const st = calculateAsamUratStatus(au, warga?.jenis_kelamin)
+                        if (st) {
+                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
+                        }
+                      }
+                      return null
+                    })()}
+                  </div>
+                </Field>
               </div>
             )}
 
@@ -603,8 +660,40 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="Tanggal Persalinan" required><Input register={register} name="tanggal_persalinan" type="date" /></Field>
                 <Field label="Tinggi Badan Ibu (cm)"><Input register={register} name="tb" type="number" placeholder="155" /></Field>
                 <Field label="Berat Badan Ibu (kg)" required><Input register={register} name="bb" type="number" placeholder="62" /></Field>
+                <Field label="IMT">
+                  {(() => {
+                    const bb = watch('bb')
+                    const tb = watch('tb') || warga?.tb
+                    const bmi = calculateBMI(bb, tb)
+                    if (bmi) {
+                      return (
+                        <div className={`flex h-9 w-full items-center justify-between rounded-md border px-3 py-2 text-sm font-bold sm:h-10 ${bmi.color}`}>
+                          <span>{bmi.value}</span>
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/50">{bmi.status}</span>
+                        </div>
+                      )
+                    }
+                    return (
+                      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 sm:h-10">
+                        -
+                      </div>
+                    )
+                  })()}
+                </Field>
                 <Field label="Tekanan Darah (mmHg)" required>
-                  <TdInput setValue={setValue} watch={watch} name="td" />
+                  <div className="relative">
+                    <TdInput setValue={setValue} watch={watch} name="td" />
+                    {(() => {
+                      const td = watch('td')
+                      if (td) {
+                        const st = calculateTDStatus(td)
+                        if (st) {
+                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
+                        }
+                      }
+                      return null
+                    })()}
+                  </div>
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
