@@ -663,7 +663,7 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                 <Field label="IMT">
                   {(() => {
                     const bb = watch('bb')
-                    const tb = watch('tb') || warga?.tb
+                    const tb = watch('tb')
                     const bmi = calculateBMI(bb, tb)
                     if (bmi) {
                       return (
