@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit2, Plus, Printer } from 'lucide-react'
+import { Edit2, Plus, Printer, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Warga } from '../services/wargaService'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -294,7 +294,7 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
               className="flex-1 h-10 text-sm border-slate-200 text-slate-700 bg-white hover:bg-slate-50 flex items-center justify-center shadow-sm font-medium"
               onClick={() => onView(data.id)}
             >
-              <Edit2 className="w-4 h-4 mr-1.5" /> Edit Profil
+              <Eye className="w-4 h-4 mr-1.5" /> Lihat Profil
             </Button>
             <Button
               variant="outline"

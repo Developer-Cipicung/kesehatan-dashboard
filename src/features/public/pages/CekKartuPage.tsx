@@ -63,7 +63,7 @@ export const CekKartuPage = () => {
               </div>
               <h1 className="text-2xl font-bold text-slate-800">Cek Kartu Posyandu</h1>
               <p className="text-slate-500 text-sm mt-2">
-                Masukkan NIK dan Tanggal Lahir Anda untuk melihat riwayat posyandu digital Anda.
+                Masukkan NIK (atau NIK Sementara) dan Tanggal Lahir Anda untuk melihat riwayat posyandu digital Anda.
               </p>
             </div>
 
@@ -73,7 +73,7 @@ export const CekKartuPage = () => {
                 <Input 
                   id="nik" 
                   type="number" 
-                  placeholder="Masukkan 16 digit NIK" 
+                  placeholder="Masukkan 16 digit NIK / NIK Sementara" 
                   value={nik}
                   onChange={(e) => setNik(e.target.value)}
                   className="h-12"

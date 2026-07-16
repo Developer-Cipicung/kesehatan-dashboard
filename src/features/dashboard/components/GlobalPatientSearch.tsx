@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Plus, User, Baby, HeartPulse, PersonStanding, Activity, Loader2 } from 'lucide-react'
+import { Search, Plus, User, Baby, HeartPulse, PersonStanding, Activity, Loader2, Upload } from 'lucide-react'
 import { wargaService, Warga } from '@/features/warga/services/wargaService'
 import { calculateAgeInMonths } from '@/utils/age'
 import { MonthlyRecordForm } from '@/features/pemeriksaan/components/MonthlyRecordForm'
 import { AddPatientDialog } from '@/features/warga/components/AddPatientDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { ImportWargaModal } from '@/features/warga/components/ImportWargaModal'
+import { useQueryClient } from '@tanstack/react-query'
 
 export function GlobalPatientSearch() {
   const [search, setSearch] = useState('')
@@ -12,9 +14,12 @@ export function GlobalPatientSearch() {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   
+  const queryClient = useQueryClient()
+  
   const [selectedWarga, setSelectedWarga] = useState<Warga | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showAddWarga, setShowAddWarga] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [showCategorySelect, setShowCategorySelect] = useState(false)
   const [selectedNewCategory, setSelectedNewCategory] = useState<string>('')
   const [detectedCategory, setDetectedCategory] = useState<string>('')
@@ -59,8 +64,9 @@ export function GlobalPatientSearch() {
     if (ageMonths < 60) return { id: 'balita', label: 'Balita', icon: <Baby className="w-4 h-4 text-blue-500" /> }
     if (warga.status_kehamilan === 'HAMIL') return { id: 'bumil', label: 'Ibu Hamil', icon: <HeartPulse className="w-4 h-4 text-pink-500" /> }
     if (warga.status_kehamilan === 'PASCA_PERSALINAN') return { id: 'pasca_persalinan', label: 'Pasca Salin', icon: <Activity className="w-4 h-4 text-rose-500" /> }
+    if (ageMonths >= 720) return { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-4 h-4 text-amber-500" /> }
     
-    return { id: 'lansia', label: 'Lansia', icon: <PersonStanding className="w-4 h-4 text-amber-500" /> }
+    return { id: 'lainnya', label: 'Warga Umum', icon: <User className="w-4 h-4 text-slate-500" /> }
   }
 
   const handleSelectWarga = (warga: Warga) => {
@@ -188,8 +194,32 @@ export function GlobalPatientSearch() {
               </button>
             ))}
           </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <button
+              onClick={() => {
+                setShowCategorySelect(false)
+                setTimeout(() => setShowImportModal(true), 150)
+              }}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50/50 p-3 text-center transition-all hover:bg-blue-100 hover:border-blue-300 sm:p-4 text-blue-700 font-medium"
+            >
+              <Upload className="w-5 h-5" />
+              Import e-PPGBM
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
+      <ImportWargaModal 
+        open={showImportModal} 
+        onOpenChange={setShowImportModal} 
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] })
+          // Set timeout to invalidate again after API cache expires (1 minute)
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] })
+          }, 65000)
+        }}
+      />
     </div>
   )
 }

@@ -1,0 +1,708 @@
+    <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+
+<style>
+
+@page
+    {margin:1.0in .75in 1.0in .75in;
+    mso-header-margin:.5in;
+    mso-footer-margin:.5in;}
+tr
+    {mso-height-source:auto;}
+col
+    {mso-width-source:auto;}
+br
+    {mso-data-placement:same-cell;
+    }
+
+.style0
+    {mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    white-space:nowrap;
+    mso-rotate:0;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    color:windowtext;
+    font-size:10.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial;
+    mso-generic-font-family:auto;
+    mso-font-charset:0;
+    border:none;
+    mso-protection:locked visible;
+    mso-style-name:Normal;
+    mso-style-id:0;}
+td
+    {mso-style-parent:style0;
+    padding-top:1px;
+    padding-right:1px;
+    padding-left:1px;
+    mso-ignore:padding;
+    color:windowtext;
+    font-size:10.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial;
+    mso-generic-font-family:auto;
+    mso-font-charset:0;
+    mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    border:none;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    mso-protection:locked visible;
+    white-space:nowrap;
+    mso-rotate:0;}
+.grids
+    {mso-style-parent:style0;
+    border:.5pt solid windowtext;}.head{
+    font-weight:bold;
+}
+
+</style>
+<head>
+<!--[if gte mso 9]><xml>
+<x:ExcelWorkbook>
+<x:ExcelWorksheets>
+<x:ExcelWorksheet>
+<x:Name>Application List</x:Name>
+<x:WorksheetOptions>
+<x:Print>
+</x:Print>
+</x:WorksheetOptions>
+</x:ExcelWorksheet>
+</x:ExcelWorksheets>
+</x:ExcelWorkbook> 
+</xml>
+<![endif]--> 
+</head>
+<body>
+<div class="table-auto-responsive">
+<table id="simple-table" class="table table-striped table-bordered table-hover">
+	<thead>
+		<tr>
+			<th class="center">No</th>
+							<th class="center">NIK</th>
+						<th class="center">Nama</th>
+			<th class="center">JK</th>
+			<th class="center">Tgl Lahir</th>
+			<th class="center">Nama Ortu</th>
+			<th class="center">Prov</th>
+			<th class="center ">Kab/Kota</th>
+			<th class="center ">Kec</th>
+			<th class="center ">Puskesmas</th>
+			<th class="center ">Desa/Kel</th>
+			<th class="center ">Posyandu</th>
+			<th class="centers">Tindakan</th>
+		</tr>
+	</thead>
+	<tbody>
+					<tr>
+				<td class="center">1.</td>
+									<td class="center">3201284804240002&nbsp;</td>
+								<td>BINAR RAMADHITA NURFADHILAH</td>
+				<td class="center">P</td>
+				<td class="center">08-04-2024</td>
+				<td class="center">Fera fardilla</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">2.</td>
+									<td class="center">3201281710210005&nbsp;</td>
+								<td>MOCHAMAD AZMIANSYAH</td>
+				<td class="center">L</td>
+				<td class="center">17-10-2021</td>
+				<td class="center">Adriansyah</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">3.</td>
+									<td class="center">3201282305220002&nbsp;</td>
+								<td>M.HAIDAR AL FATIH</td>
+				<td class="center">L</td>
+				<td class="center">05-05-2022</td>
+				<td class="center">Heri hermawan</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">4.</td>
+									<td class="center">3201802304264790&nbsp;</td>
+								<td>RAKA WIRYA</td>
+				<td class="center">L</td>
+				<td class="center">23-04-2026</td>
+				<td class="center">Dani wirya pratama</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">5.</td>
+									<td class="center">3201804311252071&nbsp;</td>
+								<td>SITI ADAWIYAH</td>
+				<td class="center">P</td>
+				<td class="center">03-11-2025</td>
+				<td class="center">Ayub setiawan</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">6.</td>
+									<td class="center">3201286110250001&nbsp;</td>
+								<td>ALVIRA OKTAVIA FARADIVA</td>
+				<td class="center">P</td>
+				<td class="center">21-10-2025</td>
+				<td class="center">Radi</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">7.</td>
+									<td class="center">3201804910253789&nbsp;</td>
+								<td>NAURA KHANSA BASMALAH</td>
+				<td class="center">P</td>
+				<td class="center">09-10-2025</td>
+				<td class="center">M.rizal</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">8.</td>
+									<td class="center">3201281702250004&nbsp;</td>
+								<td>M.ALFIAN RIZKI</td>
+				<td class="center">L</td>
+				<td class="center">17-02-2025</td>
+				<td class="center">Dede rusdiana</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">9.</td>
+									<td class="center">3201804909256443&nbsp;</td>
+								<td>SYAKIRA</td>
+				<td class="center">P</td>
+				<td class="center">09-09-2025</td>
+				<td class="center">Siti hodijah</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">10.</td>
+									<td class="center">3201800809249789&nbsp;</td>
+								<td>DEVANO NATHAN ALIENDRA</td>
+				<td class="center">L</td>
+				<td class="center">08-09-2024</td>
+				<td class="center">Egi maulana</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">11.</td>
+									<td class="center">3201280503220001&nbsp;</td>
+								<td>AHMAD FAUJI</td>
+				<td class="center">L</td>
+				<td class="center">05-03-2022</td>
+				<td class="center">PAHRUDIN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">12.</td>
+									<td class="center">3201246409230004&nbsp;</td>
+								<td>ALMAHYRA SHEZAN FALISHA ATHAYA</td>
+				<td class="center">P</td>
+				<td class="center">24-09-2023</td>
+				<td class="center">MOHAMAD MUHLIS</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">13.</td>
+									<td class="center">3201802805251175&nbsp;</td>
+								<td>YUNISQI AULIA BILQIS</td>
+				<td class="center">L</td>
+				<td class="center">28-05-2025</td>
+				<td class="center">ASEP SAEPUDIN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">14.</td>
+									<td class="center">3201802503256491&nbsp;</td>
+								<td>M.AISAR</td>
+				<td class="center">L</td>
+				<td class="center">25-03-2025</td>
+				<td class="center">ANDI IRAWAN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">15.</td>
+									<td class="center">3201805206252549&nbsp;</td>
+								<td>NADIRA ALMAHYRA PUTRI</td>
+				<td class="center">P</td>
+				<td class="center">12-06-2025</td>
+				<td class="center">EMAN SULAEMAN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">16.</td>
+									<td class="center">3201806712247746&nbsp;</td>
+								<td>SITI SYAHIDA AZ ZAHRA</td>
+				<td class="center">P</td>
+				<td class="center">27-12-2024</td>
+				<td class="center">HIZAJ</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">17.</td>
+									<td class="center">3201801711245375&nbsp;</td>
+								<td>M.FADIL</td>
+				<td class="center">L</td>
+				<td class="center">17-11-2024</td>
+				<td class="center">ADE</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">18.</td>
+									<td class="center">3201800309248675&nbsp;</td>
+								<td>M.NIZAR</td>
+				<td class="center">L</td>
+				<td class="center">03-09-2024</td>
+				<td class="center">FAJAR</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">19.</td>
+									<td class="center">3201806812248744&nbsp;</td>
+								<td>SASKIA MAYA</td>
+				<td class="center">P</td>
+				<td class="center">28-12-2024</td>
+				<td class="center">M.YUSUF ABDULOH</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">20.</td>
+									<td class="center">3201801804242768&nbsp;</td>
+								<td>M.RANDIKA SAPUTRA</td>
+				<td class="center">L</td>
+				<td class="center">18-04-2024</td>
+				<td class="center">WAHYUDIN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">21.</td>
+									<td class="center">3201284302240001&nbsp;</td>
+								<td>INTAN FEBRIYANTY</td>
+				<td class="center">P</td>
+				<td class="center">03-02-2024</td>
+				<td class="center">SAPRUDIN/IDAH</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">22.</td>
+									<td class="center">3201804604246027&nbsp;</td>
+								<td>ALUNA PUTRI NURFAIZA</td>
+				<td class="center">P</td>
+				<td class="center">06-04-2024</td>
+				<td class="center">MAULANA FAISAL</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">23.</td>
+									<td class="center">3201803101247278&nbsp;</td>
+								<td>M RAHMAN</td>
+				<td class="center">L</td>
+				<td class="center">31-01-2024</td>
+				<td class="center">MARLENI</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">24.</td>
+									<td class="center">3201282201240001&nbsp;</td>
+								<td>MUHAMMAD AL HAFIDZ</td>
+				<td class="center">L</td>
+				<td class="center">22-01-2024</td>
+				<td class="center">WANDI HANDOYO/RATNA YUNINGSIH</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">25.</td>
+									<td class="center">3201801302243335&nbsp;</td>
+								<td>M  LIWAUL HAMDI</td>
+				<td class="center">L</td>
+				<td class="center">13-02-2024</td>
+				<td class="center">WANDI</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">26.</td>
+									<td class="center">3201804307241968&nbsp;</td>
+								<td>AURELLIA SHAFA HUMAIRA</td>
+				<td class="center">P</td>
+				<td class="center">03-07-2024</td>
+				<td class="center">CICI PURNAMASARI</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">27.</td>
+									<td class="center">3201281409230001&nbsp;</td>
+								<td>M.RAYYAN  ALFARIZI</td>
+				<td class="center">L</td>
+				<td class="center">14-09-2023</td>
+				<td class="center">DEDE RUSDIANA</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">28.</td>
+									<td class="center">3201283003240004&nbsp;</td>
+								<td>MOHAMAD IDRIS</td>
+				<td class="center">L</td>
+				<td class="center">30-03-2024</td>
+				<td class="center">LESMANA SYARIF</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">29.</td>
+									<td class="center">3201805408232236&nbsp;</td>
+								<td>SITI ROHIMAH</td>
+				<td class="center">P</td>
+				<td class="center">14-08-2023</td>
+				<td class="center">ENGKOS KOSASIH</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">30.</td>
+									<td class="center">3201285806230002&nbsp;</td>
+								<td>HASNA GHANIA</td>
+				<td class="center">P</td>
+				<td class="center">18-06-2023</td>
+				<td class="center">ABDUL ROHIM</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">31.</td>
+									<td class="center">3201284212220003&nbsp;</td>
+								<td>ALIYANA SHAIMA</td>
+				<td class="center">P</td>
+				<td class="center">02-12-2022</td>
+				<td class="center">SAEPUDIN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">32.</td>
+									<td class="center">3201282807220002&nbsp;</td>
+								<td>M ALIF JULIANSYAH</td>
+				<td class="center">L</td>
+				<td class="center">28-07-2022</td>
+				<td class="center">Achmad ruskandar</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">33.</td>
+									<td class="center">3271015508220001&nbsp;</td>
+								<td>ANGGITA MAHARANI</td>
+				<td class="center">P</td>
+				<td class="center">15-08-2022</td>
+				<td class="center">CECEP SUNANDAR</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">34.</td>
+									<td class="center">3201282809220001&nbsp;</td>
+								<td>M ALPA RIZKI AHMADI</td>
+				<td class="center">L</td>
+				<td class="center">28-09-2022</td>
+				<td class="center">Ahmad</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">35.</td>
+									<td class="center">3201284710220002&nbsp;</td>
+								<td>SITI ARISHA</td>
+				<td class="center">P</td>
+				<td class="center">07-10-2022</td>
+				<td class="center">Sarman</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">36.</td>
+									<td class="center">3201280903220002&nbsp;</td>
+								<td>M KHAIRI</td>
+				<td class="center">L</td>
+				<td class="center">09-03-2022</td>
+				<td class="center">Andri yahya</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">37.</td>
+									<td class="center">3201285912220003&nbsp;</td>
+								<td>SITI SALWA</td>
+				<td class="center">P</td>
+				<td class="center">19-12-2022</td>
+				<td class="center">Yaman</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">38.</td>
+									<td class="center">3201802604232388&nbsp;</td>
+								<td>M RAMADHAN</td>
+				<td class="center">L</td>
+				<td class="center">26-04-2023</td>
+				<td class="center">AMIN NURJAMAN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">39.</td>
+									<td class="center">320128&nbsp;</td>
+								<td>SITI ANISA RAHAYU</td>
+				<td class="center">P</td>
+				<td class="center">20-01-2023</td>
+				<td class="center">EMAN.S</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">40.</td>
+									<td class="center">3201284507210004&nbsp;</td>
+								<td>ARAELA</td>
+				<td class="center">P</td>
+				<td class="center">05-07-2021</td>
+				<td class="center">KUNTORO</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">41.</td>
+									<td class="center">3201284207210004&nbsp;</td>
+								<td>NAURA</td>
+				<td class="center">P</td>
+				<td class="center">02-07-2021</td>
+				<td class="center">SUBUR</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">42.</td>
+									<td class="center">3201805108218665&nbsp;</td>
+								<td>NAURAH</td>
+				<td class="center">P</td>
+				<td class="center">11-08-2021</td>
+				<td class="center">IWAN</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>			<tr>
+				<td class="center">43.</td>
+									<td class="center">3201280208210002&nbsp;</td>
+								<td>M ABDULLAH</td>
+				<td class="center">L</td>
+				<td class="center">02-08-2021</td>
+				<td class="center">HIZAJ</td>
+				<td class="center">JAWA BARAT</td>
+				<td class="center">KABUPATEN BOGOR</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIJERUK</td>
+				<td class="center">CIPICUNG</td>
+				<td class="center">MELATI 2</td>
+
+			</tr>	</tbody>
+</table>
+</div>

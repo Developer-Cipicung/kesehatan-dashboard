@@ -102,6 +102,10 @@ export const wargaService = {
     const response = await api.post<WargaResponse>('/warga', payload)
     return response.data.data
   },
+  addWargaBulk: async (payloadList: Partial<AddWargaPayload>[]) => {
+    const response = await api.post<{success: boolean; message: string; data: { count: number; message: string }}>('/warga/bulk', payloadList)
+    return response.data
+  },
   updateWarga: async (id: string, payload: Partial<AddWargaPayload>) => {
     const response = await api.put<WargaResponse>(`/warga/${id}`, payload)
     return response.data.data

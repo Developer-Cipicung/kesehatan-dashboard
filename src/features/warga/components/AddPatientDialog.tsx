@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { FormField } from '@/components/forms/FormField'
 import { FormProvider } from 'react-hook-form'
 import { useAddWarga } from '../hooks/useWarga'
@@ -296,12 +297,39 @@ export function AddPatientDialog({ open, onOpenChange, defaultCategory, onSucces
               <div>
                 <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-800 sm:text-sm">Data Diri</h4>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                  <FormField
+                  <RHFFormField
                     control={methods.control}
                     name="nik"
-                    label={<>NIK <span className="text-red-500">*</span></>}
-                    placeholder="Masukkan 16 digit NIK"
-                    type="text"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-sm leading-snug sm:text-[15px]">
+                            NIK <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <button
+                            type="button"
+                            className="text-[10px] text-primary hover:underline font-semibold"
+                            onClick={() => {
+                              // Generate 16 digit temporary NIK: 9999 + 12 digit timestamp/random
+                              const tempNik = '9999' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+                              methods.setValue('nik', tempNik);
+                              toast.success('NIK Sementara dibuat', { description: `Gunakan NIK ${tempNik} untuk cek kartu nantinya.` });
+                            }}
+                          >
+                            Tidak bawa KTP?
+                          </button>
+                        </div>
+                        <FormControl>
+                          <Input
+                            placeholder="Masukkan 16 digit NIK"
+                            type="text"
+                            className="h-9 px-3 text-sm sm:h-10 sm:text-base"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs sm:text-sm" />
+                      </FormItem>
+                    )}
                   />
                   <FormField
                     control={methods.control}
