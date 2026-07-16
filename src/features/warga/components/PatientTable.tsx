@@ -420,12 +420,12 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
 
             {isBalita && (
               <>
-                <th className="px-3 py-3 font-semibold text-primary text-xs w-[160px]">Nama Ibu</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs w-[140px]">Penggunaan<br/>Kontrasepsi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi/Panjang Badan (cm)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs min-w-[140px]">Status Gizi (WHO)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">ASI<br/>Eksklusif</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Imunisasi</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs w-[160px]">Nama Ibu</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs w-[140px]">Penggunaan<br/>Kontrasepsi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bantuan<br/>Sosial</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Catatan</th>
               </>
@@ -496,10 +496,30 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
         </thead>
         <tbody className="divide-y divide-slate-100">
           {data.map((warga) => {
-            const latestBumil = warga.pemeriksaan_bumil?.[0]
-            const latestBalita = warga.pemeriksaan_balita_baduta?.[0]
-            const latestLansia = warga.pemeriksaan_lansia?.[0]
-            const latestPasca = warga.pemeriksaan_pasca_persalinan?.[0]
+            const sortCheckups = (arr: any[] | undefined) => {
+              if (!arr || arr.length === 0) return undefined;
+              return [...arr].sort((a, b) => {
+                const bDateStr = b.tanggal_kunjungan || b.tanggal_pemeriksaan || b.created_at || 0;
+                const aDateStr = a.tanggal_kunjungan || a.tanggal_pemeriksaan || a.created_at || 0;
+                const db = new Date(bDateStr).getTime();
+                const da = new Date(aDateStr).getTime();
+                if (db === da) {
+                  const cb = b.created_at ? new Date(b.created_at).getTime() : 0;
+                  const ca = a.created_at ? new Date(a.created_at).getTime() : 0;
+                  return cb - ca;
+                }
+                return db - da;
+              })[0];
+            };
+            
+            const latestBumil = sortCheckups(warga.pemeriksaan_bumil)
+            if (latestBumil) {
+              console.log('Warga:', warga.nama, 'bumil checks:', warga.pemeriksaan_bumil, 'sorted latest:', latestBumil)
+            }
+            
+            const latestBalita = sortCheckups(warga.pemeriksaan_balita_baduta)
+            const latestLansia = sortCheckups(warga.pemeriksaan_lansia)
+            const latestPasca = sortCheckups(warga.pemeriksaan_pasca_persalinan)
 
             let lastTgl = ''
             let lastBb = ''
@@ -616,6 +636,36 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                   {isBalita && (
                     <>
                       <td className="px-3 py-3">
+                        <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
+                      </td>
+                      <td className="px-3 py-3">
+                        {lastZScores ? (
+                          <div className="flex flex-col gap-1.5">
+                            {lastZScores.kategori_bb_u && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_bb_u.includes('Kurang') || lastZScores.kategori_bb_u.includes('Lebih') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 BB/U: {lastZScores.kategori_bb_u}
+                               </span>
+                            )}
+                            {lastZScores.kategori_tb_u && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_tb_u.includes('Pendek') || lastZScores.kategori_tb_u.includes('Tinggi') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 TB/U: {lastZScores.kategori_tb_u}
+                               </span>
+                            )}
+                            {lastZScores.kategori_bb_tb && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_bb_tb.includes('Buruk') || lastZScores.kategori_bb_tb.includes('Kurang') || lastZScores.kategori_bb_tb.includes('Obesitas') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : lastZScores.kategori_bb_tb.includes('Risiko') ? 'bg-amber-50 text-amber-600 border border-amber-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 BB/TB: {lastZScores.kategori_bb_tb}
+                               </span>
+                            )}
+                          </div>
+                        ) : '-'}
+                      </td>
+                    <td className="px-3 py-3">
+                      <Cell type="checkbox" value={lastAsiEksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <ImunisasiCell wargaId={warga.id} disabled={true} />
+                    </td>
+                      <td className="px-3 py-3">
                         <Cell value={row.nama_ibu} onChange={(v) => set(warga.id, 'nama_ibu', v)} placeholder={warga.ibu?.nama || warga.nama_ibu || "-"} width="w-[140px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
@@ -628,9 +678,6 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                           width="w-[120px]" 
                           disabled={true} 
                         />
-                      </td>
-                      <td className="px-3 py-3">
-                        <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
                         {lastZScores ? (
@@ -665,8 +712,8 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                       <td className="px-3 py-3">
                         <Cell type="textarea" value={row.catatan} onChange={(v) => set(warga.id, 'catatan', v)} placeholder={lastCatatan || "-"} width="w-[110px]" disabled={true} />
                       </td>
-                  </>
-                )}
+                    </>
+                  )}
 
                   {isBumil && (
                     <>
@@ -726,16 +773,30 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         <Cell value={row.riwayat_penyakit || lastRiwPen} onChange={(v) => set(warga.id, 'riwayat_penyakit', v)} placeholder="-" width="w-[120px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder={lastKadarHb || "-"} width="w-[60px]" disabled={true} max={30} min={0} />
-                        {parseFloat(row.kadar_hemoglobin || lastKadarHb) > 0 && parseFloat(row.kadar_hemoglobin || lastKadarHb) < 11 && (
-                          <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>Anemia</div>
-                        )}
+                        {(() => {
+                          const val = row.kadar_hemoglobin || lastKadarHb;
+                          const isRisk = parseFloat(val) > 0 && parseFloat(val) < 11;
+                          if (!isRisk) return <Cell type="number" value={row.kadar_hemoglobin} onChange={(v) => set(warga.id, 'kadar_hemoglobin', v)} placeholder={lastKadarHb || "-"} width="w-[60px]" disabled={true} max={30} min={0} />;
+                          return (
+                            <div className="text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap text-red-600 bg-red-50 border-red-200">
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">Risiko Anemia</span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} max={60} min={0} />
-                        {parseFloat(row.lilaGds || lastLilaGds) > 0 && parseFloat(row.lilaGds || lastLilaGds) < 23.5 && (
-                          <div className="text-[10px] text-red-500 font-bold mt-1 text-center leading-tight">Risiko<br/>KEK</div>
-                        )}
+                        {(() => {
+                          const val = row.lilaGds || lastLilaGds;
+                          const isRisk = parseFloat(val) > 0 && parseFloat(val) < 23.5;
+                          if (!isRisk) return <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} max={60} min={0} />;
+                          return (
+                            <div className="text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap text-red-600 bg-red-50 border-red-200">
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">Risiko KEK</span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-3 py-3">
                         <Cell type="number" value={row.berat_janin} onChange={(v) => set(warga.id, 'berat_janin', v)} placeholder={lastBeratJanin || "-"} width="w-[70px]" disabled={true} max={10} min={0} />
@@ -786,31 +847,55 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                       })()}
                     </td>
                       <td className="px-3 py-3">
-                        <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />
                         {(() => {
-                          const status = calculateTDStatus(row.td);
-                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                          const val = row.td || lastTd;
+                          const status = calculateTDStatus(val);
+                          if (!status || status.status === 'Normal') return <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />;
+                          return (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${status.color}`}>
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{status.status}</span>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} />
                         {(() => {
-                          const status = calculateGdsStatus(row.lilaGds);
-                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                          const val = row.lilaGds || lastLilaGds;
+                          const status = calculateGdsStatus(val);
+                          if (!status || status.status === 'Normal') return <Cell type="number" value={row.lilaGds} onChange={(v) => set(warga.id, 'lilaGds', v)} placeholder={lastLilaGds || '-'} width="w-[70px]" disabled={true} />;
+                          return (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${status.color}`}>
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{status.status}</span>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder={lastKolesterol || "-"} width="w-[70px]" disabled={true} />
                         {(() => {
-                          const status = calculateKolesterolStatus(row.kolesterol || lastKolesterol);
-                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                          const val = row.kolesterol || lastKolesterol;
+                          const status = calculateKolesterolStatus(val);
+                          if (!status || status.status === 'Normal') return <Cell type="number" value={row.kolesterol} onChange={(v) => set(warga.id, 'kolesterol', v)} placeholder={lastKolesterol || "-"} width="w-[70px]" disabled={true} />;
+                          return (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${status.color}`}>
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{status.status}</span>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder={lastAsamUrat || "-"} width="w-[70px]" disabled={true} />
                         {(() => {
-                          const status = calculateAsamUratStatus(row.asam_urat || lastAsamUrat, warga.jenis_kelamin);
-                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                          const val = row.asam_urat || lastAsamUrat;
+                          const status = calculateAsamUratStatus(val, warga.jenis_kelamin);
+                          if (!status || status.status === 'Normal') return <Cell type="number" value={row.asam_urat} onChange={(v) => set(warga.id, 'asam_urat', v)} placeholder={lastAsamUrat || "-"} width="w-[70px]" disabled={true} />;
+                          return (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${status.color}`}>
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{status.status}</span>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="px-3 py-3">
@@ -847,10 +932,16 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         })()}
                       </td>
                       <td className="px-3 py-3">
-                        <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />
                         {(() => {
-                          const status = calculateTDStatus(row.td);
-                          return status ? <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded border text-center uppercase tracking-wider ${status.color}`}>{status.status}</div> : null;
+                          const val = row.td || lastTd;
+                          const status = calculateTDStatus(val);
+                          if (!status || status.status === 'Normal') return <Cell type="td" value={row.td} onChange={(v) => set(warga.id, 'td', v)} placeholder={lastTd || '-'} width="w-[140px]" disabled={true} />;
+                          return (
+                            <div className={`text-[11px] font-bold px-1.5 py-1 rounded border text-center leading-tight whitespace-nowrap ${status.color}`}>
+                              {val}<br/>
+                              <span className="font-medium text-[9px] uppercase tracking-wider">{status.status}</span>
+                            </div>
+                          );
                         })()}
                       </td>
                       <td className="px-3 py-3">

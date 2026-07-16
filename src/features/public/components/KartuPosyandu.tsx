@@ -1,5 +1,6 @@
 import React from 'react';
 import { Warga } from '../../warga/services/wargaService';
+import { calculateKolesterolStatus, calculateAsamUratStatus, calculateGdsStatus } from '../../warga/components/PatientTable';
 
 interface KartuPosyanduProps {
   warga: Warga;
@@ -38,30 +39,41 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
       return <p className="text-xs sm:text-sm font-medium text-slate-500 italic mt-1">Belum ada riwayat kesehatan terdata.</p>;
     }
 
-    // Sort by date descending and take top 3
+    // Sort by date descending, fallback to created_at
     const recentCheckups = [...checkups]
-      .sort((a, b) => new Date(b.tanggal_kunjungan || b.tanggal_pemeriksaan).getTime() - new Date(a.tanggal_kunjungan || a.tanggal_pemeriksaan).getTime())
-      .slice(0, 3);
+      .sort((a, b) => {
+        const bDateStr = b.tanggal_kunjungan || b.tanggal_pemeriksaan || b.created_at || 0;
+        const aDateStr = a.tanggal_kunjungan || a.tanggal_pemeriksaan || a.created_at || 0;
+        const db = new Date(bDateStr).getTime();
+        const da = new Date(aDateStr).getTime();
+        if (db === da) {
+          const cb = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const ca = a.created_at ? new Date(a.created_at).getTime() : 0;
+          return cb - ca;
+        }
+        return db - da;
+      })
+      .slice(0, 1);
 
     const formatStatusGizi = (p: any) => {
       const gizi = [];
       if (p.zscore_bb_u != null) {
         const val = parseFloat(p.zscore_bb_u);
-        if (val < -3) gizi.push('BB Sangat Kurang');
-        else if (val < -2) gizi.push('BB Kurang');
+        if (val < -3) gizi.push(`BB Sangat Kurang (${val})`);
+        else if (val < -2) gizi.push(`BB Kurang (${val})`);
       }
       if (p.zscore_tb_u != null) {
         const val = parseFloat(p.zscore_tb_u);
-        if (val < -3) gizi.push('Sangat Pendek');
-        else if (val < -2) gizi.push('Pendek');
+        if (val < -3) gizi.push(`Sangat Pendek (${val})`);
+        else if (val < -2) gizi.push(`Pendek (${val})`);
       }
       if (p.zscore_bb_tb != null) {
         const val = parseFloat(p.zscore_bb_tb);
-        if (val < -3) gizi.push('Gizi Buruk');
-        else if (val < -2) gizi.push('Gizi Kurang');
-        else if (val > 3) gizi.push('Obesitas');
-        else if (val > 2) gizi.push('Gizi Lebih');
-        else if (val > 1) gizi.push('Berisiko Lebih');
+        if (val < -3) gizi.push(`Gizi Buruk (${val})`);
+        else if (val < -2) gizi.push(`Gizi Kurang (${val})`);
+        else if (val > 3) gizi.push(`Obesitas (${val})`);
+        else if (val > 2) gizi.push(`Gizi Lebih (${val})`);
+        else if (val > 1) gizi.push(`Berisiko Lebih (${val})`);
       }
       return gizi.length > 0 ? gizi.join(', ') : 'Normal';
     };
@@ -80,46 +92,150 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
         {recentCheckups.map((p, idx) => {
           const rawDate = p.tanggal_kunjungan || p.tanggal_pemeriksaan;
           const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-          let info = '';
+          let metrics: { label: string, value: string }[] = [];
           
           if (type === 'balita') {
-            info = `BB: ${p.bb || '-'}kg | TB: ${p.tb || '-'}cm`;
+            metrics = [
+              { label: 'BB', value: `${p.bb || '-'} kg` },
+              { label: 'TB', value: `${p.tb || '-'} cm` }
+            ];
           } else if (type === 'bumil') {
             const imt = calculateIMT(p.bb || p.berat_badan, p.tb);
-            info = `BB: ${p.bb || p.berat_badan || '-'}kg | TB: ${p.tb || '-'}cm | IMT: ${imt || '-'} | LILA: ${p.lingkar_lengan_atas || '-'}cm | Usia: ${p.usia_kehamilan_minggu || '-'} mgg | L.Perut: ${p.lingkar_perut || '-'}cm | L.Fundus: ${p.tinggi_fundus || '-'}cm`;
+            metrics = [
+              { label: 'BB', value: `${p.bb || p.berat_badan || '-'} kg` },
+              { label: 'TB', value: `${p.tb || '-'} cm` },
+              { label: 'IMT', value: `${imt || '-'}` },
+              { label: 'LILA', value: `${p.lingkar_lengan_atas || '-'} cm` },
+              { label: 'Usia', value: `${p.usia_kehamilan_minggu || '-'} mgg` },
+              { label: 'L.Perut', value: `${p.lingkar_perut || '-'} cm` },
+              { label: 'T.Fundus', value: `${p.tinggi_fundus || '-'} cm` }
+            ];
           } else if (type === 'pasca') {
             const imt = calculateIMT(p.berat_badan_ibu, p.tb);
-            info = `BB Ibu: ${p.berat_badan_ibu || '-'}kg | TB Ibu: ${p.tb || '-'}cm | IMT Ibu: ${imt || '-'} | BB Bayi: ${p.berat_badan_bayi || '-'}kg | TB Bayi: ${p.tinggi_badan_bayi || '-'}cm`;
+            metrics = [
+              { label: 'BB Ibu', value: `${p.berat_badan_ibu || '-'} kg` },
+              { label: 'TB Ibu', value: `${p.tb || '-'} cm` },
+              { label: 'IMT Ibu', value: `${imt || '-'}` },
+              { label: 'BB Bayi', value: `${p.berat_badan_bayi || '-'} kg` },
+              { label: 'TB Bayi', value: `${p.tinggi_badan_bayi || '-'} cm` }
+            ];
           } else if (type === 'lansia') {
             const imt = calculateIMT(p.bb, p.tb);
-            info = `Tensi: ${p.tekanan_darah_sistolik || '-'}/${p.tekanan_darah_diastolik || '-'} | BB: ${p.bb || '-'}kg | TB: ${p.tb || '-'}cm | IMT: ${imt || '-'} | L.Perut: ${p.lingkar_perut || '-'}cm`;
+            metrics = [
+              { label: 'Tensi', value: `${p.tekanan_darah_sistolik || '-'}/${p.tekanan_darah_diastolik || '-'}` },
+              { label: 'BB', value: `${p.bb || '-'} kg` },
+              { label: 'TB', value: `${p.tb || '-'} cm` },
+              { label: 'IMT', value: `${imt || '-'}` },
+              { label: 'L.Perut', value: `${p.lingkar_perut || '-'} cm` }
+            ];
           }
 
-          const statusKesehatan = type === 'balita' ? (p.kondisi || p.catatan || '-') :
-                                  type === 'bumil' ? (p.riwayat_penyakit || p.catatan || '-') :
-                                  type === 'pasca' ? (p.kondisi_ibu || p.catatan || '-') :
-                                  (p.catatan || '-');
+          let finalStatus: { text: string, type: 'success' | 'warning' | 'danger' }[] = [];
+          
+          if (type === 'balita') {
+            if (p.kondisi) {
+              const k = p.kondisi.toLowerCase();
+              const isDanger = k.includes('sakit') || k.includes('buruk') || k.includes('kurang');
+              finalStatus.push({ text: p.kondisi, type: isDanger ? 'danger' : 'success' });
+            }
+          } else if (type === 'bumil') {
+            if (p.riwayat_penyakit) finalStatus.push({ text: p.riwayat_penyakit, type: 'danger' });
+            if (p.kadar_hemoglobin) {
+               const hb = parseFloat(p.kadar_hemoglobin);
+               if (hb < 11) finalStatus.push({ text: `Risiko Anemia (${hb})`, type: 'danger' });
+               else finalStatus.push({ text: `Hb Normal (${hb})`, type: 'success' });
+            }
+            if (p.lingkar_lengan_atas) {
+               const lila = parseFloat(p.lingkar_lengan_atas);
+               if (lila < 23.5) finalStatus.push({ text: `Risiko KEK (${lila})`, type: 'danger' });
+               else finalStatus.push({ text: `LILA Normal (${lila})`, type: 'success' });
+            }
+            if (p.terpapar_rokok) finalStatus.push({ text: 'Terpapar Asap Rokok', type: 'warning' });
+            if (p.kie) finalStatus.push({ text: 'Edukasi KIE', type: 'success' });
+            if (p.suplemen_tambah_darah) finalStatus.push({ text: 'Dapat TTD', type: 'success' });
+            if (p.fasilitasi_rujukan) finalStatus.push({ text: 'Dirujuk', type: 'warning' });
+            if (p.fasilitasi_bantuan_sosial) finalStatus.push({ text: 'Menerima Bansos', type: 'success' });
+          } else if (type === 'pasca') {
+            if (p.kondisi_ibu) {
+              const isDanger = p.kondisi_ibu.toLowerCase().includes('sakit');
+              finalStatus.push({ text: p.kondisi_ibu, type: isDanger ? 'danger' : 'success' });
+            }
+            if (warga.penggunaan_kontrasepsi) finalStatus.push({ text: `KB ${warga.penggunaan_kontrasepsi}`, type: 'success' });
+            if (p.kie) finalStatus.push({ text: 'Edukasi KIE', type: 'success' });
+            if (p.fasilitasi_rujukan) finalStatus.push({ text: 'Dirujuk', type: 'warning' });
+            if (p.fasilitasi_bantuan_sosial) finalStatus.push({ text: 'Menerima Bansos', type: 'success' });
+          } else if (type === 'lansia') {
+            const tdS = parseFloat(p.tekanan_darah_sistolik);
+            const tdD = parseFloat(p.tekanan_darah_diastolik);
+            if (tdS >= 140 || tdD >= 90) finalStatus.push({ text: `Hipertensi (${tdS}/${tdD})`, type: 'danger' });
+            else if (tdS < 90 || tdD < 60) finalStatus.push({ text: `Hipotensi (${tdS}/${tdD})`, type: 'warning' });
+            else if (!isNaN(tdS) && !isNaN(tdD)) finalStatus.push({ text: `Tensi Normal (${tdS}/${tdD})`, type: 'success' });
+
+            if (p.kolesterol) {
+               const st = calculateKolesterolStatus(p.kolesterol);
+               if (st) {
+                 finalStatus.push({ text: `Kolesterol ${st.status} (${p.kolesterol})`, type: st.status === 'Normal' ? 'success' : st.status === 'Batas Tinggi' ? 'warning' : 'danger' });
+               }
+            }
+            if (p.asam_urat) {
+               const st = calculateAsamUratStatus(p.asam_urat, warga.jenis_kelamin);
+               if (st) {
+                 finalStatus.push({ text: `Asam Urat ${st.status} (${p.asam_urat})`, type: st.status === 'Normal' ? 'success' : 'danger' });
+               }
+            }
+            if (p.gula_darah_sewaktu) {
+               const st = calculateGdsStatus(p.gula_darah_sewaktu);
+               if (st) {
+                 finalStatus.push({ text: `GDS ${st.status} (${p.gula_darah_sewaktu})`, type: st.status === 'Normal' ? 'success' : 'danger' });
+               }
+            }
+          }
+          if (p.catatan) finalStatus.push({ text: p.catatan, type: 'warning' });
 
           return (
-            <div key={idx} className="flex flex-col text-xs sm:text-[13px] border-b border-slate-200/60 print:border-slate-300 py-1.5 last:border-0 last:pb-0">
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="font-semibold text-slate-700 print:text-black shrink-0">{dateStr}</span>
-                <span className="text-slate-600 print:text-black text-right font-medium">{info}</span>
+            <div key={idx} className="flex flex-col text-xs sm:text-[13px] pt-1 pb-2">
+              <div className="font-bold text-slate-800 print:text-black mb-1.5 text-sm">{dateStr}</div>
+              
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-2.5 bg-slate-50 print:bg-transparent rounded-md p-2 print:p-0 border border-slate-100 print:border-none">
+                {metrics.map((m, i) => (
+                  <div key={i} className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="text-slate-500 print:text-slate-600 font-medium text-[11px] sm:text-xs uppercase tracking-wider">{m.label}</span>
+                    <span className="font-semibold text-slate-700 print:text-black">{m.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex flex-col gap-0.5 text-[11px] sm:text-xs">
+
+              <div className="flex flex-col gap-1.5 text-[11px] sm:text-xs">
                 {type === 'balita' && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 print:text-slate-600">Status Gizi:</span>
-                    <span className={`font-semibold print:text-black ${formatStatusGizi(p) === 'Normal' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  <div className="flex gap-2 items-start">
+                    <span className="text-slate-400 print:text-slate-500 shrink-0 w-24">Status Gizi:</span>
+                    <span className={`font-semibold print:text-black leading-snug ${formatStatusGizi(p) === 'Normal' ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {formatStatusGizi(p)}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-slate-400 print:text-slate-600">Status Kesehatan:</span>
-                  <span className="text-slate-700 print:text-black text-right truncate max-w-[200px]">
-                    {statusKesehatan}
-                  </span>
+                <div className="flex gap-2 items-start mt-0.5">
+                  <span className="text-slate-400 print:text-slate-500 shrink-0 w-24 pt-0.5">Status Kesehatan:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {finalStatus.length > 0 ? (
+                      finalStatus.map((st, i) => {
+                        let color = "bg-emerald-50 text-emerald-700 border-emerald-200 print:bg-white print:border-black print:text-black";
+                        if (st.type === 'danger') {
+                          color = "bg-red-50 text-red-700 border-red-200 print:bg-white print:border-black print:text-black";
+                        } else if (st.type === 'warning') {
+                          color = "bg-amber-50 text-amber-700 border-amber-200 print:bg-white print:border-black print:text-black";
+                        }
+                        
+                        return (
+                          <span key={i} className={`px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold rounded border ${color}`}>
+                            {st.text}
+                          </span>
+                        )
+                      })
+                    ) : (
+                      <span className="text-slate-700 print:text-black font-medium leading-snug">-</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,15 +296,15 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold print:text-black print:text-xs">Kategori / JK</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold print:text-black print:text-xs">Kategori / Jenis Kelamin</p>
               <p className="text-sm sm:text-base font-medium text-slate-700 print:text-black">
-                <span className="text-primary print:text-black font-semibold">{getKategori(warga)}</span> / {warga.jenis_kelamin === 'L' ? 'L' : 'P'}
+                <span className="text-primary print:text-black font-semibold">{getKategori(warga)}</span> / {warga.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}
               </p>
             </div>
             <div>
-              <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold print:text-black print:text-xs">Golongan Darah</p>
-              <p className="text-sm sm:text-base font-bold text-red-500 print:text-black">
-                {warga.golongan_darah || '-'}
+              <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold print:text-black print:text-xs">No. Telepon</p>
+              <p className="text-sm sm:text-base font-bold text-slate-700 print:text-black">
+                {warga.nomor || '-'}
               </p>
             </div>
           </div>
@@ -207,45 +323,7 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
             {renderRiwayatKesehatan()}
           </div>
 
-          {(() => {
-            const kat = getKategori(warga);
-            let capsules: string[] = [];
-            
-            if (kat === 'Ibu Hamil' && warga.pemeriksaan_bumil?.[0]) {
-              const p = warga.pemeriksaan_bumil[0];
-              if (p.terpapar_rokok) capsules.push('Terpapar Asap Rokok');
-              if (p.kie) capsules.push('Telah Edukasi KIE');
-              if (p.suplemen_tambah_darah) capsules.push(`TTD: ${p.suplemen_tambah_darah}`);
-              if (p.fasilitasi_rujukan) capsules.push('Dirujuk ke RS/Puskesmas');
-              if (p.fasilitasi_bantuan_sosial) capsules.push('Menerima Bansos');
-            } else if (kat === 'Ibu Pasca Salin' && warga.pemeriksaan_pasca_persalinan?.[0]) {
-              const p = warga.pemeriksaan_pasca_persalinan[0];
-              if (warga.penggunaan_kontrasepsi) capsules.push(`KB: ${warga.penggunaan_kontrasepsi}`);
-              if (p.kie) capsules.push('Telah Edukasi KIE');
-              if (p.fasilitasi_rujukan) capsules.push('Dirujuk ke RS/Puskesmas');
-              if (p.fasilitasi_bantuan_sosial) capsules.push('Menerima Bansos');
-            } else if (kat === 'Lansia' && warga.pemeriksaan_lansia?.[0]) {
-              const p = warga.pemeriksaan_lansia[0];
-              if (p.kolesterol) capsules.push(`Kolesterol: ${p.kolesterol}`);
-              if (p.asam_urat) capsules.push(`Asam Urat: ${p.asam_urat}`);
-              if (p.gula_darah_sewaktu) capsules.push(`GDS: ${p.gula_darah_sewaktu}`);
-            }
 
-            if (capsules.length === 0) return null;
-
-            return (
-              <div className="pt-3 sm:pt-4 mt-2 border-t border-slate-200/60 print:border-black">
-                <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold print:text-black print:text-xs mb-2">Informasi Tambahan</p>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {capsules.map((cap, idx) => (
-                    <span key={idx} className="bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] print:bg-white print:border print:border-black print:text-black print:px-2 print:py-0.5">
-                      {cap}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
 
           {getKategori(warga) === 'Balita / Baduta' && (
             <div className="pt-3 sm:pt-4 mt-2 border-t border-slate-200/60 print:border-black">

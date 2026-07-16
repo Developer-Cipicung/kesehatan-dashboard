@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit3, Plus, Printer } from 'lucide-react'
+import { Edit2, Plus, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Warga } from '../services/wargaService'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -57,11 +57,27 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
 
   const isBumil = kategori === 'bumil'
 
+  const sortCheckups = (arr: any[] | undefined) => {
+    if (!arr || arr.length === 0) return undefined;
+    return [...arr].sort((a, b) => {
+      const bDateStr = b.tanggal_kunjungan || b.tanggal_pemeriksaan || b.created_at || 0;
+      const aDateStr = a.tanggal_kunjungan || a.tanggal_pemeriksaan || a.created_at || 0;
+      const db = new Date(bDateStr).getTime();
+      const da = new Date(aDateStr).getTime();
+      if (db === da) {
+        const cb = b.created_at ? new Date(b.created_at).getTime() : 0;
+        const ca = a.created_at ? new Date(a.created_at).getTime() : 0;
+        return cb - ca;
+      }
+      return db - da;
+    })[0];
+  };
+
   // Last checkup summary
-  const latestBumil = data.pemeriksaan_bumil?.[0]
-  const latestLansia = data.pemeriksaan_lansia?.[0]
-  const latestPasca = data.pemeriksaan_pasca_persalinan?.[0]
-  const latestBalita = data.pemeriksaan_balita_baduta?.[0]
+  const latestBumil = sortCheckups(data.pemeriksaan_bumil)
+  const latestLansia = sortCheckups(data.pemeriksaan_lansia)
+  const latestPasca = sortCheckups(data.pemeriksaan_pasca_persalinan)
+  const latestBalita = sortCheckups(data.pemeriksaan_balita_baduta)
 
   const lastDate = latestBumil?.tanggal_kunjungan
     || latestLansia?.tanggal_kunjungan
@@ -275,10 +291,10 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
           <div className="flex gap-2 w-full">
             <Button
               variant="outline"
-              className="flex-1 h-10 text-sm border-slate-200 text-slate-600 flex items-center justify-center gap-1 hover:bg-slate-50"
+              className="flex-1 h-10 text-sm border-slate-200 text-slate-700 bg-white hover:bg-slate-50 flex items-center justify-center shadow-sm font-medium"
               onClick={() => onView(data.id)}
             >
-              <Edit3 className="w-4 h-4" /> Profil
+              <Edit2 className="w-4 h-4 mr-1.5" /> Edit Profil
             </Button>
             <Button
               variant="outline"
