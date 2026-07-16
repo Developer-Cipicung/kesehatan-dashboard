@@ -154,8 +154,8 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
             </p>
           </div>
           {/* Posyandu Logo placeholder */}
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 print:border-black">
-            <span className="text-primary text-xs font-bold print:text-black">PSYD</span>
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 print:border-black overflow-hidden">
+            <img src="/logo-cipicung.webp" alt="Logo Posyandu" className="w-9 h-9 object-contain" />
           </div>
         </div>
 

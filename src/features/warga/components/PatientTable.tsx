@@ -423,7 +423,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                 <th className="px-3 py-3 font-semibold text-primary text-xs w-[160px]">Nama Ibu</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs w-[140px]">Penggunaan<br/>Kontrasepsi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Tinggi/Panjang Badan (cm)</th>
-                <th className="px-3 py-3 font-semibold text-primary text-xs">Status Gizi (BB/TB)</th>
+                <th className="px-3 py-3 font-semibold text-primary text-xs min-w-[140px]">Status Gizi (WHO)</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">ASI<br/>Eksklusif</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs">Imunisasi</th>
                 <th className="px-3 py-3 font-semibold text-primary text-xs text-center">Bantuan<br/>Sosial</th>
@@ -519,7 +519,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             let lastRujukan: boolean | undefined = undefined
             let lastBansos: boolean | undefined = undefined
             let lastCatatan = ''
-            let lastStatusGizi = ''
+            let lastZScores: any = null
             let lastAsiEksklusif: boolean | undefined = undefined
             let lastKolesterol = ''
             let lastAsamUrat = ''
@@ -551,12 +551,12 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
               lastTfuTb = latestBalita.tb?.toString()
               lastLilaGds = latestBalita.lingkar_lengan_atas?.toString()
               
-              const { kategori_bb_tb } = classifyZScore(
+              const zScores = classifyZScore(
                 latestBalita.zscore_bb_u != null ? Number(latestBalita.zscore_bb_u) : null,
                 latestBalita.zscore_tb_u != null ? Number(latestBalita.zscore_tb_u) : null,
                 latestBalita.zscore_bb_tb != null ? Number(latestBalita.zscore_bb_tb) : null
               )
-              lastStatusGizi = kategori_bb_tb || ''
+              lastZScores = zScores
               
               lastAsiEksklusif = latestBalita.asi_eksklusif ?? undefined
               lastBansos = latestBalita.fasilitasi_bantuan_sosial ?? undefined
@@ -633,7 +633,25 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                         <Cell type="number" value={row.tfuTb} onChange={(v) => set(warga.id, 'tfuTb', v)} placeholder={lastTfuTb || '-'} width="w-[70px]" disabled={true} />
                       </td>
                       <td className="px-3 py-3">
-                        <Cell value={row.kondisi} onChange={(v) => set(warga.id, 'kondisi', v)} placeholder={lastStatusGizi || "-"} width="w-[100px]" disabled={true} />
+                        {lastZScores ? (
+                          <div className="flex flex-col gap-1.5">
+                            {lastZScores.kategori_bb_u && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_bb_u.includes('Kurang') || lastZScores.kategori_bb_u.includes('Lebih') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 BB/U: {lastZScores.kategori_bb_u}
+                               </span>
+                            )}
+                            {lastZScores.kategori_tb_u && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_tb_u.includes('Pendek') || lastZScores.kategori_tb_u.includes('Tinggi') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 TB/U: {lastZScores.kategori_tb_u}
+                               </span>
+                            )}
+                            {lastZScores.kategori_bb_tb && (
+                               <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${lastZScores.kategori_bb_tb.includes('Buruk') || lastZScores.kategori_bb_tb.includes('Kurang') || lastZScores.kategori_bb_tb.includes('Obesitas') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : lastZScores.kategori_bb_tb.includes('Risiko') ? 'bg-amber-50 text-amber-600 border border-amber-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                                 BB/TB: {lastZScores.kategori_bb_tb}
+                               </span>
+                            )}
+                          </div>
+                        ) : '-'}
                       </td>
                     <td className="px-3 py-3">
                       <Cell type="checkbox" value={lastAsiEksklusif as any} onChange={(v) => set(warga.id, 'asi_eksklusif', v)} width="w-full" disabled={true} />
@@ -963,10 +981,8 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
                     warga_id: confirmId,
                     tanggal_kunjungan: new Date().toISOString().split('T')[0],
                     tanggal_persalinan: tanggalPersalinan,
-                    bb: 0,
-                    tekanan_darah_sistolik: 120,
-                    tekanan_darah_diastolik: 80,
-                    suhu_tubuh: 36.5,
+                    bb: data.find(x => x.id === confirmId)?.pemeriksaan_bumil?.[0]?.bb || 0,
+                    catatan: 'Data otomatis dari perubahan status Ibu Hamil ke Pasca Persalinan',
                   })
                   toast.success('Pasien berhasil ditandai telah bersalin')
                   window.location.reload()

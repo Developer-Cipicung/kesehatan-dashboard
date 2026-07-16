@@ -47,7 +47,7 @@ export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, on
             
             {isBumil && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">HPHT / HTP</th>}
             
-            {(isLansia || isPasca) && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tekanan Darah</th>}
+            {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Tekanan Darah</th>}
             {isLansia && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Pemeriksaan Darah</th>}
             {isPasca && <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-xs">Kondisi Ibu</th>}
 
@@ -145,11 +145,11 @@ export function HistoryTimeline({ history, warga, kategori, isLocked, onEdit, on
                   </td>
                 )}
 
-                {(isLansia || isPasca) && (
+                {isLansia && (
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
                       <span>{td}</span>
-                      {(isLansia || isPasca) && record.tekanan_darah_sistolik && (
+                      {isLansia && record.tekanan_darah_sistolik && (
                         (() => {
                           const status = calculateTDStatus(`${record.tekanan_darah_sistolik}/${record.tekanan_darah_diastolik}`);
                           return status ? <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span> : null;

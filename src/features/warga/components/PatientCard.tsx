@@ -91,14 +91,38 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                 <span className="text-sm font-semibold text-slate-800">{latestBalita.bb || '-'} kg / {latestBalita.tb || '-'} cm</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Status Gizi (BB/TB)</span>
-                <span className="text-sm font-semibold text-slate-800">
-                  {classifyZScore(
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Status Gizi (WHO)</span>
+                {(() => {
+                  const zScores = classifyZScore(
                     latestBalita.zscore_bb_u != null ? Number(latestBalita.zscore_bb_u) : null,
                     latestBalita.zscore_tb_u != null ? Number(latestBalita.zscore_tb_u) : null,
                     latestBalita.zscore_bb_tb != null ? Number(latestBalita.zscore_bb_tb) : null
-                  ).kategori_bb_tb || '-'}
-                </span>
+                  )
+                  
+                  if (!zScores.kategori_bb_u && !zScores.kategori_tb_u && !zScores.kategori_bb_tb) {
+                    return <span className="text-sm font-semibold text-slate-800">-</span>
+                  }
+                  
+                  return (
+                    <div className="flex flex-col gap-1.5 mt-1">
+                      {zScores.kategori_bb_u && (
+                         <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${zScores.kategori_bb_u.includes('Kurang') || zScores.kategori_bb_u.includes('Lebih') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                           BB/U: {zScores.kategori_bb_u}
+                         </span>
+                      )}
+                      {zScores.kategori_tb_u && (
+                         <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${zScores.kategori_tb_u.includes('Pendek') || zScores.kategori_tb_u.includes('Tinggi') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                           TB/U: {zScores.kategori_tb_u}
+                         </span>
+                      )}
+                      {zScores.kategori_bb_tb && (
+                         <span className={`text-[10px] px-2 py-0.5 rounded-md w-max ${zScores.kategori_bb_tb.includes('Buruk') || zScores.kategori_bb_tb.includes('Kurang') || zScores.kategori_bb_tb.includes('Obesitas') ? 'bg-red-50 text-red-600 border border-red-200 font-bold' : zScores.kategori_bb_tb.includes('Risiko') ? 'bg-amber-50 text-amber-600 border border-amber-200 font-bold' : 'bg-emerald-50 text-emerald-600 border border-emerald-200 font-bold'}`}>
+                           BB/TB: {zScores.kategori_bb_tb}
+                         </span>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           )}
@@ -159,20 +183,6 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                     ) : <span className="text-sm font-semibold text-slate-800">-</span>;
                   })()}
                 </div>
-              </div>
-              <div className="flex flex-col mt-1">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tekanan Darah</span>
-                {(() => {
-                  const tdStr = (latestPasca.tekanan_darah_sistolik && latestPasca.tekanan_darah_diastolik) 
-                    ? `${latestPasca.tekanan_darah_sistolik}/${latestPasca.tekanan_darah_diastolik}` : '';
-                  const status = calculateTDStatus(tdStr);
-                  return (
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-semibold text-slate-800">{tdStr || '-'}</span>
-                      {status && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${status.color}`}>{status.status}</span>}
-                    </div>
-                  )
-                })()}
               </div>
             </div>
           )}
@@ -348,11 +358,8 @@ export function PatientCard({ data, kategori, onView, isReadOnly }: PatientCardP
                     warga_id: data.id,
                     tanggal_kunjungan: new Date().toISOString().split('T')[0],
                     tanggal_persalinan: tanggalPersalinan,
-                    bb: 0,
-                    kondisi_ibu: 'Sehat',
-                    tekanan_darah_sistolik: 120,
-                    tekanan_darah_diastolik: 80,
-                    suhu_tubuh: 36.5,
+                    bb: latestBumil?.bb || 0,
+                    catatan: 'Data otomatis dari perubahan status Ibu Hamil ke Pasca Persalinan',
                   })
                   toast.success('Pasien berhasil ditandai telah bersalin')
                   window.location.reload()

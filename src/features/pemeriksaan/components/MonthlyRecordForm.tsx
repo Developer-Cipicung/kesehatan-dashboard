@@ -680,21 +680,6 @@ export function MonthlyRecordForm({ open, onOpenChange, kategori, wargaId, initi
                     )
                   })()}
                 </Field>
-                <Field label="Tekanan Darah (mmHg)" required>
-                  <div className="relative">
-                    <TdInput setValue={setValue} watch={watch} name="td" />
-                    {(() => {
-                      const td = watch('td')
-                      if (td) {
-                        const st = calculateTDStatus(td)
-                        if (st) {
-                          return <div className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded font-bold border ${st.color}`}>{st.status}</div>
-                        }
-                      }
-                      return null
-                    })()}
-                  </div>
-                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Kondisi Ibu"><Input register={register} name="kondisi_ibu" placeholder="Baik, tidak ada keluhan" /></Field>
                 </div>

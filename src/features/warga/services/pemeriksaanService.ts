@@ -39,9 +39,9 @@ export interface CreatePascaPayload {
   tanggal_kunjungan: string
   tanggal_persalinan: string
   bb: number
-  tekanan_darah_sistolik: number
-  tekanan_darah_diastolik: number
-  suhu_tubuh: number
+  tekanan_darah_sistolik?: number
+  tekanan_darah_diastolik?: number
+  suhu_tubuh?: number
   kondisi_ibu?: string
   tinggi_badan_bayi?: number
   berat_badan_bayi?: number
