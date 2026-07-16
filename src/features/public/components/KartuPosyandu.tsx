@@ -139,7 +139,10 @@ export const KartuPosyandu: React.FC<KartuPosyanduProps> = ({ warga }) => {
               finalStatus.push({ text: p.kondisi, type: isDanger ? 'danger' : 'success' });
             }
           } else if (type === 'bumil') {
-            if (p.riwayat_penyakit) finalStatus.push({ text: p.riwayat_penyakit, type: 'danger' });
+            if (p.riwayat_penyakit) {
+              const isTidakAda = p.riwayat_penyakit.toLowerCase() === 'tidak ada' || p.riwayat_penyakit === '-';
+              finalStatus.push({ text: `Riwayat Penyakit: ${p.riwayat_penyakit}`, type: isTidakAda ? 'success' : 'danger' });
+            }
             if (p.kadar_hemoglobin) {
                const hb = parseFloat(p.kadar_hemoglobin);
                if (hb < 11) finalStatus.push({ text: `Risiko Anemia (${hb})`, type: 'danger' });

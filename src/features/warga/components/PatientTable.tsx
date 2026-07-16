@@ -513,9 +513,7 @@ export function PatientTable({ data, kategori, onView }: PatientTableProps) {
             };
             
             const latestBumil = sortCheckups(warga.pemeriksaan_bumil)
-            if (latestBumil) {
-              console.log('Warga:', warga.nama, 'bumil checks:', warga.pemeriksaan_bumil, 'sorted latest:', latestBumil)
-            }
+
             
             const latestBalita = sortCheckups(warga.pemeriksaan_balita_baduta)
             const latestLansia = sortCheckups(warga.pemeriksaan_lansia)
