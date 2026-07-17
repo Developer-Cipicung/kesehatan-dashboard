@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit2, Plus, Printer, Eye } from 'lucide-react'
+import { Plus, Printer, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Warga } from '../services/wargaService'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
