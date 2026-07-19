@@ -4,6 +4,7 @@ import { PatientToolbar } from './PatientToolbar'
 import { PatientTable } from './PatientTable'
 import { PatientCard } from './PatientCard'
 import { AddPatientDialog } from './AddPatientDialog'
+import { ImportHealthRecordModal } from '@/features/pemeriksaan/components/ImportHealthRecordModal'
 import { SkeletonCard } from '@/components/feedback/LoadingSkeleton'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { useNavigate } from 'react-router-dom'
@@ -26,6 +27,7 @@ interface SharedPatientListProps {
 export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
   const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isImportHealthOpen, setIsImportHealthOpen] = useState(false)
   const { selectedPosyanduId, posyandu } = useAuthStore()
   const navigate = useNavigate()
 
@@ -67,6 +69,7 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         onSearchChange={handleSearchChange}
         totalPatients={totalPatients}
         onAddPatient={() => setIsAddOpen(true)}
+        onImportHealth={() => setIsImportHealthOpen(true)}
         isReadOnly={isReadOnly}
       />
 
@@ -150,6 +153,14 @@ export function SharedPatientList({ title, kategori }: SharedPatientListProps) {
         onOpenChange={setIsAddOpen}
         defaultCategory={kategori}
         onSuccess={() => setPage(1)}
+      />
+
+      <ImportHealthRecordModal
+        key={`import-${kategori}`}
+        open={isImportHealthOpen}
+        onOpenChange={setIsImportHealthOpen}
+        kategori={kategori}
+        onSuccess={() => refetch()}
       />
     </div>
   )

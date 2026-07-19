@@ -5,6 +5,7 @@ import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, Download }
 import { wargaService } from '../services/wargaService'
 import { toast } from 'sonner'
 import ExcelJS from 'exceljs'
+import { useAuthStore } from '@/stores/authStore'
 
 interface ImportWargaModalProps {
   open: boolean
@@ -13,6 +14,9 @@ interface ImportWargaModalProps {
 }
 
 export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaModalProps) {
+  const { posyandu } = useAuthStore()
+  const currentPosyanduName = posyandu?.nama || ''
+
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [file, setFile] = useState<File | null>(null)
@@ -117,24 +121,61 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
         
         const trs = Array.from(table.querySelectorAll('tr'))
         let headerIdx = -1
+        let colNik = -1
+        let colNama = -1
+        let colJk = -1
+        let colTglLahir = -1
+        let colNamaOrtu = -1
+        let colProv = -1
+        let colKab = -1
+        let colKec = -1
+        let colDesa = -1
+        let colPosyandu = -1
         
         // Find header row
         trs.forEach((tr, idx) => {
           if (headerIdx !== -1) return
           const textContent = tr.textContent?.toLowerCase() || ''
-          if (textContent.includes('nik') || textContent.includes('nama')) headerIdx = idx
+          if (textContent.includes('nik') || textContent.includes('nama')) {
+            headerIdx = idx
+            const ths = Array.from(tr.querySelectorAll('td, th'))
+            ths.forEach((th, colIdx) => {
+              const thText = th.textContent?.toLowerCase().trim() || ''
+              if (thText === 'nik') colNik = colIdx
+              if (thText === 'nama' || thText === 'nama anak') colNama = colIdx
+              if (thText === 'jk' || thText === 'jenis kelamin') colJk = colIdx
+              if (thText === 'tgl lahir' || thText === 'tanggal lahir') colTglLahir = colIdx
+              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu') colNamaOrtu = colIdx
+              if (thText === 'prov' || thText === 'provinsi') colProv = colIdx
+              if (thText === 'kab/kota' || thText === 'kabupaten/kota') colKab = colIdx
+              if (thText === 'kec' || thText === 'kecamatan') colKec = colIdx
+              if (thText === 'desa/kel' || thText === 'desa/kelurahan') colDesa = colIdx
+              if (thText === 'posyandu') colPosyandu = colIdx
+            })
+          }
         })
 
         if (headerIdx === -1) throw new Error('Tidak menemukan Header (NIK/Nama)')
+        // Fallback for hardcoded indexes if dynamic finding fails
+        if (colNik === -1) colNik = 1
+        if (colNama === -1) colNama = 2
+        if (colJk === -1) colJk = 3
+        if (colTglLahir === -1) colTglLahir = 4
+        if (colNamaOrtu === -1) colNamaOrtu = 5
+        if (colProv === -1) colProv = 6
+        if (colKab === -1) colKab = 7
+        if (colKec === -1) colKec = 8
+        if (colDesa === -1) colDesa = 10
+        if (colPosyandu === -1) colPosyandu = 11
 
         trs.forEach((tr, idx) => {
           if (idx <= headerIdx) return
           const tds = Array.from(tr.querySelectorAll('td, th'))
           if (tds.length < 5) return
 
-          const rawNik = tds[1]?.textContent || ''
-          const rawNama = tds[2]?.textContent?.trim() || ''
-          const rawJk = tds[3]?.textContent?.trim().toUpperCase() || ''
+          const rawNik = tds[colNik]?.textContent || ''
+          const rawNama = tds[colNama]?.textContent?.trim() || ''
+          const rawJk = tds[colJk]?.textContent?.trim().toUpperCase() || ''
           
           if (!rawNik && !rawNama) return
 
@@ -146,16 +187,24 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
           else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
           else errors.push(`Baris ${idx}: Jenis Kelamin tidak valid (${rawJk}).`)
 
-          const tglLahirStr = processDate(tds[4]?.textContent?.trim(), idx)
+          const tglLahirStr = processDate(tds[colTglLahir]?.textContent?.trim(), idx)
 
-          const namaOrtu = tds[5]?.textContent?.trim() || ''
-          const prov = tds[6]?.textContent?.trim() || ''
-          const kab = tds[7]?.textContent?.trim() || ''
-          const kec = tds[8]?.textContent?.trim() || ''
-          const desa = tds[10]?.textContent?.trim() || ''
-          const posyandu = tds[11]?.textContent?.trim() || ''
+          const namaOrtu = tds[colNamaOrtu]?.textContent?.trim() || ''
+          const prov = tds[colProv]?.textContent?.trim() || ''
+          const kab = tds[colKab]?.textContent?.trim() || ''
+          const kec = tds[colKec]?.textContent?.trim() || ''
+          const desa = tds[colDesa]?.textContent?.trim() || ''
+          const posyanduCell = tds[colPosyandu]?.textContent?.trim() || ''
 
-          const alamat = [posyandu, desa, kec, kab, prov].filter(Boolean).join(', ')
+          if (posyanduCell && currentPosyanduName) {
+            const cleanExcel = posyanduCell.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
+            const cleanCurrent = currentPosyanduName.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
+            if (cleanExcel !== cleanCurrent) {
+              throw new Error(`File ini berisi data untuk posyandu ${posyanduCell.toUpperCase()}, sedangkan Anda sedang aktif di posyandu ${currentPosyanduName.toUpperCase()}.`)
+            }
+          }
+
+          const alamat = [posyanduCell, desa, kec, kab, prov].filter(Boolean).join(', ')
 
           if (processedNik.length === 16 && rawNama && tglLahirStr) {
             rows.push({
@@ -181,24 +230,61 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
         if (!worksheet) throw new Error('Worksheet tidak ditemukan')
 
         let headerRowIdx = -1
+        let colNik = -1
+        let colNama = -1
+        let colJk = -1
+        let colTglLahir = -1
+        let colNamaOrtu = -1
+        let colProv = -1
+        let colKab = -1
+        let colKec = -1
+        let colDesa = -1
+        let colPosyandu = -1
         
         worksheet.eachRow((row, rowNumber) => {
           if (headerRowIdx !== -1) return
           const rowValues = row.values as any[]
           const rowStr = rowValues.join('').toLowerCase()
-          if (rowStr.includes('nik') || rowStr.includes('nama')) headerRowIdx = rowNumber
+          if (rowStr.includes('nik') || rowStr.includes('nama')) {
+            headerRowIdx = rowNumber
+            rowValues.forEach((val, colIdx) => {
+              if (!val) return
+              const thText = val.toString().toLowerCase().trim()
+              if (thText === 'nik') colNik = colIdx
+              if (thText === 'nama' || thText === 'nama anak') colNama = colIdx
+              if (thText === 'jk' || thText === 'jenis kelamin') colJk = colIdx
+              if (thText === 'tgl lahir' || thText === 'tanggal lahir') colTglLahir = colIdx
+              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu') colNamaOrtu = colIdx
+              if (thText === 'prov' || thText === 'provinsi') colProv = colIdx
+              if (thText === 'kab/kota' || thText === 'kabupaten/kota') colKab = colIdx
+              if (thText === 'kec' || thText === 'kecamatan') colKec = colIdx
+              if (thText === 'desa/kel' || thText === 'desa/kelurahan') colDesa = colIdx
+              if (thText === 'posyandu') colPosyandu = colIdx
+            })
+          }
         })
 
         if (headerRowIdx === -1) throw new Error('Tidak dapat menemukan baris Header (NIK, Nama, dll) di Excel.')
+
+        if (colNik === -1) colNik = 2
+        if (colNama === -1) colNama = 3
+        if (colJk === -1) colJk = 4
+        if (colTglLahir === -1) colTglLahir = 5
+        if (colNamaOrtu === -1) colNamaOrtu = 6
+        if (colProv === -1) colProv = 7
+        if (colKab === -1) colKab = 8
+        if (colKec === -1) colKec = 9
+        if (colDesa === -1) colDesa = 11
+        if (colPosyandu === -1) colPosyandu = 12
 
         worksheet.eachRow((row, rowNumber) => {
           if (rowNumber <= headerRowIdx) return // Skip header
           
           const rowValues = row.values as any[]
           
-          const rawNik = rowValues[2] ? rowValues[2].toString() : ''
-          const rawNama = rowValues[3] ? rowValues[3].toString().trim() : ''
-          const rawJk = rowValues[4] ? rowValues[4].toString().trim().toUpperCase() : ''
+          const rawNik = rowValues[colNik] ? rowValues[colNik].toString() : ''
+          const rawNama = rowValues[colNama] ? rowValues[colNama].toString().trim() : ''
+          const rawJk = rowValues[colJk] ? rowValues[colJk].toString().trim().toUpperCase() : ''
           
           if (!rawNik && !rawNama) return
 
@@ -210,16 +296,24 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
           else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
           else errors.push(`Baris ${rowNumber}: Jenis Kelamin tidak valid (${rawJk}).`)
 
-          const tglLahirStr = processDate(rowValues[5], rowNumber)
+          const tglLahirStr = processDate(rowValues[colTglLahir], rowNumber)
 
-          const namaOrtu = rowValues[6] ? rowValues[6].toString().trim() : ''
-          const prov = rowValues[7] ? rowValues[7].toString().trim() : ''
-          const kab = rowValues[8] ? rowValues[8].toString().trim() : ''
-          const kec = rowValues[9] ? rowValues[9].toString().trim() : ''
-          const desa = rowValues[11] ? rowValues[11].toString().trim() : ''
-          const posyandu = rowValues[12] ? rowValues[12].toString().trim() : ''
+          const namaOrtu = rowValues[colNamaOrtu] ? rowValues[colNamaOrtu].toString().trim() : ''
+          const prov = rowValues[colProv] ? rowValues[colProv].toString().trim() : ''
+          const kab = rowValues[colKab] ? rowValues[colKab].toString().trim() : ''
+          const kec = rowValues[colKec] ? rowValues[colKec].toString().trim() : ''
+          const desa = rowValues[colDesa] ? rowValues[colDesa].toString().trim() : ''
+          const posyanduStr = rowValues[colPosyandu] ? rowValues[colPosyandu].toString().trim() : ''
 
-          const alamat = [posyandu, desa, kec, kab, prov].filter(Boolean).join(', ')
+          if (posyanduStr && currentPosyanduName) {
+            const cleanExcel = posyanduStr.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
+            const cleanCurrent = currentPosyanduName.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
+            if (cleanExcel !== cleanCurrent) {
+              throw new Error(`File ini berisi data untuk posyandu ${posyanduStr.toUpperCase()}, sedangkan Anda sedang aktif di posyandu ${currentPosyanduName.toUpperCase()}.`)
+            }
+          }
+
+          const alamat = [posyanduStr, desa, kec, kab, prov].filter(Boolean).join(', ')
 
           if (processedNik.length === 16 && rawNama && tglLahirStr) {
             rows.push({

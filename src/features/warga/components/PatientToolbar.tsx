@@ -9,6 +9,7 @@ interface PatientToolbarProps {
   title: string
   totalPatients: number
   isReadOnly?: boolean
+  onImportHealth?: () => void
 }
 
 export function PatientToolbar({
@@ -18,6 +19,7 @@ export function PatientToolbar({
   title,
   totalPatients,
   isReadOnly,
+  onImportHealth,
 }: PatientToolbarProps) {
   return (
     <div className="flex flex-col space-y-6">
@@ -28,10 +30,15 @@ export function PatientToolbar({
           <p className="text-sm text-slate-500 mt-1">{totalPatients} pasien terdaftar</p>
         </div>
         {!isReadOnly && (
-          <Button onClick={onAddPatient} className="bg-primary hover:bg-primary/90 text-white rounded-lg shadow-sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Input Data Baru
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button onClick={onAddPatient} className="bg-primary hover:bg-primary/90 text-white rounded-lg shadow-sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Input Data Baru
+            </Button>
+            <Button onClick={onImportHealth} variant="outline" className="text-xs h-9 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 rounded-lg shadow-sm">
+              Import Data Kesehatan e-PPGBM
+            </Button>
+          </div>
         )}
       </div>
 

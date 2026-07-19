@@ -65,6 +65,12 @@ export const pemeriksaanService = {
     const response = await api.post<PemeriksaanResponse>(`/${actualEndpoint}`, payload)
     return response.data.data
   },
+  bulkCreate: async (kategori: string, payload: Partial<Pemeriksaan>[]) => {
+    const endpoint = kategori.replace('_', '-')
+    const actualEndpoint = (endpoint === 'baduta' || endpoint === 'balita') ? 'balita' : endpoint
+    const response = await api.post(`/${actualEndpoint}/bulk-pemeriksaan`, payload)
+    return response.data
+  },
   calculateZscore: async (payload: any) => {
     const response = await api.post(`/balita/calculate-zscore`, payload)
     return response.data.data
