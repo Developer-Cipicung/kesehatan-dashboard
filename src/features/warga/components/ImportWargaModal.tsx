@@ -131,6 +131,7 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
         let colKec = -1
         let colDesa = -1
         let colPosyandu = -1
+        let isBumilFormat = false
         
         // Find header row
         trs.forEach((tr, idx) => {
@@ -145,7 +146,10 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
               if (thText === 'nama' || thText === 'nama anak') colNama = colIdx
               if (thText === 'jk' || thText === 'jenis kelamin') colJk = colIdx
               if (thText === 'tgl lahir' || thText === 'tanggal lahir') colTglLahir = colIdx
-              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu') colNamaOrtu = colIdx
+              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu' || thText === 'nama suami') {
+                colNamaOrtu = colIdx
+                if (thText === 'nama suami') isBumilFormat = true
+              }
               if (thText === 'prov' || thText === 'provinsi') colProv = colIdx
               if (thText === 'kab/kota' || thText === 'kabupaten/kota') colKab = colIdx
               if (thText === 'kec' || thText === 'kecamatan') colKec = colIdx
@@ -156,26 +160,15 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
         })
 
         if (headerIdx === -1) throw new Error('Tidak menemukan Header (NIK/Nama)')
-        // Fallback for hardcoded indexes if dynamic finding fails
-        if (colNik === -1) colNik = 1
-        if (colNama === -1) colNama = 2
-        if (colJk === -1) colJk = 3
-        if (colTglLahir === -1) colTglLahir = 4
-        if (colNamaOrtu === -1) colNamaOrtu = 5
-        if (colProv === -1) colProv = 6
-        if (colKab === -1) colKab = 7
-        if (colKec === -1) colKec = 8
-        if (colDesa === -1) colDesa = 10
-        if (colPosyandu === -1) colPosyandu = 11
 
         trs.forEach((tr, idx) => {
           if (idx <= headerIdx) return
           const tds = Array.from(tr.querySelectorAll('td, th'))
           if (tds.length < 5) return
 
-          const rawNik = tds[colNik]?.textContent || ''
-          const rawNama = tds[colNama]?.textContent?.trim() || ''
-          const rawJk = tds[colJk]?.textContent?.trim().toUpperCase() || ''
+          const rawNik = colNik !== -1 ? (tds[colNik]?.textContent || '') : (tds[1]?.textContent || '')
+          const rawNama = colNama !== -1 ? (tds[colNama]?.textContent?.trim() || '') : (tds[2]?.textContent?.trim() || '')
+          const rawJk = colJk !== -1 ? (tds[colJk]?.textContent?.trim().toUpperCase() || '') : ''
           
           if (!rawNik && !rawNama) return
 
@@ -183,18 +176,24 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
           if (!rawNama) errors.push(`Baris ${idx}: Nama kosong.`)
 
           let jk: 'L'|'P' = 'L'
-          if (rawJk === 'P' || rawJk === 'PEREMPUAN') jk = 'P'
-          else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
-          else errors.push(`Baris ${idx}: Jenis Kelamin tidak valid (${rawJk}).`)
+          if (rawJk) {
+            if (rawJk === 'P' || rawJk === 'PEREMPUAN') jk = 'P'
+            else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
+            else errors.push(`Baris ${idx}: Jenis Kelamin tidak valid (${rawJk}).`)
+          } else {
+            // Jika kolom JK tidak ada, tapi ada kolom nama suami / bumil format
+            // Asumsikan perempuan
+            jk = 'P'
+          }
 
-          const tglLahirStr = processDate(tds[colTglLahir]?.textContent?.trim(), idx)
+          const tglLahirStr = colTglLahir !== -1 ? processDate(tds[colTglLahir]?.textContent?.trim(), idx) : ''
 
-          const namaOrtu = tds[colNamaOrtu]?.textContent?.trim() || ''
-          const prov = tds[colProv]?.textContent?.trim() || ''
-          const kab = tds[colKab]?.textContent?.trim() || ''
-          const kec = tds[colKec]?.textContent?.trim() || ''
-          const desa = tds[colDesa]?.textContent?.trim() || ''
-          const posyanduCell = tds[colPosyandu]?.textContent?.trim() || ''
+          const namaOrtu = colNamaOrtu !== -1 ? tds[colNamaOrtu]?.textContent?.trim() || '' : ''
+          const prov = colProv !== -1 ? tds[colProv]?.textContent?.trim() || '' : ''
+          const kab = colKab !== -1 ? tds[colKab]?.textContent?.trim() || '' : ''
+          const kec = colKec !== -1 ? tds[colKec]?.textContent?.trim() || '' : ''
+          const desa = colDesa !== -1 ? tds[colDesa]?.textContent?.trim() || '' : ''
+          const posyanduCell = colPosyandu !== -1 ? tds[colPosyandu]?.textContent?.trim() || '' : ''
 
           if (posyanduCell && currentPosyanduName) {
             const cleanExcel = posyanduCell.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
@@ -215,6 +214,7 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
               tanggal_lahir: tglLahirStr,
               nama_ibu: namaOrtu,
               alamat: alamat,
+              status_kehamilan: isBumilFormat ? 'HAMIL' : 'TIDAK_HAMIL',
               kategori: 'warga'
             })
           }
@@ -240,6 +240,7 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
         let colKec = -1
         let colDesa = -1
         let colPosyandu = -1
+        let isBumilFormat = false
         
         worksheet.eachRow((row, rowNumber) => {
           if (headerRowIdx !== -1) return
@@ -254,7 +255,10 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
               if (thText === 'nama' || thText === 'nama anak') colNama = colIdx
               if (thText === 'jk' || thText === 'jenis kelamin') colJk = colIdx
               if (thText === 'tgl lahir' || thText === 'tanggal lahir') colTglLahir = colIdx
-              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu') colNamaOrtu = colIdx
+              if (thText === 'nama ortu' || thText === 'nama orangtua' || thText === 'nama ibu' || thText === 'nama suami') {
+                colNamaOrtu = colIdx
+                if (thText === 'nama suami') isBumilFormat = true
+              }
               if (thText === 'prov' || thText === 'provinsi') colProv = colIdx
               if (thText === 'kab/kota' || thText === 'kabupaten/kota') colKab = colIdx
               if (thText === 'kec' || thText === 'kecamatan') colKec = colIdx
@@ -266,25 +270,14 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
 
         if (headerRowIdx === -1) throw new Error('Tidak dapat menemukan baris Header (NIK, Nama, dll) di Excel.')
 
-        if (colNik === -1) colNik = 2
-        if (colNama === -1) colNama = 3
-        if (colJk === -1) colJk = 4
-        if (colTglLahir === -1) colTglLahir = 5
-        if (colNamaOrtu === -1) colNamaOrtu = 6
-        if (colProv === -1) colProv = 7
-        if (colKab === -1) colKab = 8
-        if (colKec === -1) colKec = 9
-        if (colDesa === -1) colDesa = 11
-        if (colPosyandu === -1) colPosyandu = 12
-
         worksheet.eachRow((row, rowNumber) => {
           if (rowNumber <= headerRowIdx) return // Skip header
           
           const rowValues = row.values as any[]
           
-          const rawNik = rowValues[colNik] ? rowValues[colNik].toString() : ''
-          const rawNama = rowValues[colNama] ? rowValues[colNama].toString().trim() : ''
-          const rawJk = rowValues[colJk] ? rowValues[colJk].toString().trim().toUpperCase() : ''
+          const rawNik = colNik !== -1 && rowValues[colNik] ? rowValues[colNik].toString() : ''
+          const rawNama = colNama !== -1 && rowValues[colNama] ? rowValues[colNama].toString().trim() : ''
+          const rawJk = colJk !== -1 && rowValues[colJk] ? rowValues[colJk].toString().trim().toUpperCase() : ''
           
           if (!rawNik && !rawNama) return
 
@@ -292,18 +285,22 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
           if (!rawNama) errors.push(`Baris ${rowNumber}: Nama kosong.`)
 
           let jk: 'L'|'P' = 'L'
-          if (rawJk === 'P' || rawJk === 'PEREMPUAN') jk = 'P'
-          else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
-          else errors.push(`Baris ${rowNumber}: Jenis Kelamin tidak valid (${rawJk}).`)
+          if (rawJk) {
+            if (rawJk === 'P' || rawJk === 'PEREMPUAN') jk = 'P'
+            else if (rawJk === 'L' || rawJk === 'LAKI-LAKI' || rawJk === 'LAKI') jk = 'L'
+            else errors.push(`Baris ${rowNumber}: Jenis Kelamin tidak valid (${rawJk}).`)
+          } else {
+            jk = 'P'
+          }
 
-          const tglLahirStr = processDate(rowValues[colTglLahir], rowNumber)
+          const tglLahirStr = colTglLahir !== -1 ? processDate(rowValues[colTglLahir], rowNumber) : ''
 
-          const namaOrtu = rowValues[colNamaOrtu] ? rowValues[colNamaOrtu].toString().trim() : ''
-          const prov = rowValues[colProv] ? rowValues[colProv].toString().trim() : ''
-          const kab = rowValues[colKab] ? rowValues[colKab].toString().trim() : ''
-          const kec = rowValues[colKec] ? rowValues[colKec].toString().trim() : ''
-          const desa = rowValues[colDesa] ? rowValues[colDesa].toString().trim() : ''
-          const posyanduStr = rowValues[colPosyandu] ? rowValues[colPosyandu].toString().trim() : ''
+          const namaOrtu = colNamaOrtu !== -1 && rowValues[colNamaOrtu] ? rowValues[colNamaOrtu].toString().trim() : ''
+          const prov = colProv !== -1 && rowValues[colProv] ? rowValues[colProv].toString().trim() : ''
+          const kab = colKab !== -1 && rowValues[colKab] ? rowValues[colKab].toString().trim() : ''
+          const kec = colKec !== -1 && rowValues[colKec] ? rowValues[colKec].toString().trim() : ''
+          const desa = colDesa !== -1 && rowValues[colDesa] ? rowValues[colDesa].toString().trim() : ''
+          const posyanduStr = colPosyandu !== -1 && rowValues[colPosyandu] ? rowValues[colPosyandu].toString().trim() : ''
 
           if (posyanduStr && currentPosyanduName) {
             const cleanExcel = posyanduStr.toLowerCase().replace(/posyandu/g, '').replace(/[aeiou\s]/g, '')
@@ -324,6 +321,7 @@ export function ImportWargaModal({ open, onOpenChange, onSuccess }: ImportWargaM
               tanggal_lahir: tglLahirStr,
               nama_ibu: namaOrtu,
               alamat: alamat,
+              status_kehamilan: isBumilFormat ? 'HAMIL' : 'TIDAK_HAMIL',
               kategori: 'warga'
             })
           }

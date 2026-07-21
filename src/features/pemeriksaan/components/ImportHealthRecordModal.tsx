@@ -86,6 +86,18 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
         return nik
       }
 
+      const processDateExcel = (rawDate: string) => {
+        const parts = rawDate.split(/[-/]/)
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+            return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`
+          } else {
+            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+          }
+        }
+        return rawDate
+      }
+
       const parseFloatSafe = (val: string | null | undefined): number | undefined => {
         if (!val) return undefined
         const parsed = parseFloat(val.replace(',', '.'))
@@ -113,6 +125,7 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
         let colLk = -1
         let colTgl = -1
         let colPosyandu = -1
+        let colHpht = -1
         
         // Find header row and columns
         trs.forEach((tr, idx) => {
@@ -130,6 +143,7 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
                if (thText.includes('lingkar kepala')) colLk = colIdx
                if (thText.includes('tgl pengukuran') || thText.includes('tanggal pengukuran') || thText.includes('tgl kunjungan') || thText.includes('tanggal kunjungan')) colTgl = colIdx
                if (thText === 'posyandu') colPosyandu = colIdx
+               if (thText === 'tgl hpht' || thText === 'hpht') colHpht = colIdx
              })
           }
         })
@@ -161,32 +175,23 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
             if (colTgl !== -1) {
               const rawDate = tds[colTgl]?.textContent?.trim()
               if (rawDate) {
-                // Try parsing DD-MM-YYYY or YYYY-MM-DD
-                const parts = rawDate.split(/[-/]/)
-                if (parts.length === 3) {
-                  if (parts[0].length === 4) {
-                    rowDate = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`
-                  } else {
-                    rowDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
-                  }
-                }
+                rowDate = processDateExcel(rawDate)
               }
             }
 
             rows.push({
-              nik: processedNik, // Will be mapped to warga_id in backend
+              nik: processedNik, 
               tanggal_kunjungan: rowDate, 
-              bb: colBb !== -1 ? parseFloatSafe(tds[colBb]?.textContent) : undefined,
-              tb: colTb !== -1 ? parseFloatSafe(tds[colTb]?.textContent) : undefined,
-              lingkar_lengan_atas: colLila !== -1 ? parseFloatSafe(tds[colLila]?.textContent) : undefined,
-              lingkar_kepala: colLk !== -1 ? parseFloatSafe(tds[colLk]?.textContent) : undefined,
-              // Backend will set defaults for missing required fields like usia_kehamilan_minggu
+              bb: colBb !== -1 ? parseFloatSafe(tds[colBb]?.textContent || '') : undefined,
+              tb: colTb !== -1 ? parseFloatSafe(tds[colTb]?.textContent || '') : undefined,
+              lingkar_lengan_atas: colLila !== -1 ? parseFloatSafe(tds[colLila]?.textContent || '') : undefined,
+              lingkar_kepala: colLk !== -1 ? parseFloatSafe(tds[colLk]?.textContent || '') : undefined,
+              hpht: colHpht !== -1 && tds[colHpht]?.textContent?.trim() ? processDateExcel(tds[colHpht].textContent!.trim()) : undefined,
             })
           }
         })
 
       } else {
-        // Normal .xlsx parsing using exceljs
         const buffer = await uploadedFile.arrayBuffer()
         const workbook = new ExcelJS.Workbook()
         await workbook.xlsx.load(buffer)
@@ -202,6 +207,7 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
         let colLk = -1
         let colTgl = -1
         let colPosyandu = -1
+        let colHpht = -1
         
         worksheet.eachRow((row, rowNumber) => {
           if (headerRowIdx !== -1) return
@@ -219,6 +225,7 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
                if (thText.includes('lingkar kepala')) colLk = colIdx
                if (thText.includes('tgl pengukuran') || thText.includes('tanggal pengukuran') || thText.includes('tgl kunjungan') || thText.includes('tanggal kunjungan')) colTgl = colIdx
                if (thText === 'posyandu') colPosyandu = colIdx
+               if (thText === 'tgl hpht' || thText === 'hpht') colHpht = colIdx
             })
           }
         })
@@ -227,7 +234,7 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
         if (colNik === -1) throw new Error('Kolom NIK tidak ditemukan di Header')
 
         worksheet.eachRow((row, rowNumber) => {
-          if (rowNumber <= headerRowIdx) return // Skip header
+          if (rowNumber <= headerRowIdx) return 
           
           const rowValues = row.values as any[]
           
@@ -250,16 +257,9 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
              if (colTgl !== -1 && rowValues[colTgl]) {
                const rawDate = rowValues[colTgl].toString().trim()
                if (rawDate) {
-                 // Try parsing DD-MM-YYYY or YYYY-MM-DD
-                 const parts = rawDate.split(/[-/]/)
-                 if (parts.length === 3) {
-                   if (parts[0].length === 4) {
-                     rowDate = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`
-                   } else {
-                     rowDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
-                   }
+                 if (rawDate.includes('-') || rawDate.includes('/')) {
+                   rowDate = processDateExcel(rawDate)
                  } else if (!isNaN(Date.parse(rawDate))) {
-                   // Fallback for real date objects from exceljs
                    rowDate = new Date(rawDate).toISOString().split('T')[0]
                  }
                }
@@ -270,8 +270,9 @@ export function ImportHealthRecordModal({ open, onOpenChange, kategori, onSucces
               tanggal_kunjungan: rowDate,
               bb: colBb !== -1 ? parseFloatSafe(rowValues[colBb]?.toString()) : undefined,
               tb: colTb !== -1 ? parseFloatSafe(rowValues[colTb]?.toString()) : undefined,
-              lingkar_lengan_atas: colLila !== -1 ? parseFloatSafe(rowValues[colLila]?.toString()) : undefined,
+              lingkar_lengan_atas: colLila !== -1 ? parseFloatSafe(rowValues[colLila]) : undefined,
               lingkar_kepala: colLk !== -1 ? parseFloatSafe(rowValues[colLk]?.toString()) : undefined,
+              hpht: colHpht !== -1 && rowValues[colHpht] ? processDateExcel(rowValues[colHpht].toString().trim()) : undefined,
             })
           }
         })
